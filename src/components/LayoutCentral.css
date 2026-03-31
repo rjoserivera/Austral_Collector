@@ -1,0 +1,33 @@
+.layout-central {
+  padding: 60px 0;
+}
+
+.layout-central-inner {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 32px;
+  align-items: start;
+}
+
+.layout-main {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.layout-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: sticky;
+  top: 80px;
+}
+
+@media (max-width: 1024px) {
+  .layout-central-inner {
+    grid-template-columns: 1fr;
+  }
+  .layout-sidebar {
+    position: static;
+  }
+}

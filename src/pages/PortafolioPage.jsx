@@ -1,0 +1,154 @@
+import { Link } from 'react-router-dom'
+import './PortafolioPage.css'
+
+/* ─── Mock Data ─────────────────────────────────────────── */
+const IDENTIDAD = [
+  {
+    id: 'mision',
+    icon: '🎯',
+    title: 'Misión',
+    desc: 'Reunir a coleccionistas apasionados en una comunidad activa donde pueden compartir, exhibir y perseguir piezas únicas del mundo del entretenimiento.',
+  },
+  {
+    id: 'valores',
+    icon: '⭐',
+    title: 'Valores',
+    desc: 'Comunidad, respeto, pasión por la historia, autenticidad y colaboración entre miembros.',
+  },
+  {
+    id: 'metas',
+    icon: '🏆',
+    title: 'Metas',
+    desc: 'Expandir la comunidad a nivel nacional, organizar eventos presenciales y posicionarnos como referentes del coleccionismo en Chile.',
+  },
+]
+
+const GALERIA = [
+  { id: 1, img: '/mock_fig1.png', alt: 'Galería figura 1' },
+  { id: 2, img: '/mock_fig2.png', alt: 'Galería figura 2' },
+  { id: 3, img: '/mock_fig3.png', alt: 'Galería figura 3' },
+  { id: 4, img: '/mock_fig1.png', alt: 'Galería figura 4' },
+]
+
+const VIDEOS_PORTA = [
+  { id: 1, thumb: '/mock_community.png', title: 'Unboxing colección 2024' },
+  { id: 2, thumb: '/mock_community.png', title: 'Restauración de figuras vintage' },
+]
+
+function PlayIcon() {
+  return (
+    <svg className="pp-play-icon" viewBox="0 0 56 56" fill="none">
+      <circle cx="28" cy="28" r="26" fill="rgba(0,0,0,0.6)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/>
+      <polygon points="22,16 42,28 22,40" fill="white"/>
+    </svg>
+  )
+}
+
+export default function PortafolioPage() {
+  return (
+    <div className="portafolio-page">
+
+      {/* ── HERO ─────────────────────────────────────────── */}
+      <section className="pp-hero" id="pp-hero">
+        <div className="pp-hero-nebula"  aria-hidden="true"/>
+        <div className="pp-hero-grain"   aria-hidden="true"/>
+        <div className="pp-hero-vignette" aria-hidden="true"/>
+
+        <div className="pp-hero-inner section-wrapper">
+          <div className="pp-hero-mascot-wrap">
+            <div className="pp-mascot-glow" aria-hidden="true"/>
+            <img src="/mascota_sin_fondo.png" alt="Mascota Robot Austral Collector" className="pp-mascot"/>
+          </div>
+          <div className="pp-hero-content">
+            <h1 className="pp-hero-title">
+              <span className="pp-title-austral">AUSTRAL</span><br/>
+              <span className="pp-title-collector">COLLECTOR</span>
+            </h1>
+            <p className="pp-hero-subtitle">Portafolio Austral Collector</p>
+            <div className="gold-divider" style={{ width: '220px', margin: '14px 0 22px' }}/>
+            <button onClick={() => alert("Función de registro aún no implementada.")} id="pp-btn-unirse" className="btn-primary pp-hero-btn">Unirse</button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── NUESTRA IDENTIDAD ─────────────────────────────── */}
+      <section className="pp-identidad section-wrapper" id="pp-identidad">
+        <h2 className="pp-section-title">⭐ Nuestra Identidad</h2>
+        <div className="pp-identidad-grid">
+          {IDENTIDAD.map(item => (
+            <article key={item.id} className="pp-identidad-card card" id={`pp-${item.id}`}>
+              <div className="pp-identidad-icon">{item.icon}</div>
+              <h3 className="pp-identidad-name">{item.title}</h3>
+              <div className="gold-divider" style={{ margin: '10px auto' }}/>
+              <p className="pp-identidad-desc">{item.desc}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* ── GALERÍA + VIDEOS SPLIT ────────────────────────── */}
+      <section className="pp-media section-wrapper" id="pp-galeria">
+        {/* Galería */}
+        <div className="pp-media-block">
+          <h2 className="pp-section-title">⚜️ Galería</h2>
+          <div className="pp-galeria-grid">
+            {GALERIA.map(g => (
+              <div key={g.id} className="pp-galeria-item card" id={`pp-gal-${g.id}`}>
+                <img src={g.img} alt={g.alt} className="pp-galeria-img" loading="lazy"/>
+              </div>
+            ))}
+          </div>
+          <div className="pp-media-footer">
+            <Link to="/galeria" id="pp-btn-galeria" className="btn-primary">Ver Galería Completa</Link>
+          </div>
+        </div>
+
+        {/* Videos */}
+        <div className="pp-media-block" id="pp-videos">
+          <h2 className="pp-section-title">▶ Videos</h2>
+          <div className="pp-videos-list">
+            {VIDEOS_PORTA.map(v => (
+              <div key={v.id} className="pp-video-thumb card" id={`pp-vid-${v.id}`}>
+                <img src={v.thumb} alt={v.title} className="pp-video-img" loading="lazy"/>
+                <div className="pp-video-overlay">
+                  <PlayIcon/>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="pp-media-footer">
+            <Link to="/" id="pp-btn-videos" className="btn-outline">Ver Más Videos</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── ÚNETE A LA COMUNIDAD ──────────────────────────── */}
+      <section className="pp-comunidad" id="pp-comunidad">
+        <div className="pp-comunidad-bg" aria-hidden="true"/>
+        <div className="pp-comunidad-grain" aria-hidden="true"/>
+        <div className="pp-comunidad-overlay" aria-hidden="true"/>
+
+        <div className="pp-comunidad-inner section-wrapper">
+          <div className="pp-comunidad-content">
+            <h2 className="pp-comunidad-title">Únete a la Comunidad</h2>
+            <p className="pp-comunidad-desc">Comparte tu colección con otros apasionados.</p>
+            <button onClick={() => alert("Función de registro aún no implementada.")} id="pp-btn-comunidad" className="btn-primary pp-comunidad-btn">Unirse</button>
+          </div>
+          <div className="pp-comunidad-image" aria-hidden="true">
+            <img
+              src="/mock_community.png"
+              alt="Comunidad de coleccionistas"
+              className="pp-comunidad-img"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ───────────────────────────────────────── */}
+      <footer className="pp-footer">
+        <div className="gold-divider"/>
+        <p className="pp-footer-copy">© 2024 Austral Collector — Comunidad de coleccionistas.</p>
+      </footer>
+    </div>
+  )
+}

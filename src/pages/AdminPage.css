@@ -1,0 +1,173 @@
+/* ============================================================
+   ADMIN PAGE
+   ============================================================ */
+
+.admin-page { padding-top: 50px; padding-bottom: 80px; }
+
+/* Header */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  border-bottom: 1px solid rgba(201,168,76,.15);
+  padding-bottom: 24px;
+}
+
+.admin-title {
+  font-family: var(--font-title);
+  font-size: 2.2rem;
+  color: var(--color-red);
+  text-shadow: 0 0 16px rgba(192,57,43,.4);
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+.admin-subtitle { color: var(--color-cream-dim); font-size: .95rem; }
+
+.admin-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(18,10,7,.8);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(201,168,76,.2);
+  font-size: .8rem;
+  color: var(--color-gold);
+  font-family: var(--font-heading);
+}
+
+.status-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #2ecc71;
+  box-shadow: 0 0 8px #2ecc71;
+  animation: pulseGreen 2s infinite;
+}
+@keyframes pulseGreen {
+  0% { transform: scale(.9); opacity: .8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(.9); opacity: .8; }
+}
+
+/* Dashboard Grid (4 blocks) */
+.admin-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.admin-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  background: linear-gradient(145deg, rgba(26,15,10,.6), rgba(18,10,7,.9));
+  border: 1px solid rgba(201,168,76,.15);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.panel-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--color-cream);
+}
+
+.badge-alert {
+  background: var(--color-red);
+  color: #fff;
+  font-size: .65rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.panel-desc {
+  font-size: .85rem;
+  color: var(--color-cream-dim);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-btn-action {
+  font-size: .75rem !important;
+  padding: 8px 14px !important;
+  display: flex; align-items: center; gap: 6px;
+  flex: 1; justify-content: center;
+}
+.admin-btn-action.danger { border-color: rgba(231,76,60,.4); color: #e74c3c; }
+.admin-btn-action.danger:hover { background: rgba(231,76,60,.1) !important; color: #fff; border-color: #e74c3c; }
+
+/* Live activity list */
+.live-activity-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.live-activity-item { display: flex; gap: 12px; align-items: center; font-size: .85rem; }
+.live-time { color: var(--color-gold); font-family: monospace; }
+.live-text { color: var(--color-cream-dim); }
+
+/* Activity Log Table */
+.admin-log-section {
+  padding: 24px;
+  background: rgba(18,10,7,.8);
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.admin-section-title {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  color: var(--color-gold);
+}
+
+.log-btn-sm { font-size: .7rem !important; padding: 6px 14px !important; }
+
+.log-table-wrap { overflow-x: auto; }
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.log-table th {
+  font-family: var(--font-heading);
+  font-size: .75rem;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(201,168,76,.3);
+  letter-spacing: .05em;
+}
+
+.log-table td {
+  padding: 16px;
+  border-bottom: 1px solid rgba(201,168,76,.1);
+  font-size: .85rem;
+  color: var(--color-cream-dim);
+}
+
+.log-table tr:hover td { background: rgba(201,168,76,.03); color: var(--color-cream); }
+
+.td-user { display: flex; align-items: center; gap: 12px; font-weight: 600; color: var(--color-cream) !important; }
+.log-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-gold); }
+.td-time { color: var(--color-gold) !important; font-size: .75rem; }
+
+@media (max-width: 900px) {
+  .admin-dashboard-grid { grid-template-columns: 1fr; }
+  .admin-header { flex-direction: column; gap: 16px; }
+}
