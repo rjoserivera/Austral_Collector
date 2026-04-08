@@ -2,9 +2,9 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(18, 10, 7, 0.92);
+  background: rgba(30, 77, 90, 0.96);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+  border-bottom: 1px solid rgba(200, 169, 110, 0.35);
   padding: 14px 0;
 }
 
@@ -26,16 +26,26 @@
   height: 40px;
   object-fit: contain;
   border-radius: 50%;
-  border: 1.5px solid rgba(201, 168, 76, 0.5);
+  border: 1.5px solid rgba(200, 169, 110, 0.6);
 }
 
 .navbar-title {
-  font-family: var(--font-heading);
+  font-family: var(--font-title);
   font-size: 1rem;
-  font-weight: 700;
-  color: var(--color-gold);
+  font-weight: 900;
   letter-spacing: 0.05em;
+  text-transform: uppercase;
   white-space: nowrap;
+  display: flex;
+  gap: 6px;
+}
+
+.title-austral {
+  color: #a8d4e0;
+}
+
+.title-collector {
+  color: #dfc08a;
 }
 
 .navbar-links {
@@ -51,7 +61,7 @@
   font-size: 0.75rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-cream-dim);
+  color: rgba(221, 208, 184, 0.85);
   transition: color 0.2s;
   position: relative;
 }
@@ -63,12 +73,12 @@
   left: 0;
   width: 0;
   height: 1px;
-  background: var(--color-gold);
+  background: var(--color-sand-light);
   transition: width 0.2s;
 }
 
 .navbar-links a:hover {
-  color: var(--color-gold);
+  color: var(--color-sand-light);
 }
 
 .navbar-links a:hover::after {
@@ -76,11 +86,11 @@
 }
 
 .navbar-links .nav-active {
-  color: var(--color-gold) !important;
+  color: var(--color-sand-light) !important;
 }
 .navbar-links .nav-active::after {
   width: 100% !important;
-  background: var(--color-gold) !important;
+  background: var(--color-sand-light) !important;
 }
 
 .navbar-actions {
@@ -89,7 +99,26 @@
   flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
+.navbar-actions .btn-admin-nav {
+  background: var(--color-gold);
+  color: var(--color-teal-dark);
+  font-weight: 700;
+}
+
+.navbar-actions .btn-admin-nav:hover {
+  background: var(--color-gold-dark);
+}
+
+@media (max-width: 1024px) {
+  .navbar-inner { gap: 12px; }
+  .navbar-logo { width: 32px; height: 32px; }
+  .navbar-title { font-size: 0.8rem; }
+  .navbar-links { gap: 12px; }
+  .navbar-links a { font-size: 0.65rem; letter-spacing: 0.05em; }
+  #nav-login-btn { padding: 6px 12px; font-size: 0.75rem; }
+}
+
+@media (max-width: 700px) {
   .navbar-links { display: none; }
   .navbar-actions .btn-outline { display: none; }
 }

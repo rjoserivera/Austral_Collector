@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import './PortafolioPage.css'
+import { API_URL, BASE_URL } from '../config.js'
 
 /* ─── Mock Data ─────────────────────────────────────────── */
 const IDENTIDAD = [
@@ -45,6 +47,25 @@ function PlayIcon() {
 }
 
 export default function PortafolioPage() {
+  const [galeriaReal, setGaleriaReal] = useState(GALERIA);
+  const [videosReal, setVideosReal] = useState(VIDEOS_PORTA);
+
+  useEffect(() => {
+    fetch(`${API_URL}/public/home_data.php`)
+      .then(r => r.json())
+      .then(d => {
+        if(d.success) {
+          if (d.data.ultimas && d.data.ultimas.length > 0) {
+            setGaleriaReal(d.data.ultimas.slice(0, 4));
+          }
+          if (d.data.videos && d.data.videos.length > 0) {
+            setVideosReal(d.data.videos.slice(0, 2));
+          }
+        }
+      })
+      .catch(e => console.error("Error loading portafolio data:", e))
+  }, []);
+
   return (
     <div className="portafolio-page">
 
@@ -57,7 +78,7 @@ export default function PortafolioPage() {
         <div className="pp-hero-inner section-wrapper">
           <div className="pp-hero-mascot-wrap">
             <div className="pp-mascot-glow" aria-hidden="true"/>
-            <img src="/mascota_sin_fondo.png" alt="Mascota Robot Austral Collector" className="pp-mascot"/>
+            <img src="/robot_sin_fondo.png" alt="Mascota Robot Austral Collector" className="pp-mascot"/>
           </div>
           <div className="pp-hero-content">
             <h1 className="pp-hero-title">
@@ -92,9 +113,9 @@ export default function PortafolioPage() {
         <div className="pp-media-block">
           <h2 className="pp-section-title">⚜️ Galería</h2>
           <div className="pp-galeria-grid">
-            {GALERIA.map(g => (
-              <div key={g.id} className="pp-galeria-item card" id={`pp-gal-${g.id}`}>
-                <img src={g.img} alt={g.alt} className="pp-galeria-img" loading="lazy"/>
+            {galeriaReal.map((g, idx) => (
+              <div key={g.id || idx} className="pp-galeria-item card" id={`pp-gal-${g.id || idx}`}>
+                <img src={g.imagen_url ? `${BASE_URL}/${g.imagen_url}` : g.img} alt={g.nombre || g.alt} className="pp-galeria-img" loading="lazy"/>
               </div>
             ))}
           </div>
@@ -107,14 +128,24 @@ export default function PortafolioPage() {
         <div className="pp-media-block" id="pp-videos">
           <h2 className="pp-section-title">▶ Videos</h2>
           <div className="pp-videos-list">
-            {VIDEOS_PORTA.map(v => (
-              <div key={v.id} className="pp-video-thumb card" id={`pp-vid-${v.id}`}>
-                <img src={v.thumb} alt={v.title} className="pp-video-img" loading="lazy"/>
-                <div className="pp-video-overlay">
-                  <PlayIcon/>
+            {videosReal.map((v, idx) => {
+              let ytid = v.link_yt;
+              if (ytid) {
+                const match = ytid.match(/[?&]v=([^&]+)/);
+                if (match) ytid = match[1];
+                else { const sl = ytid.split('/'); ytid = sl[sl.length-1]; }
+              }
+              const thumbUrl = ytid ? `https://img.youtube.com/vi/${ytid}/0.jpg` : v.thumb;
+              
+              return (
+                <div key={v.id || idx} className="pp-video-thumb card" id={`pp-vid-${v.id || idx}`} onClick={() => v.link_yt ? window.open(v.link_yt, '_blank') : null}>
+                  <img src={thumbUrl} alt={v.titulo || v.title} className="pp-video-img" loading="lazy" onError={(e) => { e.target.src='/mock_community.png' }}/>
+                  <div className="pp-video-overlay">
+                    <PlayIcon/>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="pp-media-footer">
             <Link to="/" id="pp-btn-videos" className="btn-outline">Ver Más Videos</Link>
@@ -124,10 +155,6 @@ export default function PortafolioPage() {
 
       {/* ── ÚNETE A LA COMUNIDAD ──────────────────────────── */}
       <section className="pp-comunidad" id="pp-comunidad">
-        <div className="pp-comunidad-bg" aria-hidden="true"/>
-        <div className="pp-comunidad-grain" aria-hidden="true"/>
-        <div className="pp-comunidad-overlay" aria-hidden="true"/>
-
         <div className="pp-comunidad-inner section-wrapper">
           <div className="pp-comunidad-content">
             <h2 className="pp-comunidad-title">Únete a la Comunidad</h2>

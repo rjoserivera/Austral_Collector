@@ -77,18 +77,18 @@
   font-family: var(--font-heading);
   font-size: 1rem;
   font-weight: 700;
-  color: var(--color-cream);
+  color: #ffffff;           /* blanco puro */
 }
 
 .miembro-username {
   font-size: 0.72rem;
-  color: var(--color-gold);
+  color: #dfc08a;           /* dorado visible */
   letter-spacing: 0.06em;
 }
 
 .miembro-bio {
   font-size: 0.75rem;
-  color: var(--color-cream-dim);
+  color: rgba(240,228,204,0.80);   /* crema claro — legible */
   line-height: 1.5;
   margin-top: 6px;
 }
@@ -116,14 +116,14 @@
   font-family: var(--font-heading);
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--color-gold);
+  color: #dfc08a;           /* dorado visible */
 }
 
 .miembro-stat-lbl {
   font-size: 0.65rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: rgba(240,228,204,0.60);   /* crema tenue pero legible */
 }
 
 .miembro-stat-div {
@@ -145,7 +145,7 @@
   font-size: 0.65rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: rgba(240,228,204,0.55);   /* crema sutil */
 }
 
 .miembro-badges {

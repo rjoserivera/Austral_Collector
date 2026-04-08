@@ -1,24 +1,37 @@
 /* ============================================================
    AUSTRAL COLLECTOR — Global Design System
-   Dark Fantasy / Retro-Steampunk
+   Vintage Retro / Aged Paper
    ============================================================ */
 
 /* --- CSS Custom Properties --- */
 :root {
-  --color-bg:       #1A0F0A;
-  --color-bg2:      #120A07;
-  --color-red:      #C0392B;
-  --color-red-dark: #8B1A0F;
-  --color-red-glow: rgba(192, 57, 43, 0.35);
-  --color-gold:     #C9A84C;
-  --color-gold-light: #E2C06A;
-  --color-gold-dim: rgba(201, 168, 76, 0.25);
-  --color-cream:    #E8D5B5;
-  --color-cream-dim: rgba(232, 213, 181, 0.65);
-  --color-muted:    #7A6555;
+  --color-bg:       #ddd0b8;          /* papel envejecido claro */
+  --color-bg2:      #ccc0a5;          /* papel envejecido más oscuro */
 
-  --font-title:     'Cinzel Decorative', 'Cinzel', serif;
-  --font-heading:   'Cinzel', serif;
+  /* Botones y acciones — rojo oxidado vintage */
+  --color-red:      #8b2020;
+  --color-red-dark: #6a1515;
+  --color-red-glow: rgba(139, 32, 32, 0.35);
+
+  /* Teal oscuro vintage — tarjetas, nav */
+  --color-steel:      #2d6e7e;        /* azul-verde oscuro */
+  --color-steel-dark: #1e4d5a;
+  --color-steel-glow: rgba(45, 110, 126, 0.35);
+  --color-sand:       #c8a96e;        /* tan/dorado envejecido */
+  --color-sand-light: #dfc08a;
+  --color-sand-dim:   rgba(200, 169, 110, 0.3);
+
+  /* Compatibilidad: gold apunta al sand del logo */
+  --color-gold:     var(--color-sand);
+  --color-gold-light: var(--color-sand-light);
+  --color-gold-dim: var(--color-sand-dim);
+
+  --color-cream:    #2e1f0f;          /* texto oscuro sobre fondo claro */
+  --color-cream-dim: rgba(46, 31, 15, 0.72);
+  --color-muted:    #5a4530;
+
+  --font-title:     'Archivo Black', sans-serif;
+  --font-heading:   'Oswald', sans-serif;
   --font-body:      'Inter', sans-serif;
 
   --radius-sm:  6px;
@@ -26,9 +39,10 @@
   --radius-lg:  20px;
   --radius-xl:  32px;
 
-  --shadow-gold: 0 0 18px rgba(201, 168, 76, 0.3);
-  --shadow-red:  0 0 18px rgba(192, 57, 43, 0.4);
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 0 18px rgba(200, 169, 110, 0.35);
+  --shadow-steel: 0 0 18px rgba(45, 110, 126, 0.4);
+  --shadow-red:  0 0 18px rgba(139, 32, 32, 0.4);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.35);
 }
 
 /* --- Reset & Base --- */
@@ -50,20 +64,21 @@ body {
   line-height: 1.65;
   min-height: 100vh;
   overflow-x: hidden;
-  /* Grain texture via repeating SVG noise */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+  /* Grain texture — más pronunciada para efecto vintage */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.1'/%3E%3C/svg%3E");
 }
 
 /* --- Scrollbar --- */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--color-bg2); }
-::-webkit-scrollbar-thumb { background: var(--color-red-dark); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--color-steel-dark); border-radius: 3px; }
 
 /* --- Typography --- */
-h1, h2, h3, h4 { font-family: var(--font-heading); color: var(--color-cream); line-height: 1.2; }
+h1, h2, h3 { font-family: var(--font-heading); color: var(--color-steel-dark); line-height: 1.2; }
+h4 { font-family: var(--font-heading); color: var(--color-cream); line-height: 1.2; }
 p { color: var(--color-cream-dim); }
-a { color: var(--color-gold); text-decoration: none; transition: color 0.2s; }
-a:hover { color: var(--color-gold-light); }
+a { color: var(--color-steel); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--color-steel-dark); }
 
 /* --- Buttons --- */
 .btn-primary {
@@ -105,21 +120,21 @@ a:hover { color: var(--color-gold-light); }
   align-items: center;
   gap: 8px;
   background: transparent;
-  color: var(--color-gold);
+  color: var(--color-steel-dark);
   font-family: var(--font-heading);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 11px 28px;
-  border: 1.5px solid var(--color-gold);
+  border: 1.5px solid var(--color-steel-dark);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.25s ease;
 }
 .btn-outline:hover {
-  background: var(--color-gold-dim);
-  box-shadow: var(--shadow-gold);
+  background: rgba(30, 77, 90, 0.12);
+  box-shadow: var(--shadow-steel);
   transform: translateY(-2px);
 }
 
@@ -157,16 +172,19 @@ a:hover { color: var(--color-gold-light); }
 
 /* --- Cards --- */
 .card {
-  background: linear-gradient(135deg, #2a1810 0%, #1e1008 100%);
-  border: 1px solid rgba(201, 168, 76, 0.15);
+  background: linear-gradient(135deg, #2d6e7e 0%, #1e4d5a 100%);
+  border: 1px solid rgba(200, 169, 110, 0.25);
   border-radius: var(--radius-md);
   overflow: hidden;
   transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
+/* Texto dentro de tarjetas teal oscuras — siempre claro */
+.card h1, .card h2, .card h3, .card h4 { color: #f0e4cc; }
+.card p { color: rgba(240, 228, 204, 0.80); }
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: var(--shadow-card), 0 0 20px rgba(201, 168, 76, 0.1);
-  border-color: rgba(201, 168, 76, 0.35);
+  box-shadow: var(--shadow-card), 0 0 20px rgba(45, 110, 126, 0.25);
+  border-color: rgba(200, 169, 110, 0.5);
 }
 
 /* --- Utility --- */
@@ -189,7 +207,7 @@ a:hover { color: var(--color-gold-light); }
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, rgba(201,168,76,0.35), transparent);
+  background: linear-gradient(90deg, rgba(45,110,126,0.4), transparent);
 }
 
 /* Scrollbar inside sidebar panels */

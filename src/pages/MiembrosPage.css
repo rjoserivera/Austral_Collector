@@ -1,0 +1,170 @@
+.miembros-page {
+  min-height: 100vh;
+  padding: 80px 20px 60px;
+}
+
+.mi-hero {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 50px;
+}
+
+.mi-hero-title {
+  font-family: var(--font-heading);
+  color: var(--color-gold);
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  letter-spacing: 0.05em;
+  text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.mi-hero-desc {
+  color: var(--color-cream);
+  opacity: 0.9;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+/* Grid de Tarjetas de Perfil */
+.mi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Tarjeta Tipo Twitter/X */
+.mi-card {
+  position: relative;
+  background: var(--color-surface);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.mi-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(220, 169, 58, 0.2);
+  border-color: rgba(220, 169, 58, 0.3);
+}
+
+/* --- Top Half: Banner --- */
+.mi-card-banner {
+  width: 100%;
+  height: 100px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  border-bottom: 2px solid var(--color-gold);
+}
+
+/* --- Center-Left: Avatar Circular --- */
+.mi-card-avatar-wrap {
+  position: absolute;
+  top: 60px;
+  left: 20px;
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  padding: 3px; /* Espacio para el borde circular */
+  background: var(--color-surface); /* Mismo color de la carta para el borde exterior tipo Twitter */
+  z-index: 2;
+}
+
+.mi-card-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #111;
+  border: 2px solid var(--color-gold);
+}
+
+/* --- Bottom Half: Contenido Biográfico --- */
+.mi-card-body {
+  padding: 45px 20px 20px; /* Padding top enorme para dar espacio al avatar empotrado */
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.mi-card-name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.mi-card-name {
+  color: var(--color-gold);
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mi-card-role-badge {
+  background: var(--primary-color);
+  color: #000;
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.mi-card-headline {
+  font-size: 0.85rem;
+  color: #aaa;
+  margin: 0 0 10px 0;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mi-card-bio {
+  color: var(--color-cream);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0 0 15px 0;
+  /* Line clamp a 3 lineas */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+/* --- Footer Stats --- */
+.mi-card-stats {
+  border-top: 1px solid rgba(255,255,255, 0.05);
+  padding-top: 12px;
+  display: flex;
+  gap: 15px;
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-top: auto;
+}
+
+.mi-card-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mi-card-stat span {
+  font-weight: bold;
+  color: var(--color-cream);
+}

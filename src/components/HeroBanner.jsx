@@ -19,7 +19,7 @@ export default function HeroBanner() {
           </div>
 
           <div className="hero-logo-wrap">
-            <img src="/logov2_sin_fondo.png" alt="Austral Collector Logo" className="hero-logo-img" />
+            <img src="/robot_sin_fondo.png" alt="Robot" className="hero-logo-img" />
             <div>
               <h1 className="hero-title">Austral<br /><span className="hero-title-accent">Collector</span></h1>
               <div className="gold-divider" style={{ width: '180px', margin: '8px 0' }} />
@@ -66,9 +66,10 @@ export default function HeroBanner() {
         <div className="hero-mascot-wrap">
           <div className="hero-mascot-glow" aria-hidden="true" />
           <img
-            src="/mascota_sin_fondo.png"
-            alt="Mascota Robot Retro de Austral Collector"
+            src="/logo_sin_fondo.png"
+            alt="Logo Austral Collector"
             className="hero-mascot"
+            style={{ filter: 'drop-shadow(0 8px 40px rgba(94,138,154,0.3)) drop-shadow(0 0 60px rgba(200,172,123,0.2))' }}
           />
           <div className="hero-mascot-platform" aria-hidden="true" />
         </div>

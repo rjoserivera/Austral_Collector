@@ -4,9 +4,13 @@
 
 .contacto-page {
   position: relative;
-  min-height: calc(100vh - 80px); /* minus navbar */
+  min-height: calc(100vh - 80px);
   padding: 40px 0 100px;
-  background: radial-gradient(ellipse 80% 80% at 50% 20%, #2f1210 0%, #1A0F0A 100%);
+  background:
+    radial-gradient(ellipse 65% 80% at 85% 45%,  rgba(45,110,126,0.75) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 50% 92%,  rgba(30,77,90,0.60)   0%, transparent 65%),
+    radial-gradient(ellipse 50% 60% at 8% 50%,   rgba(90,45,15,0.45)   0%, transparent 65%),
+    #c8b89a;
   display: flex;
   flex-direction: column;
 }
@@ -60,37 +64,37 @@
 .contacto-title-main {
   font-family: var(--font-title);
   font-size: 3rem;
-  color: var(--color-cream);
-  text-shadow: 0 4px 12px rgba(0,0,0,0.8), 2px 2px 0px rgba(139,26,15,0.5);
+  color: #1e4d5a;          /* teal oscuro — legible sobre beige */
+  text-shadow: 0 2px 8px rgba(255,255,255,0.3);
   margin-bottom: 8px;
   letter-spacing: .02em;
 }
 
 .contacto-subtitle {
   font-family: var(--font-body);
-  color: var(--color-cream-dim);
+  color: #2e1f0f;          /* marrón oscuro — legible sobre beige */
   font-size: 1.1rem;
   line-height: 1.4;
 }
 
 /* ── DISTRESSED PANELS ───────────────────────────────── */
 .card-distressed {
-  background: rgba(30, 15, 12, 0.85);
-  border: 4px solid #20130d;
-  box-shadow: 
-    0 0 0 1px rgba(201, 168, 76, 0.2), 
-    inset 0 0 40px rgba(0,0,0,0.9), 
-    0 15px 40px rgba(0,0,0,0.9);
+  background: rgba(30, 77, 90, 0.95);    /* teal oscuro vintage */
+  border: 4px solid #1e4d5a;
+  box-shadow:
+    0 0 0 1px rgba(200,169,110,0.25),
+    inset 0 0 40px rgba(0,0,0,0.5),
+    0 15px 40px rgba(0,0,0,0.4);
   border-radius: 6px;
   padding: 24px 30px;
 }
 
 .card-distressed-sub {
-  background: rgba(22, 10, 8, 0.8);
-  border: 1px solid rgba(201, 168, 76, 0.15);
+  background: rgba(20, 60, 72, 0.85);
+  border: 1px solid rgba(200,169,110,0.2);
   border-radius: 6px;
   padding: 24px 30px;
-  box-shadow: inset 0 0 30px rgba(0,0,0,0.6), 0 5px 20px rgba(0,0,0,0.7);
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.4), 0 5px 20px rgba(0,0,0,0.4);
 }
 
 .panel-title {
@@ -126,20 +130,20 @@
 
 .form-group-custom label {
   font-family: var(--font-body);
-  color: var(--color-cream-dim);
+  color: rgba(240,228,204,0.85);   /* crema — visible sobre teal */
   font-size: 0.95rem;
   font-weight: 500;
 }
 
 .form-group-custom input, .form-group-custom textarea {
-  background: rgba(10, 5, 4, 0.7);
-  border: 1px solid rgba(139, 26, 15, 0.3);
-  color: var(--color-cream);
+  background: rgba(10, 5, 4, 0.55);
+  border: 1px solid rgba(200,169,110,.35);
+  color: #f0e4cc;              /* texto claro en input */
   padding: 12px 14px;
   border-radius: 4px;
   font-family: var(--font-body);
   font-size: 1rem;
-  box-shadow: inset 0 2px 6px rgba(0,0,0,0.8);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
   transition: all 0.2s;
 }
 
@@ -185,7 +189,7 @@
 
 .c-info-line {
   font-family: var(--font-body);
-  color: var(--color-cream);
+  color: #f0e4cc;              /* crema sobre teal */
   font-size: 1.05rem;
   display: flex;
   align-items: flex-start;
@@ -193,18 +197,18 @@
 }
 
 .c-info-line .info-emoji {
-  color: var(--color-gold);
+  color: #dfc08a;
 }
 
 .c-info-line strong {
-  color: var(--color-cream);
+  color: #f0e4cc;
   font-weight: bold;
 }
 
 .c-info-line small {
   display: block;
   font-size: 0.85rem;
-  color: var(--color-cream-dim);
+  color: rgba(240,228,204,0.65);
   margin-top: 4px;
 }
 

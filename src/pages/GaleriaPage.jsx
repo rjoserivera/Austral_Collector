@@ -1,55 +1,119 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './GaleriaPage.css'
 import PostModal from '../components/PostModal'
-
-/* ─── Mock Data ─────────────────────────────────────────── */
-const GALERIA = [
-  { id: 101, name: 'Titan Mach 01', year: 1986, cat: 'Vintage', image: '/mock_fig1.png', likes: 120, userLiked: false, saves: 45, description: "Figura original con textura matizada y empaque casi intacto." },
-  { id: 102, name: 'Darth Vader — Kenner', year: 1978, cat: 'Star Wars', image: '/mock_fig2.png', likes: 350, userLiked: false, saves: 110, description: "La clásica figura de 1978 con el sable de luz retráctil. Condición Mint." },
-  { id: 103, name: 'RX-78-2 First Grade', year: 1980, cat: 'Gundam Wing', image: '/mock_fig1.png', likes: 210, userLiked: false, saves: 80, description: "Ensamblaje original sin pintura añadida. Las articulaciones están perfectas." },
-  { id: 104, name: 'Sailor Moon Proplica', year: 1995, cat: 'Sailor Moon', image: '/mock_fig3.png', likes: 185, userLiked: false, saves: 65, description: "Edición especial con la caja de lujo. Los cromados se mantienen impecables." },
-  { id: 105, name: 'Optimus Prime G1', year: 1984, cat: 'Vintage', image: '/mock_fig2.png', likes: 420, userLiked: false, saves: 130, description: "Trailer completo con Roller y los puños enteros. Un tesoro de los 80s." },
-  { id: 106, name: 'Boba Fett Action', year: 1980, cat: 'Star Wars', image: '/mock_fig1.png', likes: 290, userLiked: false, saves: 95, description: "Con el clásico mecanismo del proyectil deshabilitado (versión segura). Pieza histórica." },
-  { id: 107, name: 'Zaku II MS-06', year: 1981, cat: 'Gundam Wing', image: '/mock_banner.png', likes: 175, userLiked: false, saves: 50, description: "Incluye la metralleta y el hacha térmica. Plástico de la primera corrida original." },
-  { id: 108, name: 'Tuxedo Mask', year: 1996, cat: 'Sailor Moon', image: '/mock_fig2.png', likes: 140, userLiked: false, saves: 40, description: "Figura articulada con capa de tela y el icónico sombrero de copa." },
-  { id: 109, name: 'He-Man Masters', year: 1982, cat: 'Vintage', image: '/mock_fig3.png', likes: 310, userLiked: false, saves: 85, description: "Músculos impecables, incluye espada de poder y escudo original." },
-]
-
-const TABS = ['Todos', 'Star Wars', 'Gundam Wing', 'Sailor Moon', 'Vintage']
+import { API_URL, BASE_URL } from '../config.js'
 
 export default function GaleriaPage() {
-  const [activeTab, setActiveTab] = useState('Todos')
-  const [search, setSearch] = useState('')
-  const [figuras, setFiguras] = useState(GALERIA)
+  const [search, setSearch]             = useState('')
+  const [activeTab, setActiveTab]       = useState('figura')
+  const [filterCat, setFilterCat]       = useState('Todas')
+  const [figuras, setFiguras]           = useState([])
   const [selectedPost, setSelectedPost] = useState(null)
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const searchRef = useRef(null)
+
+  useEffect(() => {
+    const viewerParam = currentUser ? `?viewer_username=${currentUser.username}` : '';
+    fetch(`${API_URL}/public/galeria_data.php${viewerParam}`)
+      .then(r => r.json())
+      .then(d => { 
+        if (d.success) setFiguras(d.posts || []);
+        
+        // Cargar filtro desde URL si existe
+        const params = new URLSearchParams(window.location.search);
+        const tag = params.get('tag');
+        if (tag) {
+          setFilterCat(tag);
+        }
+      })
+      .catch(e => console.error('Error fetching galeria:', e))
+  }, [])
+
+  // Cierra el dropdown al hacer clic fuera
+  useEffect(() => {
+    const handler = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target))
+        setShowSuggestions(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+  const authUserStr = localStorage.getItem('austral_auth_user')
+  let currentUser = null
+  try { if (authUserStr) currentUser = JSON.parse(authUserStr) } catch(e) { currentUser = null }
 
   const handleLike = (id) => {
-    setFiguras(prev => prev.map(f => {
-      if (f.id !== id) return f
-      return f.userLiked
-        ? { ...f, userLiked: false, likes: f.likes - 1 }
-        : { ...f, userLiked: true,  likes: f.likes + 1 }
-    }))
-    
-    // Sincronizar modal abierto si es el mismo post
-    if (selectedPost && selectedPost.id === id) {
-      setSelectedPost(prev => ({
-        ...prev,
-        userLiked: !prev.userLiked,
-        likes: prev.userLiked ? prev.likes - 1 : prev.likes + 1
-      }))
+    if (!currentUser) {
+      alert('Debes iniciar sesión para dar me gusta.')
+      return
     }
+
+    fetch(`${API_URL}/auth/toggle_like.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: currentUser.username, post_id: id })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        setFiguras(prev => prev.map(f => {
+          if (f.id !== id) return f
+          return { ...f, userLiked: d.action === 'liked', total_likes: d.total_likes }
+        }))
+        if (selectedPost && selectedPost.id === id) {
+          setSelectedPost(prev => ({
+            ...prev,
+            userLiked: d.action === 'liked',
+            total_likes: d.total_likes
+          }))
+        }
+      } else {
+        alert(d.error || 'Error al procesar el like.')
+      }
+    })
+    .catch(e => console.error("Error toggling like:", e))
   }
 
-  const filtered = figuras.filter(fig => {
-    const matchTab = activeTab === 'Todos' || fig.cat === activeTab
-    const matchSearch = fig.name.toLowerCase().includes(search.toLowerCase())
-    return matchTab && matchSearch
+  const currentTabFiguras = figuras.filter(f => (f.tipo || 'figura') === activeTab)
+
+  // Frecuencia de categorías en el tab activo
+  const catFreq = currentTabFiguras
+    .flatMap(f => f.categorias || [])
+    .reduce((acc, cat) => { acc[cat] = (acc[cat] || 0) + 1; return acc }, {})
+
+  // Ordenadas por uso
+  const allCats = Object.entries(catFreq)
+    .sort((a, b) => b[1] - a[1])
+    .map(([cat]) => cat)
+
+  // Si hay texto → muestra solo hashtags que coincidan; si no → los más usados
+  const visibleCats = search.trim()
+    ? allCats.filter(cat => cat.toLowerCase().includes(search.toLowerCase()))
+    : allCats
+
+  // Sugerencias por nombre de figura
+  const nameSuggestions = search.trim().length >= 1
+    ? currentTabFiguras
+        .filter(f => f.nombre.toLowerCase().includes(search.toLowerCase()))
+        .slice(0, 6)
+    : []
+
+  const filtered = currentTabFiguras.filter(fig => {
+    const matchName = fig.nombre.toLowerCase().includes(search.toLowerCase())
+    const matchCat  = filterCat === 'Todas' || (fig.categorias && fig.categorias.includes(filterCat))
+    return matchName && matchCat
   })
+
+  const applyNameSuggestion = (nombre) => {
+    setSearch(nombre)
+    setShowSuggestions(false)
+    setFilterCat('Todas')
+  }
 
   return (
     <div className="galeria-page">
-      {/* ── HERO INTERNO ──────────────────────────────────────── */}
+
+      {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="galeria-hero">
         <div className="galeria-hero-bg" aria-hidden="true"/>
         <div className="section-wrapper galeria-hero-inner">
@@ -60,60 +124,127 @@ export default function GaleriaPage() {
             </p>
           </div>
           <div className="galeria-mascot-wrap">
-            <img src="/mascota_sin_fondo.png" alt="Mascota" className="galeria-mascot"/>
+            <img src="/robot_completo_sin_fondo.png" alt="Mascota" className="galeria-mascot"/>
           </div>
         </div>
       </section>
 
       <div className="section-wrapper galeria-main">
-        {/* ── FILTROS Y BUSCADOR ─────────────────────────────────── */}
-        <div className="galeria-controls">
-          <div className="galeria-tabs">
-            {TABS.map(tab => (
-              <button
-                key={tab}
-                className={`galeria-tab ${activeTab === tab ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab}
-              </button>
-            ))}
+
+        {/* ── TABS PRINCIPALES ─────────────────────────────── */}
+        <div className="galeria-primary-tabs">
+          <button
+            className={`galeria-primary-tab-btn ${activeTab === 'figura' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('figura'); setFilterCat('Todas'); setSearch('') }}
+          >Figuras</button>
+          <button
+            className={`galeria-primary-tab-btn ${activeTab === 'cosplay' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('cosplay'); setFilterCat('Todas'); setSearch('') }}
+          >Cosplay</button>
+        </div>
+
+        {/* ── CONTROLES: BUSCADOR + HASHTAGS ───────────────── */}
+        <div className="galeria-controls" style={{ justifyContent: 'center', flexWrap: 'wrap', gap: '20px' }}>
+
+          {/* Buscador con autocomplete */}
+          <div className="galeria-search-wrap" ref={searchRef}>
+            <div className="galeria-search">
+              <span className="search-icon">🔍</span>
+              <input
+                id="galeria-search-input"
+                type="text"
+                placeholder="Buscar por nombre..."
+                value={search}
+                autoComplete="off"
+                className="search-input"
+                onChange={(e) => {
+                  setSearch(e.target.value)
+                  setShowSuggestions(true)
+                  setFilterCat('Todas')
+                }}
+                onFocus={() => setShowSuggestions(true)}
+              />
+              {search && (
+                <button
+                  className="galeria-search-clear"
+                  onClick={() => { setSearch(''); setFilterCat('Todas'); setShowSuggestions(false) }}
+                  aria-label="Limpiar"
+                >✕</button>
+              )}
+            </div>
+
+            {/* Dropdown de sugerencias de nombres */}
+            {showSuggestions && nameSuggestions.length > 0 && (
+              <ul className="galeria-suggestions-list">
+                {nameSuggestions.map(fig => (
+                  <li
+                    key={`sug-${fig.id}`}
+                    className="galeria-suggestion-item"
+                    onMouseDown={() => applyNameSuggestion(fig.nombre)}
+                  >
+                    <img
+                      src={fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png'}
+                      alt={fig.nombre}
+                      className="galeria-sug-thumb"
+                    />
+                    <div className="galeria-sug-info">
+                      <span className="galeria-sug-name">{fig.nombre}</span>
+                      <span className="galeria-sug-year">{fig.anio || ''}</span>
+                    </div>
+                    <span className="galeria-sug-badge">{fig.tipo}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
-          <div className="galeria-search">
-            <span className="search-icon">🔍</span>
-            <input
-              type="text"
-              placeholder="Buscar por nombre..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="search-input"
-            />
+          {/* Hashtags dinámicos */}
+          <div className="galeria-tabs">
+            <button
+              className={`galeria-tab ${filterCat === 'Todas' ? 'active' : ''}`}
+              onClick={() => setFilterCat('Todas')}
+            >Todas</button>
+
+            {visibleCats.map(cat => (
+              <button
+                key={cat}
+                className={`galeria-tab ${filterCat === cat ? 'active' : ''}`}
+                onClick={() => { setFilterCat(cat); setSearch('') }}
+              >#{cat}</button>
+            ))}
+
+            {search.trim() && visibleCats.length === 0 && (
+              <span className="galeria-no-tags">Sin categorías para "{search}"</span>
+            )}
           </div>
         </div>
 
-        {/* ── GRILLA 3 COLUMNAS ──────────────────────────────────── */}
+        {/* ── GRID ─────────────────────────────────────────── */}
         {filtered.length > 0 ? (
           <div className="galeria-grid">
             {filtered.map(fig => (
-              <article key={fig.id} className="galeria-card card" onClick={() => setSelectedPost(fig)} style={{ cursor: 'pointer' }}>
+              <article
+                key={`${fig.id}-${fig.tipo}`}
+                className="galeria-card card"
+                onClick={() => setSelectedPost(fig)}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="galeria-img-wrap">
-                  <img src={fig.image} alt={fig.name} className="galeria-img" loading="lazy"/>
-                  <div className="galeria-cat-badge">{fig.cat}</div>
+                  <img src={fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png'} alt={fig.nombre} className="galeria-img" loading="lazy"/>
+                  <div className="galeria-cat-badge">{fig.tipo.toUpperCase()}</div>
                 </div>
                 <div className="galeria-card-body">
                   <div>
-                    <h3 className="galeria-name">{fig.name}</h3>
-                    <span className="galeria-year">Año: {fig.year}</span>
+                    <h3 className="galeria-name">{fig.nombre}</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span className="galeria-year">Año: {fig.anio || '-'}</span>
+                      <span className="galeria-author">por <strong>{fig.autor || 'Coleccionista'}</strong></span>
+                    </div>
                   </div>
                   <div className="galeria-counters">
                     <div className="galeria-counter red-heart">
                       <span className="counter-icon">❤</span>
-                      <span className="counter-num">{fig.likes}</span>
-                    </div>
-                    <div className="galeria-counter gray-star">
-                      <span className="counter-icon">⭐</span>
-                      <span className="counter-num">{fig.saves}</span>
+                      <span className="counter-num">{fig.total_likes || 0}</span>
                     </div>
                   </div>
                 </div>
@@ -122,15 +253,22 @@ export default function GaleriaPage() {
           </div>
         ) : (
           <div className="galeria-empty">
-            <p>No se encontraron figuras para "{search}" en esta categoría.</p>
+            <p>No se encontraron resultados para "{search || filterCat}".</p>
           </div>
         )}
       </div>
-      <PostModal 
-        post={selectedPost} 
-        isOpen={!!selectedPost} 
-        onClose={() => setSelectedPost(null)} 
-        onLike={handleLike} 
+
+      <PostModal
+        post={selectedPost}
+        isOpen={!!selectedPost}
+        onClose={() => setSelectedPost(null)}
+        onLike={handleLike}
+        onTagClick={(tag) => {
+          setFilterCat(tag);
+          setSearch('');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          setSelectedPost(null);
+        }}
       />
     </div>
   )

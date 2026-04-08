@@ -4,7 +4,17 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: radial-gradient(ellipse 90% 80% at 60% 30%, #3d0a0a 0%, #1f0808 35%, #120404 65%, #1A0F0A 100%);
+  background:
+    /* Teal prominente — zona derecha amplia */
+    radial-gradient(ellipse 65% 80% at 85% 45%,  rgba(45,110,126,0.85)  0%, transparent 70%),
+    /* Teal secundario — bordes superior e inferior */
+    radial-gradient(ellipse 50% 40% at 50% 92%,  rgba(30,77,90,0.70)    0%, transparent 65%),
+    radial-gradient(ellipse 40% 30% at 55% 5%,   rgba(45,110,126,0.60)  0%, transparent 60%),
+    /* Manchas óxido/café — izquierda */
+    radial-gradient(ellipse 50% 60% at 8%  50%,  rgba(90,45,15,0.55)    0%, transparent 65%),
+    radial-gradient(ellipse 35% 35% at 3%  95%,  rgba(101,52,18,0.50)   0%, transparent 55%),
+    /* Base crema envejecida */
+    #c8b89a;
 }
 
 /* Nebula texture layers */
@@ -12,9 +22,10 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 60% 50% at 70% 40%, rgba(192,57,43,0.22) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 60% at 20% 60%, rgba(139,26,15,0.18) 0%, transparent 70%),
-    radial-gradient(ellipse 80% 40% at 50% 10%, rgba(201,168,76,0.06) 0%, transparent 60%);
+    /* Vignette oscura perimetral */
+    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 35%, rgba(40,22,8,0.65) 100%),
+    /* Mancha café esquina superior izquierda */
+    radial-gradient(ellipse 30% 35% at 2%  2%,   rgba(75,35,10,0.55)    0%, transparent 55%);
   pointer-events: none;
 }
 
@@ -29,7 +40,7 @@
 .hero-vignette {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 100% 100% at 50% 0%, transparent 40%, rgba(18,4,4,0.7) 100%);
+  background: radial-gradient(ellipse 100% 100% at 50% 0%, transparent 40%, rgba(180,158,120,0.35) 100%);
   pointer-events: none;
 }
 
@@ -80,29 +91,32 @@
   height: 80px;
   object-fit: contain;
   border-radius: 50%;
-  border: 2px solid rgba(201, 168, 76, 0.6);
-  box-shadow: 0 0 24px rgba(201, 168, 76, 0.25), inset 0 0 12px rgba(0,0,0,0.5);
+  border: 2px solid rgba(45, 110, 126, 0.7);
+  box-shadow: 0 0 24px rgba(45, 110, 126, 0.3), inset 0 0 12px rgba(0,0,0,0.2);
   animation: logoGlow 3s ease-in-out infinite alternate;
 }
 
 @keyframes logoGlow {
-  from { box-shadow: 0 0 20px rgba(201, 168, 76, 0.2), inset 0 0 12px rgba(0,0,0,0.5); }
-  to   { box-shadow: 0 0 36px rgba(201, 168, 76, 0.45), inset 0 0 12px rgba(0,0,0,0.5); }
+  from { box-shadow: 0 0 20px rgba(45, 110, 126, 0.25), inset 0 0 12px rgba(0,0,0,0.2); }
+  to   { box-shadow: 0 0 36px rgba(45, 110, 126, 0.5), inset 0 0 12px rgba(0,0,0,0.2); }
 }
 
 .hero-title {
   font-family: var(--font-title);
   font-size: clamp(2.2rem, 5vw, 3.4rem);
   font-weight: 900;
-  color: var(--color-cream);
+  color: #2d6e7e !important;
   line-height: 1.0;
   letter-spacing: 0.04em;
-  text-shadow: 0 2px 32px rgba(192, 57, 43, 0.4);
+  text-transform: uppercase;
+  text-shadow: 0 2px 32px rgba(45, 110, 126, 0.4);
 }
 
 .hero-title-accent {
-  color: var(--color-gold);
-  text-shadow: 0 2px 24px rgba(201, 168, 76, 0.5);
+  display: block;
+  color: #8b2020 !important;
+  text-transform: uppercase;
+  text-shadow: 0 2px 24px rgba(139, 32, 32, 0.5);
 }
 
 .hero-tagline {
@@ -189,7 +203,7 @@
   transform: translateX(-50%);
   width: 260px;
   height: 260px;
-  background: radial-gradient(circle, rgba(192,57,43,0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(45,110,126,0.22) 0%, transparent 70%);
   pointer-events: none;
   border-radius: 50%;
   animation: glowPulse 3s ease-in-out infinite alternate;
@@ -206,7 +220,7 @@
   width: 340px;
   max-width: 90%;
   object-fit: contain;
-  filter: drop-shadow(0 8px 40px rgba(201,168,76,0.2)) drop-shadow(0 0 80px rgba(192,57,43,0.15));
+  filter: drop-shadow(0 8px 40px rgba(200,169,110,0.25)) drop-shadow(0 0 60px rgba(45,110,126,0.2));
 }
 
 .hero-mascot-platform {
@@ -216,7 +230,7 @@
   transform: translateX(-50%);
   width: 200px;
   height: 16px;
-  background: radial-gradient(ellipse, rgba(201,168,76,0.35) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(45,110,126,0.3) 0%, transparent 70%);
   pointer-events: none;
 }
 
