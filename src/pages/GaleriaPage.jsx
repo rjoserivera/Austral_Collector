@@ -76,9 +76,9 @@ export default function GaleriaPage() {
 
   const currentTabFiguras = figuras.filter(f => (f.tipo || 'figura') === activeTab)
 
-  // Frecuencia de categorías en el tab activo
+  // Frecuencia de categorías en el tab activo (usando la propiedad 'hashtags' del servidor)
   const catFreq = currentTabFiguras
-    .flatMap(f => f.categorias || [])
+    .flatMap(f => f.hashtags || [])
     .reduce((acc, cat) => { acc[cat] = (acc[cat] || 0) + 1; return acc }, {})
 
   // Ordenadas por uso
@@ -91,23 +91,26 @@ export default function GaleriaPage() {
     ? allCats.filter(cat => cat.toLowerCase().includes(search.toLowerCase()))
     : allCats
 
-  // Sugerencias por nombre de figura
-  const nameSuggestions = search.trim().length >= 1
-    ? currentTabFiguras
-        .filter(f => f.nombre.toLowerCase().includes(search.toLowerCase()))
-        .slice(0, 6)
+  // Sugerencias de categorías ( hashtags) en lugar de nombres
+  const categorySuggestions = search.trim().length >= 1
+    ? allCats.filter(cat => cat.toLowerCase().includes(search.toLowerCase())).slice(0, 8)
     : []
 
   const filtered = currentTabFiguras.filter(fig => {
     const matchName = fig.nombre.toLowerCase().includes(search.toLowerCase())
-    const matchCat  = filterCat === 'Todas' || (fig.categorias && fig.categorias.includes(filterCat))
+    const matchCat  = filterCat === 'Todas' || (fig.hashtags && fig.hashtags.includes(filterCat))
     return matchName && matchCat
   })
 
-  const applyNameSuggestion = (nombre) => {
-    setSearch(nombre)
+  const applyCategorySuggestion = (cat) => {
+    // Si la categoría ya está seleccionada, al volver a darle se desmarca (vuelve a Todas)
+    if (filterCat === cat) {
+      setFilterCat('Todas')
+    } else {
+      setFilterCat(cat)
+    }
+    setSearch('')
     setShowSuggestions(false)
-    setFilterCat('Todas')
   }
 
   return (
@@ -173,50 +176,37 @@ export default function GaleriaPage() {
               )}
             </div>
 
-            {/* Dropdown de sugerencias de nombres */}
-            {showSuggestions && nameSuggestions.length > 0 && (
+            {/* Dropdown de sugerencias de CATEGORÍAS */}
+            {showSuggestions && categorySuggestions.length > 0 && (
               <ul className="galeria-suggestions-list">
-                {nameSuggestions.map(fig => (
+                {categorySuggestions.map(cat => (
                   <li
-                    key={`sug-${fig.id}`}
+                    key={`sug-${cat}`}
                     className="galeria-suggestion-item"
-                    onMouseDown={() => applyNameSuggestion(fig.nombre)}
+                    onMouseDown={() => applyCategorySuggestion(cat)}
+                    style={{ padding: '12px 16px' }}
                   >
-                    <img
-                      src={fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png'}
-                      alt={fig.nombre}
-                      className="galeria-sug-thumb"
-                    />
-                    <div className="galeria-sug-info">
-                      <span className="galeria-sug-name">{fig.nombre}</span>
-                      <span className="galeria-sug-year">{fig.anio || ''}</span>
-                    </div>
-                    <span className="galeria-sug-badge">{fig.tipo}</span>
+                    <span style={{ color: 'var(--color-gold)', marginRight: '8px', fontSize: '1.1rem' }}>#</span>
+                    <span className="galeria-sug-name" style={{ fontSize: '1rem' }}>{cat}</span>
                   </li>
                 ))}
               </ul>
             )}
           </div>
 
-          {/* Hashtags dinámicos */}
-          <div className="galeria-tabs">
-            <button
-              className={`galeria-tab ${filterCat === 'Todas' ? 'active' : ''}`}
-              onClick={() => setFilterCat('Todas')}
-            >Todas</button>
-
-            {visibleCats.map(cat => (
-              <button
-                key={cat}
-                className={`galeria-tab ${filterCat === cat ? 'active' : ''}`}
-                onClick={() => { setFilterCat(cat); setSearch('') }}
-              >#{cat}</button>
-            ))}
-
-            {search.trim() && visibleCats.length === 0 && (
-              <span className="galeria-no-tags">Sin categorías para "{search}"</span>
-            )}
-          </div>
+          {/* Mostrar Categoría Activa (Badge Desmarcable) */}
+          {filterCat !== 'Todas' && (
+            <div className="galeria-active-filter">
+              <span className="gaf-label">Filtrando por:</span>
+              <button 
+                className="gaf-tag" 
+                onClick={() => setFilterCat('Todas')}
+                title="Quitar filtro"
+              >
+                #{filterCat} <span className="gaf-close">✕</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── GRID ─────────────────────────────────────────── */}

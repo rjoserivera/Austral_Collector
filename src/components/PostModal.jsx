@@ -143,9 +143,9 @@ export default function PostModal({ post, isOpen, onClose, onLike, onTagClick, i
                 {post.descripcion || post.description || 'Una pieza increíble de la comunidad. Sin descripción detallada.'}
               </p>
               
-              {post.categorias && post.categorias.length > 0 && (
+              {post.hashtags && post.hashtags.length > 0 && (
                 <div className="pm-tags">
-                  {post.categorias.map(cat => (
+                  {post.hashtags.map(cat => (
                     <span 
                       key={cat} 
                       className="pm-tag clickable" 

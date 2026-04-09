@@ -267,12 +267,6 @@ export default function HomePage() {
               </div>
             )}
             
-            <div className="hp-cta-simple">
-              <p className="hp-cta-text">
-                <strong>Austral Collector</strong> es una comunidad chilena de amantes del coleccionismo que reúne a fanáticos de los juegos, juguetes y figuras de todas las épocas. ¡Únete y comparte tu colección!
-              </p>
-              <Link to="/login?mode=register" className="btn-primary" style={{ background: 'var(--color-sand)', color: 'var(--color-steel-dark)', fontWeight: '700' }}>UNIRSE</Link>
-            </div>
           </section>
 
           {/* Miembro Destacado del Mes / Cumpleañeros */}
@@ -393,15 +387,48 @@ export default function HomePage() {
             )}
           </section>
 
-          {/* CTA inferior */}
+          {/* CTA inferior — MOVIDO debajo de las más votadas */}
           {!currentUser && (
-            <section className="hp-cta-simple" id="comunidad">
-              <p className="hp-cta-text">
+            <section className="hp-cta-simple" id="comunidad" style={{ 
+              borderTop: '1px solid rgba(223, 192, 138, 0.2)', 
+              paddingTop: '40px', 
+              marginTop: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              width: '100%'
+            }}>
+              <p className="hp-cta-text" style={{ 
+                fontSize: '1.1rem', 
+                color: 'var(--color-cream)', 
+                fontWeight: '500',
+                maxWidth: '700px',
+                marginBottom: '20px'
+              }}>
                 <strong>Austral Collector</strong> es una comunidad chilena de amantes del
                 coleccionismo que reúne a fanáticos de los juegos, juguetes y figuras de todas
                 las épocas. ¡Únete y comparte tu colección!
               </p>
-              <Link to="/login?mode=register" id="hp-btn-cta-final" className="btn-primary" style={{ textAlign: "center", textDecoration: "none", display: "inline-block" }}>Unirse</Link>
+              <Link 
+                to="/login?mode=register" 
+                id="hp-btn-cta-final" 
+                className="btn-primary" 
+                style={{ 
+                  textAlign: "center", 
+                  textDecoration: "none", 
+                  display: "inline-block",
+                  padding: "14px 40px",
+                  fontSize: "1.1rem",
+                  fontWeight: "800",
+                  letterSpacing: "0.05em",
+                  background: 'var(--color-red)',
+                  boxShadow: "0 8px 30px rgba(139, 32, 32, 0.5)",
+                  color: '#ffffff'
+                }}
+              >
+                UNIRSE A LA COMUNIDAD
+              </Link>
             </section>
           )}
         </div>
