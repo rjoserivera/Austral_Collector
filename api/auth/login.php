@@ -24,7 +24,7 @@ if ($user && password_verify($password, $user['password'])) {
     unset($user['password']);
     
     // Log the successful login
-    $logStmt = $pdo->prepare("INSERT INTO logs (user_id, tipo, accion) VALUES (?, 'auth', 'Inicio de sesión')");
+    $logStmt = $pdo->prepare("INSERT INTO logs (user_id, tipo, accion) VALUES (?, 'login', 'Inicio de sesión')");
     $logStmt->execute([$user['id']]);
 
     echo json_encode([

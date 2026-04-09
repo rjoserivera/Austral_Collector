@@ -26,10 +26,22 @@ export default function MiembrosPage() {
   }
 
   return (
-    <div className="miembros-page section-wrapper">
+    <div className="miembros-page">
       <section className="mi-hero">
-        <h1 className="mi-hero-title">Directorio de Coleccionistas</h1>
-        <p className="mi-hero-desc">Explora los perfiles de todos los miembros de Austral Collector. ¡Descubre sus figuras, conéctate y comparte tu pasión!</p>
+        <div className="mi-hero-inner section-wrapper">
+          <div className="hp-hero-mascot-wrap mi-mascot-row">
+            <div className="hp-mascot-glow" aria-hidden="true"/>
+            <img src="/robot_completo_sin_fondo.png" alt="Mascota Robot Austral Collector" className="hp-mascot"/>
+          </div>
+          
+          <div className="mi-hero-content">
+            <h1 className="mi-hero-title">
+              <span className="mi-title-teal">DIRECTORIO DE</span><br/>
+              <span className="mi-title-red">COLECCIONISTAS</span>
+            </h1>
+            <p className="mi-hero-desc">Explora los perfiles de todos los miembros de Austral Collector. ¡Descubre sus figuras, conéctate y comparte tu pasión!</p>
+          </div>
+        </div>
       </section>
 
       <div className="mi-grid">

@@ -6,12 +6,28 @@ import { BASE_URL } from '../config.js'
 // URL base para la API
 const API_URL = 'http://localhost/Austral%20Collector/api/admin'
 
+const getLogConfig = (tipo) => {
+  const t = (tipo || '').toLowerCase();
+  const config = {
+    'login':   { label: 'LOGIN',   icon: '🟢', class: 'tipo-login' },
+    'auth':    { label: 'LOGIN',   icon: '🟢', class: 'tipo-login' },
+    'alerta':  { label: 'ALERTA',  icon: '🔴', class: 'tipo-alerta' },
+    'event':   { label: 'ALERTA',  icon: '🔴', class: 'tipo-alerta' },
+    'figura':  { label: 'FIGURA',  icon: '🗿', class: 'tipo-figura' },
+    'cosplay': { label: 'COSPLAY', icon: '🎭', class: 'tipo-cosplay' },
+    'admin':   { label: 'ADMIN',   icon: '🛡️', class: 'tipo-admin' },
+    'usuario': { label: 'USUARIO', icon: '👤', class: 'tipo-usuario' },
+  };
+  return config[t] || { label: t.toUpperCase(), icon: '⚪', class: '' };
+};
+
 const NAV = [
   { id: 'inicio',     icon: '📊', label: 'Inicio' },
   { id: 'usuarios',   icon: '👥', label: 'Gestión de Usuarios' },
   { id: 'videos',     icon: '🎬', label: 'Gestión de Videos' },
   { id: 'eventos',    icon: '📢', label: 'Noticias y Eventos' },
   { id: 'destacados', icon: '🏆', label: 'Contenido Destacado' },
+  { id: 'identidad',  icon: '⭐', label: 'Identidad y Nosotros' },
   { id: 'actividad',  icon: '📋', label: 'Log de Actividad' },
   { id: 'moderacion', icon: '🛡️', label: 'Moderación de Contenido' },
 ]
@@ -20,8 +36,15 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('inicio')
   const userRole = localStorage.getItem('austral_auth_role')
   const userNameRaw = localStorage.getItem('austral_auth_user');
+  let adminId = null;
   let userName = 'Administrador';
-  try { if (userNameRaw) userName = JSON.parse(userNameRaw).username || userNameRaw; } catch(e) { userName = userNameRaw; }
+  try { 
+    if (userNameRaw) {
+      const uObj = JSON.parse(userNameRaw);
+      userName = uObj.username || userNameRaw;
+      adminId = uObj.id;
+    }
+  } catch(e) { userName = userNameRaw; }
 
   if (userRole !== 'admin') {
     return <Navigate to="/login" replace />
@@ -77,12 +100,13 @@ export default function AdminPage() {
 
         <div className="admin-main-body">
           {activeTab === 'inicio' && <AdminInicio />}
-          {activeTab === 'usuarios' && <AdminUsuarios />}
-          {activeTab === 'videos' && <AdminVideos />}
-          {activeTab === 'eventos' && <AdminEventos />}
-          {activeTab === 'destacados' && <AdminDestacados />}
-          {activeTab === 'actividad' && <AdminActividad />}
-          {activeTab === 'moderacion' && <AdminModeracion />}
+          {activeTab === 'usuarios' && <AdminUsuarios adminId={adminId} />}
+          {activeTab === 'videos' && <AdminVideos adminId={adminId} />}
+          {activeTab === 'eventos' && <AdminEventos adminId={adminId} />}
+          {activeTab === 'destacados' && <AdminDestacados adminId={adminId} />}
+          {activeTab === 'identidad' && <AdminIdentidad adminId={adminId} />}
+          {activeTab === 'actividad' && <AdminActividad adminId={adminId} />}
+          {activeTab === 'moderacion' && <AdminModeracion adminId={adminId} />}
         </div>
       </main>
     </div>
@@ -146,7 +170,7 @@ function AdminInicio() {
           {logs.map((log) => (
             <div className="alp-row" key={log.id}>
               <span className="alp-time">{log.time}</span>
-              <span className={`badge tipo-${log.tipo}`}>{log.tipo}</span>
+              <span className={`badge ${getLogConfig(log.tipo).class}`}>{getLogConfig(log.tipo).label}</span>
               <strong className="alp-user">{log.user}</strong>
               <span className="alp-accion">{log.accion}</span>
             </div>
@@ -158,11 +182,14 @@ function AdminInicio() {
 }
 
 // ── SECCIÓN: Usuarios ────────────────────────────────────────
-function AdminUsuarios() {
+function AdminUsuarios({ adminId }) {
   const [usuarios, setUsuarios] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [keyResult, setKeyResult] = useState(null) // { username, temp_pass, email, mail_sent }
+  const [messageModal, setMessageModal] = useState(null) // { user_id, username, email, mass: bool }
+  const [messageForm, setMessageForm] = useState({ asunto: '', mensaje: '' })
+  const [isSendingMsg, setIsSendingMsg] = useState(false)
   
   // Form handling (Create / Edit)
   const [formMode, setFormMode] = useState(null) // null | 'create' | 'edit'
@@ -233,7 +260,7 @@ function AdminUsuarios() {
     }
     
     setIsSaving(true)
-    const payload = formMode === 'create' ? { ...formData } : { id: editingId, action: 'update_user', ...formData }
+    const payload = formMode === 'create' ? { ...formData, adminId } : { id: editingId, action: 'update_user', ...formData, adminId }
     const method = formMode === 'create' ? 'POST' : 'PUT'
     
     fetch(`${API_URL}/usuarios.php`, {
@@ -277,7 +304,7 @@ function AdminUsuarios() {
     fetch(`${API_URL}/usuarios.php`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, action })
+      body: JSON.stringify({ id, action, adminId })
     })
     .then(r => r.json())
     .then(d => {
@@ -304,6 +331,35 @@ function AdminUsuarios() {
     .catch(e => alert('Error de conexión: ' + e.message))
   }
 
+  const handleSendMessage = (e) => {
+    e.preventDefault()
+    if (!messageForm.asunto || !messageForm.mensaje) return alert('Por favor llena todos los campos.')
+    
+    setIsSendingMsg(true)
+    fetch(`${API_URL}/enviar_mensaje.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: messageModal.mass ? null : messageModal.user_id,
+        mass_send: messageModal.mass,
+        asunto: messageForm.asunto,
+        mensaje: messageForm.mensaje
+      })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        alert(d.message || 'Mensaje enviado con éxito.')
+        setMessageModal(null)
+        setMessageForm({ asunto: '', mensaje: '' })
+      } else {
+        alert('Error: ' + d.error)
+      }
+    })
+    .catch(e => alert('Error: ' + e.message))
+    .finally(() => setIsSendingMsg(false))
+  }
+
   const filteredUsers = usuarios.filter(u => {
     const q = searchTerm.toLowerCase()
     return u.username.toLowerCase().includes(q) || 
@@ -315,28 +371,41 @@ function AdminUsuarios() {
 
   return (
     <div className="admin-section">
-      {/* Modal de clave generada */}
-      {keyResult && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#0d2830', border: '1px solid var(--color-gold)', borderRadius: '12px', padding: '2rem', maxWidth: '440px', width: '90%', textAlign: 'center' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{keyResult.mail_sent ? '📧' : '⚠️'}</div>
-            <h3 style={{ color: '#ffd700', marginBottom: '0.5rem' }}>Clave Temporal Generada</h3>
-            <p style={{ color: '#f0e4cc', marginBottom: '0.5rem' }}>Usuario: <strong>{keyResult.username}</strong></p>
-            <p style={{ color: keyResult.mail_sent ? '#7fff99' : '#ffb5b5', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-              {keyResult.mail_sent ? `✅ Correo enviado a: ${keyResult.email}` : `⚠️ El correo no pudo enviarse. Copia la clave manualmente.`}
-            </p>
-            <div style={{ background: 'rgba(0,0,0,0.5)', border: '1px dashed var(--color-gold)', borderRadius: '8px', padding: '1rem', marginBottom: '1.5rem' }}>
-              <p style={{ color: 'rgba(240,228,204,0.6)', fontSize: '0.8rem', margin: '0 0 6px' }}>Clave Temporal</p>
-              <p style={{ color: '#ffd700', fontFamily: 'monospace', fontSize: '1.5rem', letterSpacing: '3px', margin: 0 }}>{keyResult.temp_pass}</p>
+      {/* Modal de Mensaje */}
+      {messageModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <form className="admin-modal-form" style={{ width: '500px' }} onSubmit={handleSendMessage}>
+            <h3 style={{ borderBottom: '1px solid var(--color-gold)', paddingBottom: '10px', marginBottom: '20px' }}>
+              {messageModal.mass ? '📢 Publicar Anuncio General' : `✉️ Enviar Mensaje a ${messageModal.username}`}
+            </h3>
+            <div className="admin-form-group">
+              <label>Asunto</label>
+              <input 
+                type="text" className="admin-input" required 
+                value={messageForm.asunto} 
+                onChange={e => setMessageForm({...messageForm, asunto: e.target.value})}
+                placeholder="Ej: Mantenimiento programado"
+              />
             </div>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-              <button className="btn-outline btn-sm" style={{ borderColor: 'var(--color-gold)', color: '#ffd700' }}
-                onClick={() => { navigator.clipboard.writeText(keyResult.temp_pass); alert('Copiado al portapapeles 📋'); }}>
-                📋 Copiar Clave
+            <div className="admin-form-group">
+              <label>Mensaje</label>
+              <textarea 
+                className="admin-input" required rows="6"
+                value={messageForm.mensaje}
+                onChange={e => setMessageForm({...messageForm, mensaje: e.target.value})}
+                placeholder="Escribe el contenido del correo aquí..."
+                style={{ resize: 'vertical' }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              <button type="submit" className="btn-primary" disabled={isSendingMsg} style={{ flex: 1 }}>
+                {isSendingMsg ? 'Enviando...' : 'Enviar Ahora'}
               </button>
-              <button className="btn-primary btn-sm" onClick={() => setKeyResult(null)}>Cerrar</button>
+              <button type="button" className="btn-outline" onClick={() => setMessageModal(null)} disabled={isSendingMsg}>
+                Cancelar
+              </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
 
@@ -352,6 +421,10 @@ function AdminUsuarios() {
               onChange={e => setSearchTerm(e.target.value)}
               style={{ padding: '6px 12px', width: '220px' }}
             />
+            <button className="btn-primary btn-sm" style={{ background: '#2d6e7e', borderColor: 'var(--color-gold)', color: '#fff' }}
+              onClick={() => setMessageModal({ mass: true })}>
+              📢 Anuncio General
+            </button>
             <button className="btn-primary btn-sm" onClick={() => openForm('create')}>
               ➕ Crear Usuario
             </button>
@@ -450,6 +523,7 @@ function AdminUsuarios() {
             <th>ID</th>
             <th>Usuario</th>
             <th>Email</th>
+            <th style={{ textAlign: 'center' }}>Mensaje</th>
             <th>Rol</th>
             <th>Estado</th>
             <th>Registro</th>
@@ -466,6 +540,27 @@ function AdminUsuarios() {
                   </Link>
                 </td>
                 <td className="td-muted">{u.email}</td>
+                <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                  <button 
+                    className="act-btn" 
+                    title="Enviar mensaje personalizado"
+                    style={{ 
+                      background: 'var(--color-gold)', 
+                      border: '1px solid #000', 
+                      color: '#000',
+                      width: '32px',
+                      height: '32px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setMessageModal({ user_id: u.id, username: u.username, email: u.email, mass: false })}
+                  >
+                    ✉️
+                  </button>
+                </td>
                 <td>
                   <select 
                     className={`badge-select ${u.role === 'admin' ? 'bs-admin' : 'bs-user'}`}
@@ -516,9 +611,12 @@ function AdminUsuarios() {
 
 
 // ── SECCIÓN: Videos ────────────────────────────────────────
-function AdminVideos() {
+function AdminVideos({ adminId }) {
   const [videos, setVideos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [videoModal, setVideoModal] = useState(false)
+  const [videoForm, setVideoForm] = useState({ titulo: '', link: '' })
+  const [saving, setSaving] = useState(false)
 
   const loadData = () => {
     setLoading(true)
@@ -530,17 +628,22 @@ function AdminVideos() {
 
   useEffect(() => { loadData() }, [])
 
-  const handleAdd = () => {
-    const titulo = prompt('Título del video:')
-    if (!titulo) return
-    const link = prompt('Link de YouTube:')
-    if (!link) return
+  const handleVideoSubmit = (e) => {
+    e.preventDefault()
+    if (!videoForm.titulo || !videoForm.link) return alert('Campos obligatorios')
     
+    setSaving(true)
     fetch(`${API_URL}/videos.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ titulo, link })
-    }).then(() => loadData())
+      body: JSON.stringify({ ...videoForm, adminId })
+    })
+    .then(() => {
+      setVideoModal(false)
+      setVideoForm({ titulo: '', link: '' })
+      loadData()
+    })
+    .finally(() => setSaving(false))
   }
 
   const handleDelete = (id) => {
@@ -548,7 +651,7 @@ function AdminVideos() {
     fetch(`${API_URL}/videos.php`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id })
+      body: JSON.stringify({ id, adminId })
     }).then(() => loadData())
   }
 
@@ -564,9 +667,57 @@ function AdminVideos() {
 
   return (
     <div className="admin-section">
+      {/* Modal de Video Personalizado */}
+      {videoModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <form 
+            onSubmit={handleVideoSubmit}
+            style={{ 
+              width: '450px', 
+              background: '#0d2830', 
+              border: '1px solid var(--color-gold)', 
+              borderRadius: '12px', 
+              padding: '2rem',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+              position: 'relative'
+            }}
+          >
+            <h3 style={{ borderBottom: '1px solid rgba(255,215,0,0.3)', paddingBottom: '12px', marginBottom: '20px', color: '#ffd700', fontSize: '1.4rem' }}>
+              🎬 Nuevo video de YouTube
+            </h3>
+            <div className="admin-form-group">
+              <label>Título del Video</label>
+              <input 
+                type="text" className="admin-input" required autoFocus
+                value={videoForm.titulo} 
+                onChange={e => setVideoForm({...videoForm, titulo: e.target.value})}
+                placeholder="Ej: Review de Figura XYZ"
+              />
+            </div>
+            <div className="admin-form-group">
+              <label>Link de YouTube</label>
+              <input 
+                type="url" className="admin-input" required 
+                value={videoForm.link} 
+                onChange={e => setVideoForm({...videoForm, link: e.target.value})}
+                placeholder="https://www.youtube.com/watch?v=..."
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+              <button type="submit" className="btn-primary" disabled={saving} style={{ flex: 1 }}>
+                {saving ? 'Guardando...' : '💾 Guardar Link'}
+              </button>
+              <button type="button" className="btn-outline" onClick={() => setVideoModal(false)} disabled={saving}>
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       <div className="admin-sec-header">
         <h2 className="admin-sec-title">🎬 Gestión de Videos</h2>
-        <button className="btn-primary btn-sm" onClick={handleAdd}>➕ Agregar Link</button>
+        <button className="btn-primary btn-sm" onClick={() => setVideoModal(true)}>➕ Agregar Link</button>
       </div>
       <div className="admin-table-wrap">
         <table className="admin-table">
@@ -577,15 +728,66 @@ function AdminVideos() {
             {videos.map(v => (
               <tr key={v.id}>
                 <td><strong>{v.titulo}</strong></td>
-                <td><a href={v.link} target="_blank" rel="noreferrer" className="link-yt">🔗 Ver video</a></td>
                 <td>
-                  <button className={`act-btn ${parseInt(v.destacado)===1 ? 'act-gold' : ''}`} onClick={() => toggleDest(v.id)}>
+                  <a href={v.link_yt} target="_blank" rel="noreferrer" 
+                    style={{ 
+                      color: '#0d2830', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '8px', 
+                      textDecoration: 'underline',
+                      fontWeight: '800',
+                      fontSize: '0.9rem'
+                    }}
+                  >
+                    <span style={{ fontSize: '1.2rem', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.1))' }}>📺</span> Ver video
+                  </a>
+                </td>
+                <td>
+                  <button 
+                    className={`act-btn ${parseInt(v.destacado)===1 ? 'act-gold' : ''}`} 
+                    onClick={() => toggleDest(v.id)}
+                    style={{
+                      width: '38px',
+                      height: '38px',
+                      fontSize: '1.3rem',
+                      background: parseInt(v.destacado)===1 ? '#ffd700' : '#f0e4cc',
+                      border: '2px solid #0d2830',
+                      borderRadius: '8px',
+                      color: '#000',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}
+                  >
                     {parseInt(v.destacado)===1 ? '⭐' : '☆'}
                   </button>
                 </td>
                 <td>
                   <div className="action-row">
-                    <button className="act-btn act-red" onClick={() => handleDelete(v.id)} title="Eliminar">🗑️</button>
+                    <button 
+                      className="act-btn act-red" 
+                      onClick={() => handleDelete(v.id)} 
+                      title="Eliminar"
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        fontSize: '1.2rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: '#ff4444',
+                        border: '2px solid #000',
+                        color: '#fff',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      🗑️
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -599,7 +801,7 @@ function AdminVideos() {
 }
 
 // ── SECCIÓN: Eventos ──────────────────────────────────────
-function AdminEventos() {
+function AdminEventos({ adminId }) {
   const [eventos, setEventos] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -630,6 +832,7 @@ function AdminEventos() {
     setSaving(true)
     const fd = new FormData()
     if (id) fd.append('id', id)
+    fd.append('adminId', adminId)
     fd.append('titulo', titulo)
     fd.append('fecha_display', fecha_display)
     if (imagen) fd.append('imagen', imagen)
@@ -656,7 +859,7 @@ function AdminEventos() {
     fetch(`${API_URL}/eventos.php`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: evtId })
+      body: JSON.stringify({ id: evtId, adminId })
     })
     .then(r => r.json())
     .then(d => {
@@ -809,8 +1012,132 @@ function AdminEventos() {
   )
 }
 
+// ── SECCIÓN: Identidad ────────────────────────────────────
+function AdminIdentidad({ adminId }) {
+  const [identidades, setIdentidades] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [savingId, setSavingId] = useState(null)
+  
+  let userId = null;
+  try {
+    const user = JSON.parse(localStorage.getItem('austral_auth_user') || '{}');
+    userId = user.id;
+  } catch(e) {}
+
+  const loadData = () => {
+    setLoading(true)
+    fetch(`${API_URL}/identidad_admin.php?user_id=${userId}`)
+      .then(r => r.json())
+      .then(d => {
+        if(d.success) setIdentidades(d.data || [])
+        else alert(d.error || 'Error al cargar identidad')
+      })
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => { loadData() }, [])
+
+  const handleChange = (index, field, value) => {
+    const updated = [...identidades]
+    updated[index][field] = value
+    setIdentidades(updated)
+  }
+
+  const handleSaveSingle = (index) => {
+    const item = identidades[index];
+    setSavingId(item.id);
+    
+    fetch(`${API_URL}/identidad_admin.php`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        user_id: userId, 
+        identidades: [item] 
+      })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if(d.success) {
+        alert(`✅ ${item.title} actualizado exitosamente!`)
+      } else {
+        alert("Error: " + d.error)
+      }
+    })
+    .finally(() => setSavingId(null))
+  }
+
+  if (loading) return <Loading />
+
+  return (
+    <div className="admin-section">
+      <div className="admin-sec-header">
+        <h2 className="admin-sec-title">⭐ Identidad y Nosotros</h2>
+        <button className="btn-outline btn-sm" onClick={loadData} disabled={!!savingId} style={{ borderColor: 'rgba(0,0,0,0.2)', color: '#1a3d4a' }}>
+          🔄 Recargar
+        </button>
+      </div>
+
+      <div className="admin-identidad-grid">
+        {identidades.map((item, index) => (
+          <div key={item.id} className="admin-identidad-card">
+            <div className="aic-header">
+              <span className="aic-icon-view">{item.icon}</span>
+              <h3 className="aic-id-label">{item.id}</h3>
+            </div>
+            
+            <div className="admin-form-group">
+              <label>Título Sección</label>
+              <input 
+                type="text" 
+                className="admin-input" 
+                value={item.title} 
+                onChange={e => handleChange(index, 'title', e.target.value)} 
+                required 
+              />
+            </div>
+
+            <div className="admin-form-group" style={{ marginTop: '12px' }}>
+              <label>Ícono (Emoji)</label>
+              <input 
+                type="text" 
+                className="admin-input" 
+                value={item.icon} 
+                onChange={e => handleChange(index, 'icon', e.target.value)} 
+                required 
+              />
+            </div>
+
+            <div className="admin-form-group" style={{ marginTop: '12px', flex: 1 }}>
+              <label>Descripción</label>
+              <textarea 
+                className="admin-input" 
+                rows="4" 
+                value={item.desc} 
+                onChange={e => handleChange(index, 'desc', e.target.value)} 
+                required 
+                style={{ resize: 'none' }}
+              />
+            </div>
+
+            <div className="aic-footer" style={{ marginTop: '20px' }}>
+              <button 
+                className="btn-primary" 
+                onClick={() => handleSaveSingle(index)}
+                disabled={savingId === item.id}
+                style={{ width: '100%', padding: '12px' }}
+              >
+                {savingId === item.id ? 'Guardando...' : '💾 Guardar'}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── SECCIÓN: Destacados ────────────────────────────────────
-function AdminDestacados() {
+function AdminDestacados({ adminId }) {
   const [data, setData]         = useState(null)
   const [error, setError]       = useState(null)
   const [saving, setSaving]     = useState(false)
@@ -845,7 +1172,7 @@ function AdminDestacados() {
     fetch(`${API_URL}/destacados.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clave, valor })
+      body: JSON.stringify({ clave, valor, adminId })
     })
       .then(r => r.json())
       .then(d => {
@@ -976,30 +1303,33 @@ function AdminActividad() {
       <div className="admin-sec-header" style={{ display: 'block', marginBottom: '24px' }}>
         <h2 className="admin-sec-title">📋 Log Completo de Actividad</h2>
         
-        {/* Barra de Filtros */}
+        {/* Barra de Filtros Refinada */}
         <div style={{ 
-          display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap', 
-          background: 'rgba(0,0,0,0.2)', padding: '12px 16px', borderRadius: '8px', marginTop: '16px',
-          border: '1px solid rgba(255,255,255,0.05)'
+          display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', 
+          background: 'rgba(30, 77, 90, 0.05)',
+          padding: '16px 20px', 
+          borderRadius: '10px', 
+          marginTop: '12px',
+          border: '1.5px solid rgba(45, 110, 126, 0.1)'
         }}>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '0.75rem', color: '#111', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Usuario</label>
+            <label style={{ fontSize: '0.70rem', color: '#1e4d5a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Responsable</label>
             <input 
               type="text" 
-              placeholder="Ej: CollectorMaster" 
+              placeholder="Buscar usuario..." 
               className="admin-input" 
-              style={{ width: '180px', padding: '8px 12px' }}
+              style={{ width: '180px', background: 'rgba(255,250,240,0.5)', borderColor: 'rgba(180,160,120,0.4)', color: '#2e1f0f' }}
               value={fUsuario}
               onChange={e => setFUsuario(e.target.value)}
             />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '0.75rem', color: '#111', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Tipo</label>
+            <label style={{ fontSize: '0.70rem', color: '#1e4d5a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Categoría</label>
             <select 
               className="admin-select"
-              style={{ width: '150px', padding: '8px 12px', height: '37px', fontSize: '0.9rem' }}
+              style={{ width: '150px', height: '38px', background: 'rgba(255,250,240,0.5)', borderColor: 'rgba(180,160,120,0.4)', color: '#2e1f0f' }}
               value={fTipo}
               onChange={e => setFTipo(e.target.value)}
             >
@@ -1014,30 +1344,35 @@ function AdminActividad() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '0.75rem', color: '#111', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Desde (Fecha)</label>
+            <label style={{ fontSize: '0.70rem', color: '#1e4d5a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Desde</label>
             <input 
               type="date" 
               className="admin-input" 
-              style={{ padding: '8px 12px', height: '37px' }}
+              style={{ width: '150px', background: 'rgba(255,250,240,0.5)', borderColor: 'rgba(180,160,120,0.4)', color: '#2e1f0f' }}
               value={fFechaDesde}
               onChange={e => setFFechaDesde(e.target.value)}
             />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '0.75rem', color: '#111', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Hasta (Fecha)</label>
+            <label style={{ fontSize: '0.70rem', color: '#1e4d5a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Hasta</label>
             <input 
               type="date" 
               className="admin-input" 
-              style={{ padding: '8px 12px', height: '37px' }}
+              style={{ width: '150px', background: 'rgba(255,250,240,0.5)', borderColor: 'rgba(180,160,120,0.4)', color: '#2e1f0f' }}
               value={fFechaHasta}
               onChange={e => setFFechaHasta(e.target.value)}
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', height: '100%', alignSelf: 'flex-end', paddingBottom: '2px' }}>
-            <button className="btn-primary" onClick={loadData} style={{ padding: '8px 16px', height: '37px' }}>Filtrar</button>
-            <button className="btn-outline" onClick={() => { setFUsuario(''); setFTipo(''); setFFechaDesde(''); setFFechaHasta(''); setTimeout(loadData, 50) }} style={{ padding: '8px 16px', height: '37px' }}>Limpiar</button>
+          <div style={{ display: 'flex', gap: '10px', marginLeft: 'auto', alignSelf: 'flex-end' }}>
+            <button className="btn-outline btn-sm" onClick={() => { setFUsuario(''); setFTipo(''); setFFechaDesde(''); setFFechaHasta(''); setTimeout(loadData, 50) }} 
+              style={{ borderColor: 'rgba(180,160,120,0.6)', color: '#5a4530' }}>
+              Limpiar
+            </button>
+            <button className="btn-primary btn-sm" onClick={loadData}>
+              🔍 Filtrar Log
+            </button>
           </div>
         </div>
       </div>
@@ -1062,27 +1397,8 @@ function AdminActividad() {
                     )}
                   </td>
                   <td>
-                    <span 
-                      className="badge"
-                      style={{
-                        padding: '4px 8px',
-                        fontWeight: 'bold',
-                        borderRadius: '12px',
-                        display: 'inline-block',
-                        background: log.tipo === 'login' ? '#2e7d32' : 
-                                    log.tipo === 'alerta' ? '#d32f2f' : 
-                                    log.tipo === 'figura' ? '#7b1fa2' : 
-                                    log.tipo === 'cosplay' ? '#00838f' : 
-                                    log.tipo === 'admin' ? '#f57c00' : 
-                                    '#4a6b7c', // Steel blue for 'usuario' and others
-                        color: '#ffffff',
-                        border: 'none',
-                        textTransform: 'uppercase',
-                        fontSize: '0.75rem',
-                        letterSpacing: '0.5px'
-                      }}
-                    >
-                      {log.tipo}
+                    <span className={`badge ${getLogConfig(log.tipo).class}`}>
+                      {getLogConfig(log.tipo).label}
                     </span>
                   </td>
                 </tr>
@@ -1099,7 +1415,7 @@ function AdminActividad() {
 }
 
 // ── SECCIÓN: Moderación ─────────────────────────────────────
-function AdminModeracion() {
+function AdminModeracion({ adminId }) {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -1131,7 +1447,8 @@ function AdminModeracion() {
       body: JSON.stringify({
         id: postToRemove.id,
         tipo: postToRemove.tipo,
-        motivo: deleteReason
+        motivo: deleteReason,
+        adminId: adminId
       })
     })
     .then(r => r.json())
@@ -1231,7 +1548,7 @@ function AdminModeracion() {
               <tr key={`${p.tipo}-${p.id}`}>
                 <td>
                   <img 
-                    src={`${API_URL}/../${p.imagen_url}`} 
+                    src={`${BASE_URL}/${p.imagen_url}`} 
                     alt="Mini" 
                     style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }}
                   />
@@ -1240,7 +1557,9 @@ function AdminModeracion() {
                   <strong>{p.nombre}</strong>
                 </td>
                 <td>
-                  <span className={`badge tipo-${p.tipo}`}>{p.tipo.toUpperCase()}</span>
+                  <span className={`badge ${getLogConfig(p.tipo).class}`}>
+                    {getLogConfig(p.tipo).label}
+                  </span>
                 </td>
                 <td>
                   <span className="td-muted">{p.autor}</span>

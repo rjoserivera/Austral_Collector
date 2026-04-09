@@ -4,27 +4,6 @@ import './PortafolioPage.css'
 import { API_URL, BASE_URL } from '../config.js'
 
 /* ─── Mock Data ─────────────────────────────────────────── */
-const IDENTIDAD = [
-  {
-    id: 'mision',
-    icon: '🎯',
-    title: 'Misión',
-    desc: 'Reunir a coleccionistas apasionados en una comunidad activa donde pueden compartir, exhibir y perseguir piezas únicas del mundo del entretenimiento.',
-  },
-  {
-    id: 'valores',
-    icon: '⭐',
-    title: 'Valores',
-    desc: 'Comunidad, respeto, pasión por la historia, autenticidad y colaboración entre miembros.',
-  },
-  {
-    id: 'metas',
-    icon: '🏆',
-    title: 'Metas',
-    desc: 'Expandir la comunidad a nivel nacional, organizar eventos presenciales y posicionarnos como referentes del coleccionismo en Chile.',
-  },
-]
-
 const GALERIA = [
   { id: 1, img: '/mock_fig1.png', alt: 'Galería figura 1' },
   { id: 2, img: '/mock_fig2.png', alt: 'Galería figura 2' },
@@ -49,6 +28,7 @@ function PlayIcon() {
 export default function PortafolioPage() {
   const [galeriaReal, setGaleriaReal] = useState(GALERIA);
   const [videosReal, setVideosReal] = useState(VIDEOS_PORTA);
+  const [identidadReal, setIdentidadReal] = useState([]);
 
   useEffect(() => {
     fetch(`${API_URL}/public/home_data.php`)
@@ -64,6 +44,15 @@ export default function PortafolioPage() {
         }
       })
       .catch(e => console.error("Error loading portafolio data:", e))
+
+    fetch(`${API_URL}/public/identidad.php`)
+      .then(r => r.json())
+      .then(d => {
+        if(d.success) {
+          setIdentidadReal(d.data);
+        }
+      })
+      .catch(e => console.error("Error loading identidad data:", e))
   }, []);
 
   return (
@@ -96,7 +85,7 @@ export default function PortafolioPage() {
       <section className="pp-identidad section-wrapper" id="pp-identidad">
         <h2 className="pp-section-title">⭐ Nuestra Identidad</h2>
         <div className="pp-identidad-grid">
-          {IDENTIDAD.map(item => (
+          {identidadReal.map(item => (
             <article key={item.id} className="pp-identidad-card card" id={`pp-${item.id}`}>
               <div className="pp-identidad-icon">{item.icon}</div>
               <h3 className="pp-identidad-name">{item.title}</h3>

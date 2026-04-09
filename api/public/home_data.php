@@ -34,16 +34,38 @@ try {
     $votadas = $stmtVotadas->fetchAll();
 
     // 3. Featured videos
-    $stmtVideos = $pdo->query("SELECT * FROM videos ORDER BY destacado DESC, created_at DESC LIMIT 4");
-    $videos = $stmtVideos->fetchAll();
+    // Try to get specific IDs from configuration
+    $stmtCfg = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave LIKE 'video_destacado_%'");
+    $videoConfigs = $stmtCfg->fetchAll(PDO::FETCH_KEY_PAIR);
+    $videoIds = array_filter(array_values($videoConfigs));
+
+    if (!empty($videoIds)) {
+        $placeholders = implode(',', array_fill(0, count($videoIds), '?'));
+        // Order by the specific IDs provided in config slots
+        $stmtVideos = $pdo->prepare("SELECT * FROM videos WHERE id IN ($placeholders) ORDER BY FIELD(id, $placeholders)");
+        $stmtVideos->execute(array_merge($videoIds, $videoIds));
+        $videos = $stmtVideos->fetchAll();
+    } else {
+        $stmtVideos = $pdo->query("SELECT * FROM videos ORDER BY destacado DESC, created_at DESC LIMIT 4");
+        $videos = $stmtVideos->fetchAll();
+    }
 
     // 4. Upcoming events
     $stmtEventos = $pdo->query("SELECT * FROM eventos ORDER BY created_at DESC LIMIT 5");
     $eventos = $stmtEventos->fetchAll();
 
     // 5. Featured member (Destacado del Mes)
-    $stmtDestacado = $pdo->query("SELECT u.* FROM usuarios u JOIN destacado_mes d ON u.id = d.user_id ORDER BY d.id DESC LIMIT 1");
-    $destacadoUser = $stmtDestacado->fetch();
+    // Check configuration first
+    $miembroId = $pdo->query("SELECT valor FROM configuracion WHERE clave = 'miembro_destacado'")->fetchColumn();
+    
+    if ($miembroId) {
+        $stmtDestacadoUser = $pdo->prepare("SELECT * FROM usuarios WHERE id = ?");
+        $stmtDestacadoUser->execute([$miembroId]);
+        $destacadoUser = $stmtDestacadoUser->fetch();
+    } else {
+        $stmtDestacado = $pdo->query("SELECT u.* FROM usuarios u JOIN destacado_mes d ON u.id = d.user_id ORDER BY d.id DESC LIMIT 1");
+        $destacadoUser = $stmtDestacado->fetch();
+    }
     
     $destacado = null;
     if ($destacadoUser) {

@@ -60,6 +60,12 @@ if (count($uploadedFiles) === 0) {
 $imagen_url    = $uploadedFiles[0];
 $imagenes_extra = array_slice($uploadedFiles, 1);
 
+function logAction($pdo, $userId, $tipo, $accion) {
+    if (!$userId) return;
+    $stmt = $pdo->prepare("INSERT INTO logs (user_id, tipo, accion) VALUES (?, ?, ?)");
+    $stmt->execute([$userId, $tipo, $accion]);
+}
+
 // --- Insert post ---
 try {
     $extraJson = count($imagenes_extra) > 0 ? json_encode($imagenes_extra) : null;
@@ -71,6 +77,9 @@ try {
     );
     $stmt->execute([$user_id, $nombre, $descripcion, $imagen_url, $extraJson, $tipo, $anioVal]);
     $postId = $pdo->lastInsertId();
+
+    // Log the action
+    logAction($pdo, $user_id, $tipo, "Publicó un nuevo " . $tipo . ": " . $nombre);
 
     // --- Handle Hashtags ---
     if ($hashtagsRaw) {

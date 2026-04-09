@@ -14,7 +14,10 @@ try {
         'destacado'=> $pdo->query("SELECT COUNT(*) FROM destacado_mes")->fetchColumn()
     ];
 
-    $logs = $pdo->query("SELECT l.*, u.username as user FROM logs l LEFT JOIN usuarios u ON l.user_id = u.id ORDER BY l.created_at DESC LIMIT 15")->fetchAll();
+    $logs = $pdo->query("SELECT l.*, u.username as user, DATE_FORMAT(l.created_at, '%d/%m/%Y %H:%i') as time 
+                         FROM logs l 
+                         LEFT JOIN usuarios u ON l.user_id = u.id 
+                         ORDER BY l.created_at DESC LIMIT 15")->fetchAll();
 
     echo json_encode([
         'success' => true,
