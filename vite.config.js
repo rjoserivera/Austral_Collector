@@ -29,16 +29,11 @@ export default defineConfig({
         runtimeCaching: [
           {
             // ============================================
-            // ENTORNO DE DESARROLLO LOCAL
+            // PATRÓN GLOBAL PARA CACHÉ DE API (Independiente del host local/prod)
+            // Ignora la carpeta de uploads para manejarla con CacheFirst abajo
             // ============================================
-            urlPattern: /^http:\/\/192\.168\.18\.194\/Austral%20Collector\/api\/.*/i,
-            
-            // ============================================
-            // ENTORNO DE PRODUCCIÓN (LANZAMIENTO WEB)
-            // Comentar el patrón de arriba y usar el de abajo
-            // ============================================
-            // urlPattern: /^https:\/\/www\.australcollector\.com\/api\/.*/i,
-            
+            urlPattern: /\/api\/(?!uploads\/).*/i,
+            method: 'GET',
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
@@ -54,16 +49,10 @@ export default defineConfig({
           // Caching image uploads served statically
           {
             // ============================================
-            // ENTORNO DE DESARROLLO LOCAL
+            // CACHÉ DE IMÁGENES GLOBAL (Independiente del host local/prod)
             // ============================================
-            urlPattern: /^http:\/\/192\.168\.18\.194\/Austral%20Collector\/api\/uploads\/.*/i,
-            
-            // ============================================
-            // ENTORNO DE PRODUCCIÓN (LANZAMIENTO WEB)
-            // Comentar el patrón de arriba y usar el de abajo
-            // ============================================
-            // urlPattern: /^https:\/\/www\.australcollector\.com\/api\/uploads\/.*/i,
-            
+            urlPattern: /\/api\/uploads\/.*/i,
+            method: 'GET',
             handler: 'CacheFirst',
             options: {
               cacheName: 'image-cache',

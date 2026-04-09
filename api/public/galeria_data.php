@@ -15,7 +15,7 @@ if ($viewerName) {
 }
 
 try {
-    $sql    = "SELECT p.*, u.username as autor,
+    $sql    = "SELECT p.*, u.username as autor, u.avatar_url as autor_avatar,
                (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as total_likes,
                (SELECT 1 FROM likes WHERE user_id = ? AND post_id = p.id) as userLiked
                FROM posts p JOIN usuarios u ON p.user_id = u.id";

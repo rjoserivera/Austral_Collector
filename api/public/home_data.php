@@ -14,7 +14,7 @@ try {
     }
 
     // 1. Latest posts (Ultimas) - Only Figuras
-    $stmtUltimas = $pdo->prepare("SELECT p.*, u.username as autor,
+    $stmtUltimas = $pdo->prepare("SELECT p.*, u.username as autor, u.avatar_url as autor_avatar,
         (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as total_likes,
         (SELECT 1 FROM likes WHERE user_id = ? AND post_id = p.id) as userLiked
         FROM posts p JOIN usuarios u ON p.user_id = u.id 
@@ -24,7 +24,7 @@ try {
     $ultimas = $stmtUltimas->fetchAll();
 
     // 2. Most voted (Votadas) - Only Figuras
-    $stmtVotadas = $pdo->prepare("SELECT p.*, u.username as autor,
+    $stmtVotadas = $pdo->prepare("SELECT p.*, u.username as autor, u.avatar_url as autor_avatar,
         (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as total_likes,
         (SELECT 1 FROM likes WHERE user_id = ? AND post_id = p.id) as userLiked
         FROM posts p JOIN usuarios u ON p.user_id = u.id 
@@ -77,12 +77,35 @@ try {
     }
 
     // 6. Latest Cosplays
-    $stmtCosplay = $pdo->prepare("SELECT p.*, u.username as autor,
+    $stmtCosplay = $pdo->prepare("SELECT p.*, u.username as autor, u.avatar_url as autor_avatar,
         (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as total_likes,
         (SELECT 1 FROM likes WHERE user_id = ? AND post_id = p.id) as userLiked
         FROM posts p JOIN usuarios u ON p.user_id = u.id WHERE p.tipo = 'cosplay' ORDER BY p.created_at DESC LIMIT 4");
     $stmtCosplay->execute([$viewerId]);
     $ultimos_cosplays = $stmtCosplay->fetchAll();
+
+    // 7. Cumpleaneros: Buscar si hay alguien de cumpleaños hoy o mañana
+    $stmtCumple = $pdo->query("
+        SELECT *, 
+        IF(DATE_FORMAT(fecha_nacimiento, '%c-%d') = DATE_FORMAT(CURDATE(), '%c-%d'), 'hoy', 'manana') as estado_cumple 
+        FROM usuarios 
+        WHERE DATE_FORMAT(fecha_nacimiento, '%c-%d') IN (DATE_FORMAT(CURDATE(), '%c-%d'), DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 1 DAY), '%c-%d')) 
+        AND is_active = 1
+    ");
+    $rawCumple = $stmtCumple->fetchAll();
+    
+    $cumpleaneros = [];
+    foreach ($rawCumple as $u) {
+        unset($u['password']);
+        $stmtStatsC = $pdo->prepare("SELECT (SELECT COUNT(*) FROM posts WHERE user_id = ?) as posts, (SELECT COUNT(*) FROM likes WHERE post_id IN (SELECT id FROM posts WHERE user_id = ?)) as likes");
+        $stmtStatsC->execute([$u['id'], $u['id']]);
+        $statsC = $stmtStatsC->fetch();
+        $cumpleaneros[] = ['user' => $u, 'stats' => $statsC];
+    }
+
+    // 8. Global Dynamic Text Configs
+    $stmtConfigGen = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave IN ('txt_destacado', 'txt_cumple')");
+    $globalConfig = $stmtConfigGen->fetchAll(PDO::FETCH_KEY_PAIR);
 
     echo json_encode([
         'success' => true,
@@ -93,7 +116,8 @@ try {
             'eventos' => $eventos,
             'destacado' => $destacado,
             'ultimos_cosplays' => $ultimos_cosplays,
-            'cumpleaneros' => [] // Optional: logic for birthdays can be added later
+            'cumpleaneros' => $cumpleaneros,
+            'config' => $globalConfig
         ]
     ]);
 

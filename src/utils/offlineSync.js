@@ -25,6 +25,7 @@ export const savePostOffline = async (postData) => {
   });
   await tx.done;
   console.log('Post saved offline successfully.');
+  window.dispatchEvent(new CustomEvent('SYNC_QUEUE_CHANGED'));
 };
 
 // Get all offline posts
@@ -39,6 +40,7 @@ export const removeOfflinePost = async (id) => {
   const tx = db.transaction(STORE_NAME, 'readwrite');
   await tx.store.delete(id);
   await tx.done;
+  window.dispatchEvent(new CustomEvent('SYNC_QUEUE_CHANGED'));
 };
 
 // Sync all offline posts with the server
@@ -100,9 +102,11 @@ export const syncOfflinePosts = async (apiUrl) => {
         await removeOfflinePost(post.id);
       } else {
         console.error(`❌ Failed to sync post ID: ${post.id}`, data.error);
+        window.dispatchEvent(new CustomEvent('SYNC_ERROR', { detail: data.error }));
       }
     } catch (e) {
       console.error(`🔌 Sync interrupted for post ID: ${post.id}`, e);
+      window.dispatchEvent(new CustomEvent('SYNC_ERROR', { detail: e.message }));
     }
   }
 };

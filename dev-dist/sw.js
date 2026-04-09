@@ -82,13 +82,13 @@ define(['./workbox-137dedbd'], (function (workbox) { 'use strict';
     "revision": "3ca0b8505b4bec776b69afdba2768812"
   }, {
     "url": "index.html",
-    "revision": "0.pt6vrun6p2c"
+    "revision": "0.vibr72cqubc"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
     allowlist: [/^\/$/]
   }));
-  workbox.registerRoute(/^http:\/\/192\.168\.18\.194\/Austral%20Collector\/api\/.*/i, new workbox.NetworkFirst({
+  workbox.registerRoute(/\/api\/(?!uploads\/).*/i, new workbox.NetworkFirst({
     "cacheName": "api-cache",
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 50,
@@ -97,7 +97,7 @@ define(['./workbox-137dedbd'], (function (workbox) { 'use strict';
       statuses: [0, 200]
     })]
   }), 'GET');
-  workbox.registerRoute(/^http:\/\/192\.168\.18\.194\/Austral%20Collector\/api\/uploads\/.*/i, new workbox.CacheFirst({
+  workbox.registerRoute(/\/api\/uploads\/.*/i, new workbox.CacheFirst({
     "cacheName": "image-cache",
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 100,

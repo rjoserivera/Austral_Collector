@@ -4,6 +4,7 @@ import './HomePage.css'
 import PostModal from '../components/PostModal'
 import CreatePostModal from '../components/CreatePostModal'
 import { API_URL, BASE_URL } from '../config.js'
+import { getOfflinePosts } from '../utils/offlineSync'
 
 /* ─── Sub-components ────────────────────────────────────── */
 function FiguraCard({ fig, onToggle, onClick }) {
@@ -64,14 +65,52 @@ export default function HomePage() {
   const cosplayAutoRef = useRef(null)
   const cumpleAutoRef = useRef(null)
 
-  const loadData = () => {
-    const viewerParam = currentUser ? `?viewer_username=${currentUser.username}` : '';
-    fetch(`${API_URL}/public/home_data.php${viewerParam}`)
-      .then(r => r.json())
-      .then(d => {
-        if(d.success) setData(d.data)
-      })
-      .finally(() => setLoading(false))
+  const loadData = async () => {
+    setLoading(true)
+    let homeData = { ultimas: [], votadas: [], eventos: [], videos: [], destacado: null, ultimos_cosplays: [] }
+    const viewerParam = currentUser ? `?viewer_username=${currentUser.username}` : ''
+    
+    try {
+      const r = await fetch(`${API_URL}/public/home_data.php${viewerParam}`)
+      const d = await r.json()
+      if(d.success) homeData = d.data
+    } catch(e) {
+      console.error('Error fetching home_data:', e)
+    }
+
+    try {
+      // Inyectar posts pendientes (Offline)
+      const offlinePosts = await getOfflinePosts()
+      if (offlinePosts && offlinePosts.length > 0) {
+        const offlineFormatted = offlinePosts.map(p => ({
+          id: p.id,
+          nombre: p.nombre,
+          descripcion: p.descripcion,
+          anio: p.anio,
+          autor: currentUser?.username || 'Yo',
+          tipo: p.tipo,
+          total_likes: 0,
+          userLiked: false,
+          local_image: p.imagesBase64?.[0]?.base64,
+          isOfflineSync: true
+        }))
+
+        // Omitimos los que son "ediciones" (tienen isEditing=true o id_original) para no duplicar en el feed.
+        const newOffline = offlineFormatted.filter(p => !p.id_original)
+        
+        homeData.ultimas = [...newOffline, ...(homeData.ultimas || [])]
+        
+        const offlineCosplays = newOffline.filter(p => p.tipo === 'cosplay').map(c => ({
+          ...c, titulo: c.nombre
+        }))
+        homeData.ultimos_cosplays = [...offlineCosplays, ...(homeData.ultimos_cosplays || [])]
+      }
+    } catch(e) {
+      console.warn('Error loading offline posts:', e)
+    }
+
+    setData(homeData)
+    setLoading(false)
   }
 
   useEffect(() => { loadData() }, [])
@@ -248,9 +287,10 @@ export default function HomePage() {
                   {displayFiguras.map((fig, idx) => (
                     <article className="hp-figura-card card" key={`fig-${fig.id}-${idx}`} onClick={() => setSelectedPost(fig)}>
                       <div className="hp-figura-img-wrap">
-                        <img src={fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/figura1.png'} alt={fig.nombre} className="hp-figura-img" loading="lazy" />
+                        <img src={fig.local_image || (fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/figura1.png')} alt={fig.nombre} className="hp-figura-img" loading="lazy" />
                         {fig.anio && <div className="hp-figura-year">{fig.anio}</div>}
                         <div className="hp-figura-year" style={{top: '8px', right: '8px', left: 'auto', background: 'rgba(45,110,126,.9)'}}>{fig.tipo}</div>
+                        {fig.isOfflineSync && <div className="hp-figura-year" style={{top: '8px', right: 'auto', left: '8px', background: '#d35400', padding: '4px 8px'}} title="Pendiente de subida">⏳ Pendiente</div>}
                       </div>
                       <div className="hp-figura-body">
                         <h3 className="hp-figura-name">{fig.nombre}</h3>
@@ -317,10 +357,12 @@ export default function HomePage() {
                         ) : (
                           <span className="hp-miembro-badge-tag">✔ Miembro Destacado</span>
                         )}
-                        {targetUserObj.user.role === 'admin' && <span className="hp-miembro-badge-tag" style={{background:'var(--primary-color)', color:'#000'}}>Administrador</span>}
+                        {targetUserObj.user.role === 'admin' && <span className="hp-miembro-badge-tag" style={{background:'#ffd700', color:'#000'}}>👑 Administrador</span>}
                       </div>
                       <p className="hp-miembro-bio">
-                        {targetUserObj.user.biografia || "Por su increíble colección y valiosos aportes a Austral Collector. ¡Te deseamos lo mejor en este gran día!"}
+                        {hasCumpleaneros 
+                          ? (data.config?.txt_cumple || "¡El Gremio de Coleccionistas celebra tu día! Te deseamos un excelente cumpleaños y que tu colección siga creciendo.") 
+                          : (targetUserObj.user.biografia || data.config?.txt_destacado || "Por su constante participación, increíbles piezas y valiosos aportes a la comunidad de Austral Collector. ¡Gracias por ser parte del gremio!")}
                       </p>
                       <div className="hp-miembro-stats">
                         {hasCumpleaneros ? (
@@ -339,11 +381,6 @@ export default function HomePage() {
                         ) : (
                           <span className="hp-miembro-stat">❤️ {targetUserObj.stats.likes} Likes de la comunidad</span>
                         )}
-                      </div>
-                      <div className="hp-miembro-icons">
-                        <span title="Coleccionista">🏅</span>
-                        <span title="Festivo">🎉</span>
-                        <span title="Verificado">✔</span>
                       </div>
                     </div>
 
@@ -504,12 +541,13 @@ export default function HomePage() {
                     onClick={() => setSelectedPost({ ...cos, nombre: cos.titulo, tipo: 'cosplay' })}
                   >
                     <img
-                      src={cos.imagen_url ? `${BASE_URL}/${cos.imagen_url}` : '/mock_community.png'}
+                      src={cos.local_image || (cos.imagen_url ? `${BASE_URL}/${cos.imagen_url}` : '/mock_community.png')}
                       alt={cos.titulo}
                       className="hp-cosplay-sb-img"
                       loading="lazy"
                     />
                     <div className="hp-cosplay-sb-overlay">
+                      {cos.isOfflineSync && <span style={{background:'#d35400', color:'white', fontSize:'0.7rem', padding:'2px 6px', borderRadius:'4px', position:'absolute', top:'6px', right:'6px'}}>⏳ Pendiente</span>}
                       <span className="hp-cosplay-sb-name">{cos.titulo}</span>
                     </div>
                   </article>
@@ -519,7 +557,7 @@ export default function HomePage() {
               <p style={{color:'#aaa', textAlign:'center', marginTop:'15px', fontSize:'0.85rem'}}>Aún no hay cosplays publicados.</p>
             )}
             <div style={{textAlign:'center', marginTop:'14px'}}>
-              <a href="/galeria" style={{fontSize:'0.78rem', color:'var(--color-gold)', textDecoration:'none', letterSpacing:'.05em'}}>Ver todos los cosplays →</a>
+              <a href="/galeria?tipo=cosplay" style={{fontSize:'0.78rem', color:'var(--color-gold)', textDecoration:'none', letterSpacing:'.05em'}}>Ver todos los cosplays →</a>
             </div>
           </div>
 

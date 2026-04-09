@@ -1,54 +1,23 @@
 .site-footer {
   background: var(--color-steel-dark);
-  padding: 60px 0 0;
+  padding: 40px 0 0;
   border-top: 2px solid rgba(200, 169, 110, 0.4);
   color: #f0e4cc;
 }
 
 .footer-inner {
   display: grid;
-  grid-template-columns: 200px 1fr 200px; /* Columnas aún más estrechas */
+  grid-template-columns: 1fr 1fr 1fr; 
   align-items: start;
-  gap: 5px; /* Gap mínimo para que estén casi pegados */
-  padding-bottom: 48px;
-  max-width: 900px; /* Contenedor muy compacto */
+  gap: 20px; 
+  padding-bottom: 32px;
+  max-width: 1000px;
   margin: 0 auto;
   padding-left: 10px;
   padding-right: 10px;
 }
 
-/* Brand - Apegado a la izquierda */
-.footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  text-align: left;
-}
-
-.footer-logo {
-  width: 54px;
-  height: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 0 10px rgba(200, 169, 110, 0.2));
-}
-
-.footer-brand-name {
-  font-family: var(--font-heading);
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-gold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  display: block;
-}
-
-.footer-brand-tagline {
-  font-size: 0.78rem;
-  color: rgba(240, 228, 204, 0.6);
-  margin-top: 2px;
-}
-
-/* Nav - Centro */
+/* Nav - Izquierda */
 .footer-nav {
   display: flex;
   justify-content: center;
@@ -74,10 +43,12 @@
   text-align: center;
 }
 
-.footer-quick-links-vertical {
+.footer-quick-links-horizontal {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
   width: 100%;
 }
 
@@ -87,15 +58,13 @@
   font-family: var(--font-heading);
   text-decoration: none;
   transition: all 0.2s;
-  padding: 6px 0;
-  width: 100%;
-  text-align: center;
+  padding: 4px 6px;
+  white-space: nowrap;
 }
 
 .footer-quick-link:hover {
-  color: #fff;
-  background: rgba(255,255,255,0.05);
-  transform: scale(1.05);
+  color: var(--color-gold);
+  transform: translateY(-2px);
 }
 
 /* Contacto - Derecha */
@@ -176,6 +145,50 @@
   color: var(--color-gold);
 }
 
+/* Colores Originales de Redes Sociales */
+
+/* Instagram */
+.social-item.social-ig .social-icon-box {
+  border-color: #E1306C;
+  color: #E1306C;
+}
+.social-item.social-ig:hover .social-icon-box {
+  background: #E1306C;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(225, 48, 108, 0.4);
+}
+.social-item.social-ig:hover .social-label {
+  color: #E1306C;
+}
+
+/* Facebook */
+.social-item.social-fb .social-icon-box {
+  border-color: #1877F2;
+  color: #1877F2;
+}
+.social-item.social-fb:hover .social-icon-box {
+  background: #1877F2;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(24, 119, 242, 0.4);
+}
+.social-item.social-fb:hover .social-label {
+  color: #1877F2;
+}
+
+/* YouTube */
+.social-item.social-yt .social-icon-box {
+  border-color: #FF0000;
+  color: #FF0000;
+}
+.social-item.social-yt:hover .social-icon-box {
+  background: #FF0000;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
+}
+.social-item.social-yt:hover .social-label {
+  color: #FF0000;
+}
+
 /* Bottom bar */
 .footer-bottom {
   padding: 0 24px 30px;
@@ -194,16 +207,14 @@
   color: var(--color-gold);
 }
 
-/* Responsive */
 @media (max-width: 900px) {
   .footer-inner {
     grid-template-columns: 1fr;
     text-align: center;
-    gap: 50px;
+    gap: 24px;
   }
-  .footer-brand, .footer-contact-col, .footer-social-group {
-    align-items: center;
-    text-align: center;
-    justify-content: center;
+  .footer-contact-col, .footer-social-col {
+    align-items: center !important;
+    text-align: center !important;
   }
 }

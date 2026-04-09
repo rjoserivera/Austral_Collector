@@ -107,14 +107,29 @@ export default function PostModal({ post, isOpen, onClose, onLike, onTagClick, i
                   <span className="pm-author-name-home">{post.autor_username || post.autor || 'Coleccionista'}</span>
                 </div>
 
-                {/* Me gusta */}
-                <button
-                  className={`pm-action-btn heart-btn pm-home-heart ${post.userLiked ? 'liked' : ''}`}
-                  onClick={(e) => { e.stopPropagation(); onLike(post.id); }}
-                  title="Me gusta esta publicación"
-                >
-                  {post.userLiked ? '❤️' : '🤍'} {post.total_likes !== undefined ? post.total_likes : (post.likes || 0)}
-                </button>
+                {/* Me gusta & Ver en Galeria */}
+                <div style={{ display: 'flex', gap: '8px', zIndex: 30 }}>
+                  <button
+                    className={`pm-action-btn heart-btn pm-home-heart ${post.userLiked ? 'liked' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); onLike(post.id); }}
+                    title="Me gusta esta publicación"
+                  >
+                    {post.userLiked ? '❤️' : '🤍'} {post.total_likes !== undefined ? post.total_likes : (post.likes || 0)}
+                  </button>
+
+                  <button
+                    className="pm-action-btn pm-home-gallery-btn"
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      onClose(); 
+                      navigate(`/galeria?post=${post.id}&tipo=${post.tipo || 'figura'}`); 
+                    }}
+                    title="Ir a galería"
+                    style={{ background: 'var(--color-steel-light, #3d8ea3)', color: '#fff' }}
+                  >
+                    🔍 Ver en Galería
+                  </button>
+                </div>
               </div>
             </>
           )}

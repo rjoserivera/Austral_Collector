@@ -1,9 +1,32 @@
 import './ContactoPage.css'
+import { API_URL } from '../config.js'
 
 export default function ContactoPage() {
   const handleSubmit = (e) => {
     e.preventDefault()
-    alert('Mensaje enviado (simulado).')
+    
+    const nombre = document.getElementById('nombre').value;
+    const email = document.getElementById('email').value;
+    const mensaje = document.getElementById('mensaje').value;
+
+    fetch(`${API_URL}/public/contacto.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, email, mensaje })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        alert('🚀 Mensaje enviado. Te contactaremos pronto al correo que incluiste.');
+        document.querySelector('.contacto-form-new').reset();
+      } else {
+        alert('❌ Error al enviar el correo: ' + d.error);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('❌ Error de red al intentar enviar el mensaje.');
+    });
   }
 
   return (
@@ -38,8 +61,8 @@ export default function ContactoPage() {
               <input type="email" id="email" required />
             </div>
             <div className="form-group-custom">
-              <label htmlFor="asunto">Asunto</label>
-              <textarea id="asunto" rows="4" required></textarea>
+              <label htmlFor="mensaje">Mensaje</label>
+              <textarea id="mensaje" rows="4" placeholder="Escribe tu mensaje, duda o sugerencia aquí..." required></textarea>
             </div>
             
             <div className="form-actions">
@@ -54,26 +77,32 @@ export default function ContactoPage() {
             <span className="loc-icon" aria-hidden="true">📍</span> Contáctanos
           </h2>
           
-          <div className="contacto-info-list">
-            <div className="c-info-line">
-              <span className="info-emoji">📍</span> 
-              <span><strong>Dirección:</strong> Calle Coleccionista 999, Santiago, Chile</span>
-            </div>
+          <div className="contacto-info-list" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div className="c-info-line">
               <span className="info-emoji">✉️</span> 
-              <span><strong>E-mail:</strong> contacto@australcollector.com</span>
+              <div>
+                <strong>E-mail de Contacto:</strong><br/>
+                <a href="mailto:austral.cadmin@gmail.com" style={{ color: '#fff', textDecoration: 'none' }}>austral.cadmin@gmail.com</a>
+              </div>
             </div>
             <div className="c-info-line">
               <span className="info-emoji">📞</span> 
               <div>
                 <strong>+56 9 1234 5678</strong><br/>
-                <small>Lunes a Viernes de 10:00 a 18:00 hrs</small>
+                <small>(Próximamente)</small>
+              </div>
+            </div>
+            <div className="c-info-line">
+              <span className="info-emoji">🕒</span> 
+              <div>
+                <strong>Horario de Atención</strong><br/>
+                <small>Disponibles al correo de Lunes a Viernes, de 10:00 a 18:00 hrs</small>
               </div>
             </div>
           </div>
 
           <div className="social-footer">
-            <p>Siguenos en nuestras redes sociales:</p>
+            <p style={{ color: '#fff', fontWeight: '500' }}>Síguenos en nuestras redes sociales:</p>
             <div className="social-icons-real">
               <a href="#fb" className="real-soc fb" aria-label="Facebook">
                 <svg viewBox="0 0 320 512"><path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/></svg>

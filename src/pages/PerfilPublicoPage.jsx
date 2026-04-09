@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import './PerfilPublicoPage.css'
 import { API_URL, BASE_URL } from '../config.js'
 import CreatePostModal from '../components/CreatePostModal'
+import { getOfflinePosts } from '../utils/offlineSync'
 
 export default function PerfilPublicoPage() {
   const { id } = useParams()
@@ -15,26 +16,55 @@ export default function PerfilPublicoPage() {
   let loggedUserName = null;
   try { if (authUserStr) loggedUserName = JSON.parse(authUserStr).username; } catch(e) {}
 
-  const loadData = () => {
+  const loadData = async () => {
     const viewerParam = loggedUserName ? `&viewer_username=${loggedUserName}` : ''
-    fetch(`${API_URL}/public/perfil_data.php?username=${id}${viewerParam}`)
-      .then(r => r.json())
-      .then(d => {
-        if(d.success) setUser(d.data);
-      })
-      .catch(e => {
-        console.error("Error fetching profile:", e);
-        if (!navigator.onLine) {
-          setOfflineError(true);
-          setUser({
-            username: id || 'Desconocido',
-            headline: 'Modo Offline (Sin Conexión)',
-            biografia: 'No hay conexión a internet para descargar este perfil. Usando modo de emergencia.',
-            collection: [],
-            joined: 'Desconocida'
-          });
+    let fetchedUser = null;
+    let fallbackUser = {
+      username: id || 'Desconocido',
+      headline: 'Modo Offline (Sin Conexión)',
+      biografia: 'No hay conexión a internet para descargar este perfil. Usando modo de emergencia.',
+      collection: [],
+      joined: 'Desconocida'
+    };
+
+    try {
+      const r = await fetch(`${API_URL}/public/perfil_data.php?username=${id}${viewerParam}`);
+      const d = await r.json();
+      if(d.success) fetchedUser = d.data;
+    } catch(e) {
+      console.error("Error fetching profile:", e);
+      if (!navigator.onLine) {
+        setOfflineError(true);
+      }
+    }
+
+    let finalUser = fetchedUser || fallbackUser;
+
+    try {
+      if (finalUser.username === loggedUserName && loggedUserName) {
+        const offlinePosts = await getOfflinePosts();
+        if (offlinePosts && offlinePosts.length > 0) {
+          const offlineFormatted = offlinePosts.map(p => ({
+            id: p.id,
+            nombre: p.nombre,
+            descripcion: p.descripcion,
+            anio: p.anio,
+            tipo: p.tipo,
+            total_likes: 0,
+            userLiked: false,
+            local_image: p.imagesBase64?.[0]?.base64,
+            isOfflineSync: true,
+            id_original: p.id_original
+          }));
+          const newOffline = offlineFormatted.filter(p => !p.id_original);
+          finalUser.collection = [...newOffline, ...(finalUser.collection || [])];
         }
-      })
+      }
+    } catch (e) {
+      console.warn('Error loading offline posts:', e);
+    }
+    
+    setUser(finalUser);
   }
 
   useEffect(() => {
@@ -147,10 +177,11 @@ export default function PerfilPublicoPage() {
           <div className="perfil-grid-4">
             {user.collection && user.collection.filter(fig => (fig.tipo || 'figura') === activeTab).map(fig => (
               <article key={fig.id} className="hp-figura-card card">
-                <div className="hp-figura-img-wrap">
-                  <img src={fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png'} alt={fig.nombre} className="hp-figura-img" loading="lazy"/>
+                <div className="hp-figura-img-wrap" style={{ position: 'relative' }}>
+                  <img src={fig.local_image || (fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png')} alt={fig.nombre} className="hp-figura-img" loading="lazy"/>
                   {fig.anio && <div className="hp-figura-year">{fig.anio}</div>}
                   <div className="hp-figura-year" style={{top: '8px', right: '8px', left: 'auto', background: 'rgba(45,110,126,.9)'}}>{fig.tipo || 'figura'}</div>
+                  {fig.isOfflineSync && <div style={{position:'absolute', top:'10px', left:'10px', background:'#d35400', color:'white', fontSize:'0.75rem', padding:'4px 8px', borderRadius:'12px', zIndex:10}} title="Pendiente de subida">⏳ Pendiente</div>}
                 </div>
                 <div className="hp-figura-body">
                   <h3 className="hp-figura-name">{fig.nombre}</h3>

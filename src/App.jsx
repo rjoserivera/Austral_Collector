@@ -56,11 +56,6 @@ function App() {
 
   return (
     <div className="app-root">
-      {isOffline && (
-        <div style={{ background: '#c0392b', color: 'white', textAlign: 'center', padding: '6px', fontWeight: 'bold', fontSize: '0.85rem' }}>
-          Estás sin conexión a Internet. Estás en modo Lectura/Offline.
-        </div>
-      )}
       <NavBar />
       <Routes>
         <Route path="/" element={<HomePage />} />

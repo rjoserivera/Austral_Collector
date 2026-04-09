@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import './GaleriaPage.css'
 import PostModal from '../components/PostModal'
 import { API_URL, BASE_URL } from '../config.js'
+import { getOfflinePosts } from '../utils/offlineSync'
 
 export default function GaleriaPage() {
   const [search, setSearch]             = useState('')
@@ -14,19 +15,67 @@ export default function GaleriaPage() {
 
   useEffect(() => {
     const viewerParam = currentUser ? `?viewer_username=${currentUser.username}` : '';
-    fetch(`${API_URL}/public/galeria_data.php${viewerParam}`)
-      .then(r => r.json())
-      .then(d => { 
-        if (d.success) setFiguras(d.posts || []);
-        
-        // Cargar filtro desde URL si existe
-        const params = new URLSearchParams(window.location.search);
-        const tag = params.get('tag');
-        if (tag) {
-          setFilterCat(tag);
+    
+    const loadData = async () => {
+      let fetchedPosts = [];
+      try {
+        const r = await fetch(`${API_URL}/public/galeria_data.php${viewerParam}`);
+        const d = await r.json();
+        if (d.success) fetchedPosts = d.posts || [];
+      } catch (e) {
+        console.error('Error fetching galeria:', e);
+      }
+
+      try {
+        const offlinePosts = await getOfflinePosts();
+        if (offlinePosts && offlinePosts.length > 0) {
+          const offlineFormatted = offlinePosts.map(p => ({
+            id: p.id,
+            nombre: p.nombre,
+            descripcion: p.descripcion,
+            anio: p.anio,
+            autor: currentUser?.username || 'Yo',
+            tipo: p.tipo,
+            hashtags: p.hashtags || [],
+            total_likes: 0,
+            userLiked: false,
+            local_image: p.imagesBase64?.[0]?.base64,
+            isOfflineSync: true,
+            id_original: p.id_original
+          }));
+          const newOffline = offlineFormatted.filter(p => !p.id_original);
+          fetchedPosts = [...newOffline, ...fetchedPosts];
         }
-      })
-      .catch(e => console.error('Error fetching galeria:', e))
+      } catch (e) {
+        console.warn('Error loading offline posts:', e);
+      }
+      
+      setFiguras(fetchedPosts);
+      
+      // Cargar filtro desde URL si existe
+      const params = new URLSearchParams(window.location.search);
+      const tag = params.get('tag');
+      if (tag) {
+        setFilterCat(tag);
+      }
+
+      const tipo = params.get('tipo');
+      if (tipo === 'figura' || tipo === 'cosplay') {
+        setActiveTab(tipo);
+      }
+
+      const postParam = params.get('post');
+      if (postParam) {
+        // Encontramos el post dentro de la lista global ya fetcheada
+        const found = fetchedPosts.find(p => p.id == postParam);
+        if (found) {
+          // Un pequeño delay para que React termine de procesar el estado de tab y renderizar
+          setTimeout(() => setSelectedPost(found), 200);
+        }
+      }
+    };
+    
+    loadData();
   }, [])
 
   // Cierra el dropdown al hacer clic fuera
@@ -121,7 +170,7 @@ export default function GaleriaPage() {
         <div className="galeria-hero-bg" aria-hidden="true"/>
         <div className="section-wrapper galeria-hero-inner">
           <div className="galeria-hero-text">
-            <h1 className="galeria-title">Galería de Figuras</h1>
+            <h1 className="galeria-title">Galería de Figuras y Cosplay</h1>
             <p className="galeria-subtitle">
               Explora miles de archivos históricos, subidos por coleccionistas de élite.
             </p>
@@ -219,9 +268,10 @@ export default function GaleriaPage() {
                 onClick={() => setSelectedPost(fig)}
                 style={{ cursor: 'pointer' }}
               >
-                <div className="galeria-img-wrap">
-                  <img src={fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png'} alt={fig.nombre} className="galeria-img" loading="lazy"/>
+                <div className="galeria-img-wrap" style={{ position: 'relative' }}>
+                  <img src={fig.local_image || (fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png')} alt={fig.nombre} className="galeria-img" loading="lazy"/>
                   <div className="galeria-cat-badge">{fig.tipo.toUpperCase()}</div>
+                  {fig.isOfflineSync && <div style={{position:'absolute', top:'10px', left:'10px', background:'#d35400', color:'white', fontSize:'0.75rem', padding:'4px 8px', borderRadius:'12px', zIndex:10}} title="Pendiente de subida">⏳ Pendiente</div>}
                 </div>
                 <div className="galeria-card-body">
                   <div>

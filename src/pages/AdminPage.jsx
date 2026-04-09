@@ -1149,6 +1149,8 @@ function AdminDestacados({ adminId }) {
   const [videoId2, setVideoId2] = useState('')
   const [videoId3, setVideoId3] = useState('')
   const [videoId4, setVideoId4] = useState('')
+  const [txtDestacado, setTxtDestacado] = useState('')
+  const [txtCumple, setTxtCumple] = useState('')
 
   useEffect(() => {
     fetch(`${API_URL}/destacados.php`)
@@ -1163,6 +1165,8 @@ function AdminDestacados({ adminId }) {
         setVideoId2(d.config?.video_destacado_2 || '')
         setVideoId3(d.config?.video_destacado_3 || '')
         setVideoId4(d.config?.video_destacado_4 || '')
+        setTxtDestacado(d.config?.txt_destacado || '')
+        setTxtCumple(d.config?.txt_cumple || '')
       })
       .catch(e => setError(e.message))
   }, [])
@@ -1228,6 +1232,56 @@ function AdminDestacados({ adminId }) {
             >
               {saving ? 'Guardando...' : 'Guardar Miembro'}
             </button>
+          </div>
+        </div>
+
+        {/* --- MENSAJES PERSONALIZADOS --- */}
+        <div className="dest-card">
+          <h3 className="dest-card-title">📝 Mensajes de Biografía</h3>
+          <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '16px' }}>
+            Escribe el texto que acompañará a la biografía del Destacado y del Cumpleañero, por si ellos no tienen uno definido.
+          </p>
+
+          <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: '1fr 1fr' }}>
+            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <h4 style={{ color: '#ddd', marginBottom: '8px', fontSize: '0.9rem' }}>🏆 Mensaje de Destacado</h4>
+              <textarea 
+                className="admin-input" 
+                rows="4" 
+                value={txtDestacado}
+                onChange={e => setTxtDestacado(e.target.value)}
+                placeholder="Por su increíble colección y valiosos aportes..."
+                style={{ width: '100%', marginBottom: '12px', resize: 'vertical' }}
+              />
+              <button
+                className="btn-outline btn-sm"
+                disabled={saving}
+                onClick={() => handleSave('txt_destacado', txtDestacado)}
+                style={{ width: '100%' }}
+              >
+                Guardar Mensaje
+              </button>
+            </div>
+
+            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <h4 style={{ color: '#ddd', marginBottom: '8px', fontSize: '0.9rem' }}>🎉 Mensaje de Cumpleañero</h4>
+              <textarea 
+                className="admin-input" 
+                rows="4" 
+                value={txtCumple}
+                onChange={e => setTxtCumple(e.target.value)}
+                placeholder="¡El Gremio celebra tu día...!"
+                style={{ width: '100%', marginBottom: '12px', resize: 'vertical' }}
+              />
+              <button
+                className="btn-outline btn-sm"
+                disabled={saving}
+                onClick={() => handleSave('txt_cumple', txtCumple)}
+                style={{ width: '100%' }}
+              >
+                Guardar Mensaje
+              </button>
+            </div>
           </div>
         </div>
 

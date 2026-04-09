@@ -2,10 +2,13 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import './NavBar.css'
 import './NavBarDropdown.css'
+import { useSyncStatus } from '../hooks/useSyncStatus'
 
 export default function NavBar() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef(null)
+
+  const { status, pendingCount } = useSyncStatus()
 
   const location = useLocation()
   const path = location.pathname
@@ -115,6 +118,20 @@ export default function NavBar() {
 
         {/* Actions */}
         <div className="navbar-actions">
+          
+          {/* Indicador Global de Red/Sync */}
+          <div className={`sync-indicator status-${status}`} title={
+            status === 'online' ? 'Conectado a la base de datos' :
+            status === 'offline' ? 'Sin conexión (Modo Local)' :
+            status === 'pending' ? `Sincronizando... (${pendingCount} pendiente/s)` :
+            'Error de Sincronización'
+          }>
+            {status === 'online' && '🟢'}
+            {status === 'offline' && '🔴'}
+            {status === 'pending' && '⏳'}
+            {status === 'error' && '🟠'}
+          </div>
+
           {authUser ? (
             <div className="nav-user-menu" ref={dropdownRef}>
               <button 
