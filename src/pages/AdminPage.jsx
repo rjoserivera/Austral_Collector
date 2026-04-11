@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import './AdminPage.css'
 import { BASE_URL } from '../config.js'
+import PostModal from '../components/PostModal'
 
 // URL base para la API
 const API_URL = 'http://localhost/Austral%20Collector/api/admin'
@@ -24,12 +25,12 @@ const getLogConfig = (tipo) => {
 const NAV = [
   { id: 'inicio',     icon: '📊', label: 'Inicio' },
   { id: 'usuarios',   icon: '👥', label: 'Gestión de Usuarios' },
+  { id: 'moderacion', icon: '⚖️', label: 'Moderación de Contenido' },
   { id: 'videos',     icon: '🎬', label: 'Gestión de Videos' },
-  { id: 'eventos',    icon: '📢', label: 'Noticias y Eventos' },
   { id: 'destacados', icon: '🏆', label: 'Contenido Destacado' },
+  { id: 'eventos',    icon: '📢', label: 'Noticias y Eventos' },
   { id: 'identidad',  icon: '⭐', label: 'Identidad y Nosotros' },
   { id: 'actividad',  icon: '📋', label: 'Log de Actividad' },
-  { id: 'moderacion', icon: '🛡️', label: 'Moderación de Contenido' },
 ]
 
 export default function AdminPage() {
@@ -167,7 +168,7 @@ function AdminInicio() {
         <h2 className="admin-sec-title">⏳ Actividad Reciente</h2>
         <div className="admin-log-preview">
           {logs.length === 0 ? <p style={{ color: '#aaa' }}>No hay actividad reciente.</p> : null}
-          {logs.map((log) => (
+          {logs.slice(0, 6).map((log) => (
             <div className="alp-row" key={log.id}>
               <span className="alp-time">{log.time}</span>
               <span className={`badge ${getLogConfig(log.tipo).class}`}>{getLogConfig(log.tipo).label}</span>
@@ -1474,6 +1475,7 @@ function AdminModeracion({ adminId }) {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterTipo, setFilterTipo] = useState('all') // all | figura | cosplay
+  const [selectedPost, setSelectedPost] = useState(null)
   
   // Modal de eliminación con advertencia
   const [postToRemove, setPostToRemove] = useState(null) // { id, tipo, nombre }
@@ -1621,6 +1623,9 @@ function AdminModeracion({ adminId }) {
                 <td className="td-muted">{p.created_at.split(' ')[0]}</td>
                 <td>
                   <div className="action-row centered">
+                    <button className="act-btn" style={{ background: 'var(--color-teal)', border: '1px solid rgba(255,255,255,0.2)' }} title="Ver Publicación" onClick={() => setSelectedPost(p)}>
+                      👁️
+                    </button>
                     <button className="act-btn act-red" title="Eliminar Publicación" onClick={() => setPostToRemove(p)}>
                       🗑️
                     </button>
@@ -1634,6 +1639,14 @@ function AdminModeracion({ adminId }) {
           </tbody>
         </table>
       </div>
+
+      <PostModal 
+        post={selectedPost}
+        isOpen={!!selectedPost}
+        onClose={() => setSelectedPost(null)}
+        onLike={() => {}} 
+        onTagClick={() => {}} 
+      />
     </div>
   )
 }

@@ -2,8 +2,8 @@
 // ENTORNO DE DESARROLLO LOCAL
 // ============================================
 // Ruta para cuando estés desarrollando solo en esta PC o en red local
-export const API_URL  = 'http://localhost/Austral%20Collector/api';
-export const BASE_URL = 'http://localhost/Austral%20Collector';
+export const API_URL  = 'http://192.168.18.100/Austral%20Collector/api';
+export const BASE_URL = 'http://192.168.18.100/Austral%20Collector';
 
 // ============================================
 // ENTORNO DE PRODUCCIÓN (LANZAMIENTO WEB)

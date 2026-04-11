@@ -14,16 +14,33 @@ export default function GaleriaPage() {
   const searchRef = useRef(null)
 
   useEffect(() => {
+    const authUserStr = localStorage.getItem('austral_auth_user')
+    let currentUser = null
+    try { if (authUserStr) currentUser = JSON.parse(authUserStr) } catch(e) { currentUser = null }
     const viewerParam = currentUser ? `?viewer_username=${currentUser.username}` : '';
     
     const loadData = async () => {
       let fetchedPosts = [];
       try {
         const r = await fetch(`${API_URL}/public/galeria_data.php${viewerParam}`);
+        if (!r.ok) throw new Error('HTTP error');
         const d = await r.json();
-        if (d.success) fetchedPosts = d.posts || [];
+        if (d.success) {
+          fetchedPosts = d.posts || [];
+          localStorage.setItem('austral_galeria_cache', JSON.stringify(fetchedPosts));
+        } else {
+          throw new Error('API returned false success');
+        }
       } catch (e) {
-        console.error('Error fetching galeria:', e);
+        console.error('Error fetching galeria, attempting to load cache:', e);
+        const cached = localStorage.getItem('austral_galeria_cache');
+        if (cached) {
+          try {
+            fetchedPosts = JSON.parse(cached);
+          } catch(err) {
+            console.error('Cache parsing failed:', err);
+          }
+        }
       }
 
       try {

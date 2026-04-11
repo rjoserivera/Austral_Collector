@@ -425,7 +425,11 @@
   .galeria-search { width: 100%; }
 }
 @media (max-width: 600px) {
-  .galeria-grid { grid-template-columns: 1fr; }
+  .galeria-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .galeria-hero-inner { flex-direction: column; text-align: center; }
   .galeria-mascot-wrap { width: 100px; }
+  .galeria-card-body { padding: 10px; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .galeria-name { font-size: 0.85rem; margin-bottom: 2px; }
+  .galeria-author { font-size: 0.7rem; line-height: 1.2; }
+  .galeria-counters { align-items: flex-start; width: 100%; flex-direction: row; justify-content: space-between; margin-top: 4px; }
 }

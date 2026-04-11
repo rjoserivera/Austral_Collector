@@ -82,7 +82,7 @@ define(['./workbox-137dedbd'], (function (workbox) { 'use strict';
     "revision": "3ca0b8505b4bec776b69afdba2768812"
   }, {
     "url": "index.html",
-    "revision": "0.vibr72cqubc"
+    "revision": "0.6da58jisj9k"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
@@ -97,7 +97,7 @@ define(['./workbox-137dedbd'], (function (workbox) { 'use strict';
       statuses: [0, 200]
     })]
   }), 'GET');
-  workbox.registerRoute(/\/api\/uploads\/.*/i, new workbox.CacheFirst({
+  workbox.registerRoute(/\/uploads\/.*/i, new workbox.CacheFirst({
     "cacheName": "image-cache",
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 100,

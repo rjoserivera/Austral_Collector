@@ -72,10 +72,26 @@ export default function HomePage() {
     
     try {
       const r = await fetch(`${API_URL}/public/home_data.php${viewerParam}`)
+      if (!r.ok) throw new Error('Network error')
       const d = await r.json()
-      if(d.success) homeData = d.data
+      if(d.success) {
+        homeData = d.data
+        localStorage.setItem('austral_home_cache', JSON.stringify(d.data))
+      } else {
+        throw new Error('API returned false success')
+      }
     } catch(e) {
-      console.error('Error fetching home_data:', e)
+      console.error('Error fetching home_data, attempting to load cache:', e)
+      const cached = localStorage.getItem('austral_home_cache')
+      if (cached) {
+        try {
+          const parsedCache = JSON.parse(cached)
+          // Make sure we have all keys even if cache is old
+          homeData = { ...homeData, ...parsedCache }
+        } catch(err) {
+          console.error('Cache parsing failed:', err)
+        }
+      }
     }
 
     try {
@@ -257,9 +273,9 @@ export default function HomePage() {
               <span className="hp-title-collector">COLLECTOR</span>
             </h1>
             <p className="hp-hero-tagline">Juegos, juguetes y coleccionables de ayer y hoy</p>
-            <div className="hp-hero-actions" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '16px' }}>
-              <Link to="/galeria" id="hp-btn-galeria" className="btn-primary" style={{ fontSize: '1.1rem', padding: '16px 42px', borderRadius: '10px', letterSpacing: '0.1em', boxShadow: '0 8px 32px rgba(139, 32, 32, 0.5)' }}>Ver Galería</Link>
-              <Link to="/login?mode=register" id="hp-btn-unirse" className="btn-primary" style={{ fontSize: '1.1rem', padding: '16px 42px', borderRadius: '10px', letterSpacing: '0.1em', background: 'var(--color-steel)', boxShadow: '0 8px 32px rgba(45, 110, 126, 0.5)' }}>Unirse</Link>
+            <div className="hp-hero-actions" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '14px' }}>
+              <Link to="/galeria" id="hp-btn-galeria" className="btn-primary" style={{ fontSize: '0.95rem', padding: '12px 32px', borderRadius: '8px', letterSpacing: '0.1em', background: '#2d6e7e', color: '#ffffff', boxShadow: '0 8px 32px rgba(45, 110, 126, 0.5)' }}>Ver Galería</Link>
+              <Link to="/login?mode=register" id="hp-btn-unirse" className="btn-primary" style={{ fontSize: '0.95rem', padding: '12px 32px', borderRadius: '8px', letterSpacing: '0.1em', background: '#8b2020', color: '#000000', boxShadow: '0 8px 32px rgba(139, 32, 32, 0.5)' }}>Unirse</Link>
             </div>
           </div>
         </div>
@@ -270,6 +286,19 @@ export default function HomePage() {
 
         {/* LEFT column */}
         <div className="hp-main-col">
+
+          {/* Botón Subir Publicación MOBILE */}
+          {currentUser && (
+            <div className="hp-mobile-upload-btn-wrap">
+              <button
+                className="btn-primary"
+                onClick={() => setShowUpload(true)}
+                style={{ width: '100%', padding: '12px 16px', fontSize: '0.95rem', borderRadius: '8px', justifyContent: 'center', letterSpacing: '0.05em', height: '48px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}
+              >
+                ➕ Subir Figura o Cosplay
+              </button>
+            </div>
+          )}
 
           {/* Últimas Figuras Publicadas */}
           <section className="hp-section">
@@ -476,7 +505,7 @@ export default function HomePage() {
           {/* Botón Subir Publicación — solo logueados */}
           {currentUser && (
             <button
-              className="btn-primary"
+              className="btn-primary hp-desktop-upload-btn"
               onClick={() => setShowUpload(true)}
               style={{ width: '100%', marginBottom: '20px', padding: '10px 16px', fontSize: '0.85rem', borderRadius: '8px', justifyContent: 'center', letterSpacing: '0.05em', height: '44px' }}
             >

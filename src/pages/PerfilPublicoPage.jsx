@@ -30,11 +30,22 @@ export default function PerfilPublicoPage() {
     try {
       const r = await fetch(`${API_URL}/public/perfil_data.php?username=${id}${viewerParam}`);
       const d = await r.json();
-      if(d.success) fetchedUser = d.data;
+      if(d.success) {
+        fetchedUser = d.data;
+        localStorage.setItem(`austral_perfil_cache_${id}`, JSON.stringify(d.data));
+      }
     } catch(e) {
-      console.error("Error fetching profile:", e);
+      console.error("Error fetching profile, attempting to load cache:", e);
       if (!navigator.onLine) {
         setOfflineError(true);
+      }
+      const cached = localStorage.getItem(`austral_perfil_cache_${id}`);
+      if (cached) {
+        try {
+          fetchedUser = JSON.parse(cached);
+        } catch(err) {
+          console.error("Cache parsing failed:", err);
+        }
       }
     }
 
@@ -144,7 +155,7 @@ export default function PerfilPublicoPage() {
             </div>
             <p className="perfil-bio">{user.biografia || 'Sin biografía disponible.'}</p>
             {isOwner && (
-              <div style={{marginTop: '24px', display: 'flex', gap: '12px'}}>
+              <div className="perfil-owner-actions">
                 <Link to="/dashboard" className="perfil-btn-outline">✏️ Editar Perfil</Link>
                 <button className="perfil-btn-primary" onClick={() => setShowUpload(true)}>➕ Subir Publicación</button>
               </div>

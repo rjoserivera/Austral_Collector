@@ -146,6 +146,12 @@
   transform: translateY(-2px);
 }
 
+.perfil-owner-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+}
+
 /* Portafolio Section */
 .perfil-portafolio-header {
   display: flex;
@@ -316,8 +322,11 @@
   .perfil-grid-4 { grid-template-columns: repeat(3, 1fr); }
 }
 @media (max-width: 768px) {
-  .perfil-info-card { flex-direction: column; align-items: center; text-align: center; margin-top: -60px; }
-  .perfil-avatar-wrap { width: 120px; height: 120px; }
+  .perfil-info-card { flex-direction: column; align-items: center; text-align: center; margin-top: -60px; gap: 12px;}
+  .perfil-user-details { padding-top: 16px; gap: 12px; }
+  .perfil-avatar-wrap { width: 120px; height: 120px; margin-bottom: 0px;}
   .perfil-grid-4 { grid-template-columns: repeat(2, 1fr); }
-  .perfil-meta { justify-content: center; }
+  .perfil-meta { justify-content: center; flex-wrap: wrap; gap: 8px; font-size: 0.85rem; }
+  .perfil-portafolio-header { flex-direction: column; align-items: center; text-align: center; gap: 16px; }
+  .perfil-owner-actions { justify-content: center; flex-wrap: wrap; }
 }

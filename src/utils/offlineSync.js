@@ -43,71 +43,80 @@ export const removeOfflinePost = async (id) => {
   window.dispatchEvent(new CustomEvent('SYNC_QUEUE_CHANGED'));
 };
 
+let isSyncing = false;
+
 // Sync all offline posts with the server
 export const syncOfflinePosts = async (apiUrl) => {
   if (!navigator.onLine) return; // Prevent sync if still offline
+  if (isSyncing) return; // Prevent concurrent syncs
 
-  const posts = await getOfflinePosts();
-  if (posts.length === 0) return; // Nothing to sync
+  isSyncing = true; // Acquire lock synchronously BEFORE querying DB
 
-  console.log(`☁️ Syncing ${posts.length} offline posts to server...`);
+  try {
+    const posts = await getOfflinePosts();
+    if (posts.length === 0) return; // Nothing to sync
 
-  for (const post of posts) {
-    try {
-      const formData = new FormData();
-      formData.append('tipo', post.tipo);
-      formData.append('nombre', post.nombre);
-      formData.append('descripcion', post.descripcion || '');
-      if (post.hashtags) formData.append('hashtags', JSON.stringify(post.hashtags));
-      if (post.anio) formData.append('anio', post.anio);
-      
-      let url = '';
-      
-      if (post.isEditing) {
-        formData.append('id', post.id_original);
-        formData.append('tipo_original', post.tipo_original);
-        url = `${apiUrl}/auth/editar_post.php`;
+    console.log(`☁️ Syncing ${posts.length} offline posts to server...`);
+
+    for (const post of posts) {
+      try {
+        const formData = new FormData();
+        formData.append('tipo', post.tipo);
+        formData.append('nombre', post.nombre);
+        formData.append('descripcion', post.descripcion || '');
+        if (post.hashtags) formData.append('hashtags', JSON.stringify(post.hashtags));
+        if (post.anio) formData.append('anio', post.anio);
         
-        const order = [];
-        let newImageIndex = 0;
+        let url = '';
         
-        post.imagesBase64.forEach((imgObj) => {
-          if (imgObj.isKept) {
-            order.push(imgObj.originalUrl);
-          } else {
-            order.push(`new_${newImageIndex}`);
-            // Convert base64 back to file
+        if (post.isEditing) {
+          formData.append('id', post.id_original);
+          formData.append('tipo_original', post.tipo_original);
+          url = `${apiUrl}/auth/editar_post.php`;
+          
+          const order = [];
+          let newImageIndex = 0;
+          
+          post.imagesBase64.forEach((imgObj) => {
+            if (imgObj.isKept) {
+              order.push(imgObj.originalUrl);
+            } else {
+              order.push(`new_${newImageIndex}`);
+              // Convert base64 back to file
+              const file = base64ToFile(imgObj.base64, imgObj.name);
+              formData.append('images[]', file);
+              newImageIndex++;
+            }
+          });
+          formData.append('media_order', JSON.stringify(order));
+          
+        } else {
+          formData.append('user_id', post.user_id);
+          url = `${apiUrl}/auth/publicar_post.php`;
+          
+          post.imagesBase64.forEach((imgObj) => {
             const file = base64ToFile(imgObj.base64, imgObj.name);
             formData.append('images[]', file);
-            newImageIndex++;
-          }
-        });
-        formData.append('media_order', JSON.stringify(order));
-        
-      } else {
-        formData.append('user_id', post.user_id);
-        url = `${apiUrl}/auth/publicar_post.php`;
-        
-        post.imagesBase64.forEach((imgObj) => {
-          const file = base64ToFile(imgObj.base64, imgObj.name);
-          formData.append('images[]', file);
-        });
-      }
+          });
+        }
 
-      const response = await fetch(url, { method: 'POST', body: formData });
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log(`✅ Synced post ID: ${post.id}`);
-        await removeOfflinePost(post.id);
-      } else {
-        console.error(`❌ Failed to sync post ID: ${post.id}`, data.error);
-        window.dispatchEvent(new CustomEvent('SYNC_ERROR', { detail: data.error }));
+        const response = await fetch(url, { method: 'POST', body: formData });
+        const data = await response.json();
+        
+        if (data.success) {
+          console.log(`✅ Synced post ID: ${post.id}`);
+          await removeOfflinePost(post.id);
+        } else {
+          console.error(`❌ Failed to sync post ID: ${post.id}`, data.error);
+          window.dispatchEvent(new CustomEvent('SYNC_ERROR', { detail: data.error }));
+        }
+      } catch (e) {
+        console.error(`🔌 Sync interrupted for post ID: ${post.id}`, e);
+        window.dispatchEvent(new CustomEvent('SYNC_ERROR', { detail: e.message }));
       }
-    } catch (e) {
-      console.error(`🔌 Sync interrupted for post ID: ${post.id}`, e);
-      window.dispatchEvent(new CustomEvent('SYNC_ERROR', { detail: e.message }));
     }
+  } finally {
+    isSyncing = false; // Always release lock safely
   }
 };
 

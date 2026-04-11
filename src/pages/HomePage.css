@@ -5,7 +5,7 @@
 /* ── Hero ─────────────────────────────────────────────────── */
 .hp-hero {
   position: relative;
-  min-height: 420px;
+  min-height: 280px;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -46,8 +46,8 @@
   display: flex;
   align-items: center;
   gap: 36px;
-  padding-top: 48px;
-  padding-bottom: 48px;
+  padding-top: 24px;
+  padding-bottom: 24px;
 }
 
 /* Mascot */
@@ -638,18 +638,23 @@
   object-fit: cover;
   transition: transform .3s;
 }
-.hp-video-side-thumb:hover img { transform: scale(1.05); }
+  .hp-video-side-thumb:hover img { transform: scale(1.05); }
+  
+  .hp-play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    width: 36px;
+    height: 36px;
+  }
 
-.hp-play-icon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  width: 36px;
-  height: 36px;
-}
-
-/* Responsive adjustments for Tablets and Mobile */
+  /* Ocultar botón mobile por defecto (en escritorio) */
+  .hp-mobile-upload-btn-wrap {
+    display: none;
+  }
+  
+  /* Responsive adjustments for Tablets and Mobile */
 @media (max-width: 1024px) {
   /* Mantener dos columnas en tablet, pero achicar los espacios para que todo quepa "al lado" */
   .hp-body { 
@@ -701,6 +706,16 @@
   }
   .hp-videos-sidebar-grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Ocultar CTA en celular */
+  #comunidad { display: none !important; }
+
+  /* Mostrar botón de subir en main content y ocultarlo en la sidebar */
+  .hp-desktop-upload-btn { display: none !important; }
+  .hp-mobile-upload-btn-wrap { 
+    display: block !important; 
+    margin-bottom: 24px; 
   }
 }
 

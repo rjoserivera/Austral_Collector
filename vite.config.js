@@ -51,7 +51,7 @@ export default defineConfig({
             // ============================================
             // CACHÉ DE IMÁGENES GLOBAL (Independiente del host local/prod)
             // ============================================
-            urlPattern: /\/api\/uploads\/.*/i,
+            urlPattern: /\/uploads\/.*/i,
             method: 'GET',
             handler: 'CacheFirst',
             options: {
