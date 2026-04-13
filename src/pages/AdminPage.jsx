@@ -154,6 +154,16 @@ function AdminInicio() {
 
   return (
     <div className="admin-section">
+      {data.alert_destacado && (
+        <div style={{ background: 'linear-gradient(135deg, #8b1111 0%, #aa2525 100%)', color: '#fff', padding: '16px 20px', borderRadius: '8px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', border: '1px solid #ff4b2b' }}>
+          <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+          <div>
+            <strong style={{ display: 'block', fontSize: '1.1rem', marginBottom: '4px' }}>¡Atención Administrador! No hay cumpleañeros este mes.</strong>
+            <span style={{ fontSize: '0.9rem', color: '#f0e4cc' }}>El sistema ha asignado temporalmente al usuario con más "me gustas" en sus publicaciones. Para elegir manualmente, ve a la pestaña de <strong>Contenido Destacado</strong> y asigna uno.</span>
+          </div>
+        </div>
+      )}
+
       <div className="admin-stats-grid">
         {statCards.map((s, i) => (
           <div className={`asc-card asc-${s.color}`} key={i}>

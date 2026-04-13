@@ -133,9 +133,19 @@ export default function HomePage() {
 
   // Auto-rotar el carrusel de cumpleañeros cada 4 segundos si hay más de 1
   useEffect(() => {
-    if (data.cumpleaneros && data.cumpleaneros.length > 1) {
+    const todayDate = new Date();
+    const currentMonth = todayDate.getMonth() + 1;
+    const currentDay = todayDate.getDate();
+    const valid = (data.cumpleaneros || []).filter(c => {
+       if (!c.user?.fecha_nacimiento) return false;
+       const p = c.user.fecha_nacimiento.split('-');
+       if (p.length !== 3) return false;
+       return parseInt(p[1], 10) === currentMonth && parseInt(p[2], 10) >= currentDay;
+    });
+
+    if (valid.length > 1) {
       cumpleAutoRef.current = setInterval(() => {
-        setCumpleIdx(p => (p + 1) % data.cumpleaneros.length)
+        setCumpleIdx(p => (p + 1) % valid.length)
       }, 4000)
     }
     return () => {
@@ -340,18 +350,43 @@ export default function HomePage() {
 
           {/* Miembro Destacado del Mes / Cumpleañeros */}
           {(() => {
-            const hasCumpleaneros = data.cumpleaneros && data.cumpleaneros.length > 0;
-            const targetUserObj = hasCumpleaneros ? data.cumpleaneros[cumpleIdx] : data.destacado;
+            const todayDate = new Date();
+            const currentMonth = todayDate.getMonth() + 1;
+            const currentDay = todayDate.getDate();
+
+            // Filtrar cumpleañeros válidos (de este mes y que el día sea mayor o igual a hoy)
+            const validCumpleaneros = (data.cumpleaneros || []).filter(c => {
+               if (!c.user?.fecha_nacimiento) return false;
+               const p = c.user.fecha_nacimiento.split('-');
+               if (p.length !== 3) return false;
+               const month = parseInt(p[1], 10);
+               const day = parseInt(p[2], 10);
+               return month === currentMonth && day >= currentDay;
+            }).map(c => {
+               // Recalcular estado_cumple por si proviene de caché
+               const p = c.user.fecha_nacimiento.split('-');
+               const day = parseInt(p[2], 10);
+               let estado = 'este_mes';
+               if (day === currentDay) estado = 'hoy';
+               else if (day === currentDay + 1) estado = 'manana';
+               return { ...c, user: { ...c.user, estado_cumple: estado } };
+            });
+
+            const hasCumpleaneros = validCumpleaneros.length > 0;
+            const safeIdx = cumpleIdx >= validCumpleaneros.length ? 0 : cumpleIdx;
+            const targetUserObj = hasCumpleaneros ? validCumpleaneros[safeIdx] : data.destacado;
 
             const nextCumple = () => {
-              setCumpleIdx(p => (p + 1) % data.cumpleaneros.length);
+              if (!hasCumpleaneros) return;
+              setCumpleIdx(p => (p + 1) % validCumpleaneros.length);
               if (cumpleAutoRef.current) clearInterval(cumpleAutoRef.current);
-              cumpleAutoRef.current = setInterval(() => setCumpleIdx(p => (p + 1) % data.cumpleaneros.length), 4000);
+              cumpleAutoRef.current = setInterval(() => setCumpleIdx(p => (p + 1) % validCumpleaneros.length), 4000);
             };
             const prevCumple = () => {
-              setCumpleIdx(p => (p - 1 + data.cumpleaneros.length) % data.cumpleaneros.length);
+              if (!hasCumpleaneros) return;
+              setCumpleIdx(p => (p - 1 + validCumpleaneros.length) % validCumpleaneros.length);
               if (cumpleAutoRef.current) clearInterval(cumpleAutoRef.current);
-              cumpleAutoRef.current = setInterval(() => setCumpleIdx(p => (p + 1) % data.cumpleaneros.length), 4000);
+              cumpleAutoRef.current = setInterval(() => setCumpleIdx(p => (p + 1) % validCumpleaneros.length), 4000);
             };
 
             return (
@@ -360,66 +395,85 @@ export default function HomePage() {
                   {hasCumpleaneros ? '🎉 ¡Coleccionistas de Cumpleaños!' : '🏆 Miembro Destacado del Mes'}
                 </h2>
                 {targetUserObj && targetUserObj.user ? (
-                  <div className="hp-miembro-wrap card" style={{ position: 'relative', overflow: 'hidden' }}>
-                    {hasCumpleaneros && (
-                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, textAlign: 'center', background: 'linear-gradient(90deg, #ff416c, #ff4b2b)', color: '#fff', padding: '6px', fontWeight: 'bold', fontSize: '0.9rem', zIndex: 10, letterSpacing: '1px' }}>
-                        🎊 {targetUserObj.user.estado_cumple === 'hoy' ? '¡ESTÁ DE CUMPLEAÑOS HOY!' : '¡MAÑANA ES SU CUMPLEAÑOS!'} 🎊
+                  <div className="card" style={{ position: 'relative', overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column' }}>
+                    {/* Top UI Area with Banner Background */}
+                    <div className="hp-miembro-wrap" style={{ 
+                        position: 'relative',
+                        backgroundImage: targetUserObj.user.banner_url ? `url('${BASE_URL}/${targetUserObj.user.banner_url}')` : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        flex: 1
+                    }}>
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(20,35,45,0.92) 0%, rgba(20,35,45,0.4) 100%)', zIndex: 1 }} />
+
+                      {hasCumpleaneros && (
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, textAlign: 'center', background: 'linear-gradient(90deg, #ff416c, #ff4b2b)', color: '#fff', padding: '6px', fontWeight: 'bold', fontSize: '0.9rem', zIndex: 10, letterSpacing: '1px' }}>
+                          🎊 {targetUserObj.user.estado_cumple === 'hoy' ? '¡ESTÁ DE CUMPLEAÑOS HOY!' : (targetUserObj.user.estado_cumple === 'manana' ? '¡MAÑANA ES SU CUMPLEAÑOS!' : '¡PRONTO ES SU CUMPLEAÑOS!')} 🎊
+                        </div>
+                      )}
+                      
+                      <div className="hp-miembro-left" style={{ marginTop: hasCumpleaneros ? '30px' : '0', position: 'relative', zIndex: 2, background: 'transparent', borderRight: 'none' }}>
+                        <div className="hp-miembro-avatar-frame">
+                          <div className="hp-miembro-ring"/>
+                          <img
+                            src={targetUserObj.user.avatar_url ? `${BASE_URL}/${targetUserObj.user.avatar_url}` : '/mock_avatar.png'}
+                            alt={targetUserObj.user.username}
+                            className="hp-miembro-avatar"
+                          />
+                        </div>
+                        <div className="hp-miembro-likes">❤️ {targetUserObj.stats.likes}</div>
+                        <span className="hp-miembro-credit" style={{ color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>Publicaciones: {targetUserObj.stats.posts}</span>
                       </div>
-                    )}
-                    <div className="hp-miembro-left" style={{ marginTop: hasCumpleaneros ? '30px' : '0' }}>
-                      <div className="hp-miembro-avatar-frame">
-                        <div className="hp-miembro-ring"/>
-                        <img
-                          src={targetUserObj.user.avatar_url ? `${BASE_URL}/${targetUserObj.user.avatar_url}` : '/mock_avatar.png'}
-                          alt={targetUserObj.user.username}
-                          className="hp-miembro-avatar"
-                        />
+                      
+                      <div className="hp-miembro-right" style={{ marginTop: hasCumpleaneros ? '30px' : '0', position: 'relative', zIndex: 2, justifyContent: 'center' }}>
+                        <h3 className="hp-miembro-name" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{targetUserObj.user.username}</h3>
+                        <div className="hp-miembro-badges-row">
+                          {hasCumpleaneros ? (
+                            <span className="hp-miembro-badge-tag" style={{background:'#ffd700', color:'#000'}}>🎂 Cumpleañero/a</span>
+                          ) : (
+                            <span className="hp-miembro-badge-tag">✔ Miembro Destacado</span>
+                          )}
+                          {targetUserObj.user.role === 'admin' && <span className="hp-miembro-badge-tag" style={{background:'#ffd700', color:'#000'}}>👑 Administrador</span>}
+                        </div>
+                        
+                        <div className="hp-miembro-stats" style={{ marginTop: '12px' }}>
+                          {hasCumpleaneros ? (
+                            <span className="hp-miembro-stat" style={{ color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
+                              🎂 { (() => {
+                                  if (targetUserObj.user.fecha_nacimiento) {
+                                    let p = targetUserObj.user.fecha_nacimiento.split('-');
+                                    if(p.length === 3) {
+                                      const m = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+                                      return `${parseInt(p[2])} de ${m[parseInt(p[1])-1]}`;
+                                    }
+                                  }
+                                  return 'Cumpleaños';
+                              })() }
+                            </span>
+                          ) : (
+                            <span className="hp-miembro-stat" style={{ color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>❤️ {targetUserObj.stats.likes} Likes de la comunidad</span>
+                          )}
+                        </div>
                       </div>
-                      <div className="hp-miembro-likes">❤️ {targetUserObj.stats.likes}</div>
-                      <span className="hp-miembro-credit">Publicaciones: {targetUserObj.stats.posts}</span>
                     </div>
-                    <div className="hp-miembro-right" style={{ marginTop: hasCumpleaneros ? '30px' : '0' }}>
-                      <h3 className="hp-miembro-name">{targetUserObj.user.username}</h3>
-                      <div className="hp-miembro-badges-row">
-                        {hasCumpleaneros ? (
-                          <span className="hp-miembro-badge-tag" style={{background:'#ffd700', color:'#000'}}>🎂 Cumpleañero/a</span>
-                        ) : (
-                          <span className="hp-miembro-badge-tag">✔ Miembro Destacado</span>
-                        )}
-                        {targetUserObj.user.role === 'admin' && <span className="hp-miembro-badge-tag" style={{background:'#ffd700', color:'#000'}}>👑 Administrador</span>}
-                      </div>
-                      <p className="hp-miembro-bio">
+
+                    {/* Bottom Blue Bio Area */}
+                    <div style={{ background: '#1c4a57', borderTop: '2px solid rgba(223, 192, 138, 0.6)', padding: '16px 20px', position: 'relative', zIndex: 2 }}>
+                      <p className="hp-miembro-bio" style={{ margin: 0, color: '#f0e4cc', fontSize: '0.85rem', lineHeight: '1.5', paddingRight: (hasCumpleaneros && validCumpleaneros.length > 1) ? '40px' : '0' }}>
                         {hasCumpleaneros 
                           ? (data.config?.txt_cumple || "¡El Gremio de Coleccionistas celebra tu día! Te deseamos un excelente cumpleaños y que tu colección siga creciendo.") 
                           : (targetUserObj.user.biografia || data.config?.txt_destacado || "Por su constante participación, increíbles piezas y valiosos aportes a la comunidad de Austral Collector. ¡Gracias por ser parte del gremio!")}
                       </p>
-                      <div className="hp-miembro-stats">
-                        {hasCumpleaneros ? (
-                          <span className="hp-miembro-stat">
-                            🎂 { (() => {
-                                if (targetUserObj.user.fecha_nacimiento) {
-                                  let p = targetUserObj.user.fecha_nacimiento.split('-');
-                                  if(p.length === 3) {
-                                    const m = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-                                    return `${parseInt(p[2])} de ${m[parseInt(p[1])-1]}`;
-                                  }
-                                }
-                                return 'Cumpleaños';
-                            })() }
-                          </span>
-                        ) : (
-                          <span className="hp-miembro-stat">❤️ {targetUserObj.stats.likes} Likes de la comunidad</span>
-                        )}
-                      </div>
+                      
+                      {/* Dots for carousel, moved to bottom bar */}
+                      {hasCumpleaneros && validCumpleaneros.length > 1 && (
+                        <div style={{ position: 'absolute', bottom: '16px', right: '16px', display: 'flex', gap: '6px' }}>
+                          {validCumpleaneros.map((_, i) => (
+                            <span key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: i === cumpleIdx ? '#ffd700' : 'rgba(255,255,255,0.4)', display: 'inline-block', transition: 'background 0.3s' }} />
+                          ))}
+                        </div>
+                      )}
                     </div>
-
-                    {hasCumpleaneros && data.cumpleaneros.length > 1 && (
-                      <div style={{ position: 'absolute', bottom: '12px', right: '0', left: '0', display: 'flex', justifyContent: 'center', gap: '6px', zIndex: 10 }}>
-                        {data.cumpleaneros.map((_, i) => (
-                          <span key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: i === cumpleIdx ? '#ffd700' : 'rgba(255,255,255,0.35)', display: 'inline-block', transition: 'background 0.3s' }} />
-                        ))}
-                      </div>
-                    )}
                   </div>
                 ) : (
                   <div className="card" style={{padding:'30px', textAlign:'center', color:'#aaa'}}>No hay un miembro destacado asignado actualmente.</div>

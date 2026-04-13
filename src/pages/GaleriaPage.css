@@ -33,7 +33,10 @@
   z-index: 1;
 }
 
-.galeria-hero-text { flex: 1; }
+.galeria-hero-text { 
+  flex: 1; 
+  text-align: center;
+}
 
 .galeria-title {
   font-family: var(--font-title);

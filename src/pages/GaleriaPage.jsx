@@ -6,7 +6,6 @@ import { getOfflinePosts } from '../utils/offlineSync'
 
 export default function GaleriaPage() {
   const [search, setSearch]             = useState('')
-  const [activeTab, setActiveTab]       = useState('figura')
   const [filterCat, setFilterCat]       = useState('Todas')
   const [figuras, setFiguras]           = useState([])
   const [selectedPost, setSelectedPost] = useState(null)
@@ -76,10 +75,7 @@ export default function GaleriaPage() {
         setFilterCat(tag);
       }
 
-      const tipo = params.get('tipo');
-      if (tipo === 'figura' || tipo === 'cosplay') {
-        setActiveTab(tipo);
-      }
+      // Filtro de 'tipo' en URL eliminado porque la galeria es unica (Figuras)
 
       const postParam = params.get('post');
       if (postParam) {
@@ -140,7 +136,7 @@ export default function GaleriaPage() {
     .catch(e => console.error("Error toggling like:", e))
   }
 
-  const currentTabFiguras = figuras.filter(f => (f.tipo || 'figura') === activeTab)
+  const currentTabFiguras = figuras.filter(f => (f.tipo || 'figura') === 'figura')
 
   // Frecuencia de categorías en el tab activo (usando la propiedad 'hashtags' del servidor)
   const catFreq = currentTabFiguras
@@ -187,7 +183,7 @@ export default function GaleriaPage() {
         <div className="galeria-hero-bg" aria-hidden="true"/>
         <div className="section-wrapper galeria-hero-inner">
           <div className="galeria-hero-text">
-            <h1 className="galeria-title">Galería de Figuras y Cosplay</h1>
+            <h1 className="galeria-title">Galería de Figuras</h1>
             <p className="galeria-subtitle">
               Explora miles de archivos históricos, subidos por coleccionistas de élite.
             </p>
@@ -200,17 +196,7 @@ export default function GaleriaPage() {
 
       <div className="section-wrapper galeria-main">
 
-        {/* ── TABS PRINCIPALES ─────────────────────────────── */}
-        <div className="galeria-primary-tabs">
-          <button
-            className={`galeria-primary-tab-btn ${activeTab === 'figura' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('figura'); setFilterCat('Todas'); setSearch('') }}
-          >Figuras</button>
-          <button
-            className={`galeria-primary-tab-btn ${activeTab === 'cosplay' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('cosplay'); setFilterCat('Todas'); setSearch('') }}
-          >Cosplay</button>
-        </div>
+        {/* TABS DE TIPO FUERON ELIMINADOS, AHORA SOLO MOSTRARÁ FIGURAS */}
 
         {/* ── CONTROLES: BUSCADOR + HASHTAGS ───────────────── */}
         <div className="galeria-controls" style={{ justifyContent: 'center', flexWrap: 'wrap', gap: '20px' }}>

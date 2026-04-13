@@ -63,7 +63,15 @@ try {
         $stmtDestacadoUser->execute([$miembroId]);
         $destacadoUser = $stmtDestacadoUser->fetch();
     } else {
-        $stmtDestacado = $pdo->query("SELECT u.* FROM usuarios u JOIN destacado_mes d ON u.id = d.user_id ORDER BY d.id DESC LIMIT 1");
+        // Fallback momentáneo: el usuario con más me gustas en total
+        $stmtDestacado = $pdo->query("
+            SELECT u.*, 
+            (SELECT COUNT(*) FROM likes l JOIN posts p ON l.post_id = p.id WHERE p.user_id = u.id) as total_likes 
+            FROM usuarios u 
+            WHERE is_active = 1
+            ORDER BY total_likes DESC 
+            LIMIT 1
+        ");
         $destacadoUser = $stmtDestacado->fetch();
     }
     
@@ -84,13 +92,19 @@ try {
     $stmtCosplay->execute([$viewerId]);
     $ultimos_cosplays = $stmtCosplay->fetchAll();
 
-    // 7. Cumpleaneros: Buscar si hay alguien de cumpleaños hoy o mañana
+    // 7. Cumpleaneros: Buscar si hay alguien de cumpleaños este mes y que no haya pasado
     $stmtCumple = $pdo->query("
         SELECT *, 
-        IF(DATE_FORMAT(fecha_nacimiento, '%c-%d') = DATE_FORMAT(CURDATE(), '%c-%d'), 'hoy', 'manana') as estado_cumple 
+        CASE 
+            WHEN DAY(fecha_nacimiento) = DAY(CURDATE()) THEN 'hoy'
+            WHEN DAY(fecha_nacimiento) = DAY(CURDATE()) + 1 THEN 'manana'
+            ELSE 'este_mes'
+        END as estado_cumple 
         FROM usuarios 
-        WHERE DATE_FORMAT(fecha_nacimiento, '%c-%d') IN (DATE_FORMAT(CURDATE(), '%c-%d'), DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 1 DAY), '%c-%d')) 
+        WHERE MONTH(fecha_nacimiento) = MONTH(CURDATE())
+        AND DAY(fecha_nacimiento) >= DAY(CURDATE())
         AND is_active = 1
+        ORDER BY DAY(fecha_nacimiento) ASC
     ");
     $rawCumple = $stmtCumple->fetchAll();
     
