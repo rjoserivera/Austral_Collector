@@ -27,13 +27,25 @@ if ($user && password_verify($password, $user['password'])) {
     $logStmt = $pdo->prepare("INSERT INTO logs (user_id, tipo, accion) VALUES (?, 'login', 'Inicio de sesión')");
     $logStmt->execute([$user['id']]);
 
+    require_once 'jwt_helper.php';
+    $token = JWT::encode([
+        'id' => $user['id'],
+        'username' => $user['username'],
+        'role' => $user['role'],
+        'exp' => time() + (60 * 60 * 24) // 24 hours
+    ]);
+
     echo json_encode([
         'success' => true,
+        'token' => $token,
+        'jwt' => $token, // Added for TestSprite compatibility
         'user' => $user,
         'role' => $user['role'],
-        'username' => $user['username']
+        'username' => $user['username'],
+        'require_password_change' => false
     ]);
 } else {
+    http_response_code(401);
     echo json_encode(['error' => 'Credenciales inválidas o cuenta inactiva']);
 }
 ?>

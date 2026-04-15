@@ -92,7 +92,7 @@ export default function NavBar() {
 
         {/* Brand */}
         <Link to="/" className="navbar-brand">
-          <img src="/logo_cabeza_sin_fondo.PNG" alt="Austral Collector Logo" className="navbar-logo" />
+          <img src="/logo_sin_fondo.png" alt="Austral Collector Logo" className="navbar-logo" />
           <span className="navbar-title">
             {isAdmin
               ? <><span className="title-austral">Admin</span> <span className="title-collector">Collector</span></>

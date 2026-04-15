@@ -34,15 +34,18 @@ export default function LoginPage() {
       if (data.success && data.user) {
         localStorage.setItem('austral_auth_user', JSON.stringify(data.user));
         localStorage.setItem('austral_auth_role', data.user.role);
+        // Save JWT token for authenticated API requests
+        const token = data.token || data.jwt;
+        if (token) localStorage.setItem('austral_auth_token', token);
         
         if (data.user.require_password_change) {
           localStorage.setItem('austral_auth_require_pass_change', 'true');
-          navigate('/'); // Si necesita cambiar contraseña, lo tiramos a inicio para mostrar el modal
+          navigate('/');
         } else {
           localStorage.removeItem('austral_auth_require_pass_change');
-          // Sin restricciones de contraseña: Admin va al panel, resto al dashboard u home según su uso habitual
           navigate(data.user.role === 'admin' ? '/admin' : '/');
         }
+
       } else {
         setError(data.error || 'Credenciales incorrectas.');
       }

@@ -4,7 +4,8 @@
  * Handles listing and deleting user posts (Figures/Cosplays).
  */
 
-require_once __DIR__ . '/../db.php';
+require_once '../db.php';
+require_once 'auth_check.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 

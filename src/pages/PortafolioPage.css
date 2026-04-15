@@ -205,6 +205,32 @@
 }
 .pp-galeria-item:hover .pp-galeria-img { transform: scale(1.05); }
 
+.pp-galeria-desc {
+  padding: 8px 10px;
+  font-size: .76rem;
+  color: var(--color-muted);
+  line-height: 1.45;
+  background: rgba(0,0,0,0.05);
+  border-top: 1px solid rgba(201,168,76,.1);
+}
+
+/* Empty state */
+.pp-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  color: var(--color-muted);
+  font-size: .88rem;
+  gap: 8px;
+  border: 1px dashed rgba(201,168,76,.2);
+  border-radius: var(--radius-sm);
+  padding: 24px;
+  text-align: center;
+}
+.pp-empty-icon { font-size: 2rem; opacity: .5; }
+
 /* Videos list */
 .pp-videos-list {
   display: flex;

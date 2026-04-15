@@ -3,6 +3,7 @@
 // Created by Antigravity
 
 require_once '../db.php';
+require_once 'auth_check.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 

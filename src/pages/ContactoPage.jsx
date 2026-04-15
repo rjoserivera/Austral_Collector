@@ -38,7 +38,7 @@ export default function ContactoPage() {
         
         {/* ── HERO HEADER ────────────────────────────────────────── */}
         <header className="contacto-hero-row">
-          <img src="/robot_sin_fondo.png" alt="Austral Collector Robot" className="contacto-hero-robot"/>
+          <img src="/austral_saludando.png" alt="Austral Collector Robot" className="contacto-hero-robot"/>
           <div className="contacto-hero-text">
             <h1 className="contacto-title-main">CONTÁCTANOS</h1>
             <p className="contacto-subtitle">¿Tienes alguna duda o sugerencia?<br/>Contáctanos y serás escuchado.</p>

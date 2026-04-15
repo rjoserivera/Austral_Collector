@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import './AdminPage.css'
-import { BASE_URL } from '../config.js'
+import { BASE_URL, authFetch } from '../config.js'
 import PostModal from '../components/PostModal'
 
-// URL base para la API
-const API_URL = 'http://localhost/Austral%20Collector/api/admin'
+// URL base para la API (a través del proxy de Vite)
+const API_URL = '/api/admin'
 
 const getLogConfig = (tipo) => {
   const t = (tipo || '').toLowerCase();
@@ -129,7 +129,7 @@ function AdminInicio() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    fetch(`${API_URL}/get_stats.php`)
+    authFetch(`${API_URL}/get_stats.php`)
       .then(r => r.json())
       .then(d => {
         if(d.error) setError(d.error)
@@ -215,7 +215,7 @@ function AdminUsuarios({ adminId }) {
 
   const loadData = () => {
     setLoading(true)
-    fetch(`${API_URL}/usuarios.php`)
+    authFetch(`${API_URL}/usuarios.php`)
       .then(r => r.json())
       .then(d => setUsuarios(d.usuarios || []))
       .finally(() => setLoading(false))
@@ -274,9 +274,8 @@ function AdminUsuarios({ adminId }) {
     const payload = formMode === 'create' ? { ...formData, adminId } : { id: editingId, action: 'update_user', ...formData, adminId }
     const method = formMode === 'create' ? 'POST' : 'PUT'
     
-    fetch(`${API_URL}/usuarios.php`, {
+    authFetch(`${API_URL}/usuarios.php`, {
       method,
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
     .then(r => r.json())
@@ -298,9 +297,8 @@ function AdminUsuarios({ adminId }) {
   }
 
   const updateFieldInline = (id, field, value) => {
-    fetch(`${API_URL}/usuarios.php`, {
+    authFetch(`${API_URL}/usuarios.php`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, action: 'update_field', field, value })
     })
     .then(r => r.json())
@@ -312,9 +310,8 @@ function AdminUsuarios({ adminId }) {
   
   const toggleStatus = (id, action) => {
     if(!window.confirm(`¿Seguro que deseas aplicar esta acción?`)) return
-    fetch(`${API_URL}/usuarios.php`, {
+    authFetch(`${API_URL}/usuarios.php`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, action, adminId })
     })
     .then(r => r.json())
@@ -347,9 +344,8 @@ function AdminUsuarios({ adminId }) {
     if (!messageForm.asunto || !messageForm.mensaje) return alert('Por favor llena todos los campos.')
     
     setIsSendingMsg(true)
-    fetch(`${API_URL}/enviar_mensaje.php`, {
+    authFetch(`${API_URL}/enviar_mensaje.php`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         user_id: messageModal.mass ? null : messageModal.user_id,
         mass_send: messageModal.mass,
@@ -631,7 +627,7 @@ function AdminVideos({ adminId }) {
 
   const loadData = () => {
     setLoading(true)
-    fetch(`${API_URL}/videos.php`)
+    authFetch(`${API_URL}/videos.php`)
       .then(r => r.json())
       .then(d => setVideos(d.videos || []))
       .finally(() => setLoading(false))
@@ -644,9 +640,8 @@ function AdminVideos({ adminId }) {
     if (!videoForm.titulo || !videoForm.link) return alert('Campos obligatorios')
     
     setSaving(true)
-    fetch(`${API_URL}/videos.php`, {
+    authFetch(`${API_URL}/videos.php`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...videoForm, adminId })
     })
     .then(() => {
@@ -659,17 +654,15 @@ function AdminVideos({ adminId }) {
 
   const handleDelete = (id) => {
     if(!window.confirm(`¿Eliminar video?`)) return
-    fetch(`${API_URL}/videos.php`, {
+    authFetch(`${API_URL}/videos.php`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, adminId })
     }).then(() => loadData())
   }
 
   const toggleDest = (id) => {
-    fetch(`${API_URL}/videos.php`, {
+    authFetch(`${API_URL}/videos.php`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })
     }).then(() => loadData())
   }
@@ -826,7 +819,7 @@ function AdminEventos({ adminId }) {
 
   const loadData = () => {
     setLoading(true)
-    fetch(`${API_URL}/eventos.php`)
+    authFetch(`${API_URL}/eventos.php`)
       .then(r => r.json())
       .then(d => { if(d.success) setEventos(d.eventos || []) })
       .finally(() => setLoading(false))
@@ -848,8 +841,11 @@ function AdminEventos({ adminId }) {
     fd.append('fecha_display', fecha_display)
     if (imagen) fd.append('imagen', imagen)
 
+    // FormData upload: inject Authorization header manually (no Content-Type to allow multipart/form-data boundary)
+    const token = localStorage.getItem('austral_auth_token')
     fetch(`${API_URL}/eventos.php`, {
       method: 'POST',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
       body: fd
     })
     .then(r => r.json())
@@ -867,9 +863,8 @@ function AdminEventos({ adminId }) {
 
   const handleDelete = (evtId) => {
     if(!window.confirm('¿Eliminar esta noticia/evento?')) return
-    fetch(`${API_URL}/eventos.php`, {
+    authFetch(`${API_URL}/eventos.php`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: evtId, adminId })
     })
     .then(r => r.json())
@@ -1028,162 +1023,262 @@ function AdminIdentidad({ adminId }) {
   const [identidades, setIdentidades] = useState([])
   const [loading, setLoading] = useState(true)
   const [savingId, setSavingId] = useState(null)
-  
-  // Portafolio States
-  const [pGal1, setPGal1] = useState('')
-  const [pGal2, setPGal2] = useState('')
-  const [pGal3, setPGal3] = useState('')
-  const [pGal4, setPGal4] = useState('')
-  const [pVid1, setPVid1] = useState('')
-  const [pVid2, setPVid2] = useState('')
-  const [pVid3, setPVid3] = useState('')
-  const [pVid4, setPVid4] = useState('')
-  const [pComunidad, setPComunidad] = useState('')
-  const [savingPortafolio, setSavingPortafolio] = useState(false)
-  
-  let userId = null;
+
+  // Galería
+  const [galeriaItems, setGaleriaItems] = useState([])
+  const [showGalModal, setShowGalModal] = useState(false)
+  const [galFile, setGalFile] = useState(null)
+  const [galPreview, setGalPreview] = useState(null)
+  const [galDesc, setGalDesc] = useState('')
+  const [uploadingGal, setUploadingGal] = useState(false)
+
+  // Videos
+  const [videos, setVideos] = useState(['', '', '', ''])
+  const [savingVid, setSavingVid] = useState(false)
+
+  // Comunidad
+  const [comunidadFile, setComunidadFile] = useState(null)
+  const [comunidadPreview, setComunidadPreview] = useState('')
+  const [comunidadUrl, setComunidadUrl] = useState('')
+  const [savingCom, setSavingCom] = useState(false)
+
+  let userId = null
   try {
-    const user = JSON.parse(localStorage.getItem('austral_auth_user') || '{}');
-    userId = user.id;
+    const user = JSON.parse(localStorage.getItem('austral_auth_user') || '{}')
+    userId = user.id
   } catch(e) {}
 
-  const loadData = () => {
+  const loadAll = () => {
     setLoading(true)
-    // Cargar tarjetas de Identidad
-    fetch(`${API_URL}/identidad_admin.php?user_id=${userId}`)
-      .then(r => r.json())
-      .then(d => {
-        if(d.success) setIdentidades(d.data || [])
-        else alert(d.error || 'Error al cargar identidad')
-      })
+    // Identidad cards
+    authFetch(`${API_URL}/identidad_admin.php?user_id=${userId}`)
+      .then(r => r.json()).then(d => { if(d.success) setIdentidades(d.data || []) })
       .catch(e => console.error(e))
-    
-    // Cargar configuración de Portafolio
-    fetch(`${API_URL}/destacados.php`)
-      .then(r => r.json())
-      .then(d => {
+
+    // Galería
+    authFetch(`${API_URL}/galeria_portafolio.php`)
+      .then(r => r.json()).then(d => { if(d.success) setGaleriaItems(d.items || []) })
+      .catch(e => console.error(e))
+
+    // Config (videos + comunidad)
+    authFetch(`${API_URL}/destacados.php`)
+      .then(r => r.json()).then(d => {
         if(d.config) {
-          setPGal1(d.config.portafolio_galeria_1 || '')
-          setPGal2(d.config.portafolio_galeria_2 || '')
-          setPGal3(d.config.portafolio_galeria_3 || '')
-          setPGal4(d.config.portafolio_galeria_4 || '')
-          setPVid1(d.config.portafolio_video_1 || '')
-          setPVid2(d.config.portafolio_video_2 || '')
-          setPVid3(d.config.portafolio_video_3 || '')
-          setPVid4(d.config.portafolio_video_4 || '')
-          setPComunidad(d.config.portafolio_comunidad || '')
+          setVideos([
+            d.config.portafolio_video_1 || '',
+            d.config.portafolio_video_2 || '',
+            d.config.portafolio_video_3 || '',
+            d.config.portafolio_video_4 || '',
+          ])
+          setComunidadUrl(d.config.portafolio_comunidad || '')
+          setComunidadPreview(d.config.portafolio_comunidad || '')
         }
       })
       .catch(e => console.error(e))
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { loadAll() }, [])
 
-  const handleSaveConfig = (clave, valor) => {
-    setSavingPortafolio(true)
-    fetch(`${API_URL}/destacados.php`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clave, valor, adminId })
-    })
-    .then(r => r.json())
-    .then(d => {
-      if(!d.success) alert('❌ Error al guardar.')
-    })
-    .catch(e => alert('❌ Error: ' + e.message))
-    .finally(() => setSavingPortafolio(false))
-  }
-
+  // ── Identidad helpers ──
   const handleChange = (index, field, value) => {
     const updated = [...identidades]
     updated[index][field] = value
     setIdentidades(updated)
   }
-
   const handleSaveSingle = (index) => {
-    const item = identidades[index];
-    setSavingId(item.id);
-    
-    fetch(`${API_URL}/identidad_admin.php`, {
+    const item = identidades[index]
+    setSavingId(item.id)
+    authFetch(`${API_URL}/identidad_admin.php`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        user_id: userId, 
-        identidades: [item] 
-      })
+      body: JSON.stringify({ user_id: userId, identidades: [item] })
+    }).then(r => r.json()).then(d => {
+      if(d.success) alert(`✅ ${item.title} actualizado!`)
+      else alert('Error: ' + d.error)
+    }).finally(() => setSavingId(null))
+  }
+
+  // ── Galería helpers ──
+  const openGalModal = () => { setGalFile(null); setGalPreview(null); setGalDesc(''); setShowGalModal(true) }
+  const handleGalFile = (e) => {
+    const f = e.target.files[0]
+    if (!f) return
+    setGalFile(f)
+    setGalPreview(URL.createObjectURL(f))
+  }
+  const handleGalUpload = (e) => {
+    e.preventDefault()
+    if (!galFile) return alert('Selecciona una imagen.')
+    setUploadingGal(true)
+    const token = localStorage.getItem('austral_auth_token')
+    const fd = new FormData()
+    fd.append('imagen', galFile)
+    fd.append('descripcion', galDesc)
+    fd.append('orden', galeriaItems.length)
+    fetch(`${API_URL}/galeria_portafolio.php`, {
+      method: 'POST',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      body: fd
+    }).then(r => r.json()).then(d => {
+      if(d.success) { setShowGalModal(false); loadAll() }
+      else alert('Error: ' + d.error)
+    }).catch(e => alert('Error: ' + e.message)).finally(() => setUploadingGal(false))
+  }
+  const handleGalDelete = (id) => {
+    if(!window.confirm('¿Eliminar esta foto de la galería?')) return
+    authFetch(`${API_URL}/galeria_portafolio.php`, {
+      method: 'DELETE',
+      body: JSON.stringify({ id })
+    }).then(r => r.json()).then(d => {
+      if(d.success) loadAll()
+      else alert('Error: ' + d.error)
     })
-    .then(r => r.json())
-    .then(d => {
-      if(d.success) {
-        alert(`✅ ${item.title} actualizado exitosamente!`)
-      } else {
-        alert("Error: " + d.error)
-      }
+  }
+  const handleGalDescUpdate = (item) => {
+    authFetch(`${API_URL}/galeria_portafolio.php`, {
+      method: 'PUT',
+      body: JSON.stringify({ id: item.id, descripcion: item.descripcion, orden: item.orden })
+    }).then(r => r.json()).then(d => {
+      if(!d.success) alert('Error al guardar descripción.')
     })
-    .finally(() => setSavingId(null))
+  }
+
+  // ── Video helpers ──
+  const saveVideo = (idx) => {
+    setSavingVid(true)
+    authFetch(`${API_URL}/destacados.php`, {
+      method: 'POST',
+      body: JSON.stringify({ clave: `portafolio_video_${idx + 1}`, valor: videos[idx], adminId })
+    }).then(r => r.json()).then(d => {
+      if(!d.success) alert('❌ Error al guardar video.')
+    }).catch(e => alert('❌ ' + e.message)).finally(() => setSavingVid(false))
+  }
+  const getYtId = (url) => {
+    if (!url) return null
+    const m = url.match(/[?&]v=([^&]+)/)
+    if (m) return m[1]
+    const sl = url.split('/')
+    return sl[sl.length - 1] || null
+  }
+
+  // ── Comunidad helpers ──
+  const handleComunidadFile = (e) => {
+    const f = e.target.files[0]
+    if (!f) return
+    setComunidadFile(f)
+    setComunidadPreview(URL.createObjectURL(f))
+  }
+  const saveComunidad = () => {
+    setSavingCom(true)
+    if (comunidadFile) {
+      // Upload file
+      const token = localStorage.getItem('austral_auth_token')
+      const fd = new FormData()
+      fd.append('imagen', comunidadFile)
+      fd.append('descripcion', 'Banner comunidad')
+      fd.append('orden', 999)
+      fetch(`${API_URL}/galeria_portafolio.php`, {
+        method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        body: fd
+      }).then(r => r.json()).then(d => {
+        if(d.success) {
+          // Save URL to config
+          return authFetch(`${API_URL}/destacados.php`, {
+            method: 'POST',
+            body: JSON.stringify({ clave: 'portafolio_comunidad', valor: d.imagen_url, adminId })
+          }).then(r => r.json()).then(() => {
+            setComunidadUrl(d.imagen_url)
+            setComunidadFile(null)
+            alert('✅ Imagen de comunidad guardada.')
+          })
+        } else {
+          alert('Error: ' + d.error)
+        }
+      }).catch(e => alert('Error: ' + e.message)).finally(() => setSavingCom(false))
+    } else {
+      // Save URL directly
+      authFetch(`${API_URL}/destacados.php`, {
+        method: 'POST',
+        body: JSON.stringify({ clave: 'portafolio_comunidad', valor: comunidadUrl, adminId })
+      }).then(r => r.json()).then(d => {
+        if(d.success) { setComunidadPreview(comunidadUrl); alert('✅ Guardado.') }
+        else alert('❌ Error al guardar.')
+      }).catch(e => alert('❌ ' + e.message)).finally(() => setSavingCom(false))
+    }
   }
 
   if (loading) return <Loading />
 
   return (
     <div className="admin-section">
-      <div className="admin-sec-header">
-        <h2 className="admin-sec-title">⭐ Identidad y Nosotros</h2>
-        <button className="btn-outline btn-sm" onClick={loadData} disabled={!!savingId} style={{ borderColor: 'rgba(0,0,0,0.2)', color: '#1a3d4a' }}>
-          🔄 Recargar
-        </button>
-      </div>
+      {/* ── MODAL AGREGAR FOTO ─────────────────────── */}
+      {showGalModal && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.88)', zIndex:1001, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <form onSubmit={handleGalUpload} style={{ width:'460px', background:'#0d2830', border:'1px solid var(--color-gold)', borderRadius:'14px', padding:'2rem', position:'relative' }}>
+            <button type="button" onClick={() => setShowGalModal(false)} style={{ position:'absolute', top:'12px', right:'14px', background:'none', border:'none', color:'#aaa', fontSize:'1.4rem', cursor:'pointer' }}>✕</button>
+            <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.2rem' }}>📷 Agregar Foto a la Galería</h3>
 
-      <div className="admin-identidad-grid">
+            <div className="admin-form-group" style={{ marginBottom:'16px' }}>
+              <label>Imagen *</label>
+              <input type="file" accept="image/*" required onChange={handleGalFile}
+                style={{ display:'block', marginTop:'6px', color:'#f0e4cc' }} />
+              {galPreview && (
+                <img src={galPreview} alt="Preview" style={{ marginTop:'12px', width:'100%', height:'180px', objectFit:'cover', borderRadius:'8px', border:'1px solid rgba(255,215,0,0.3)' }} />
+              )}
+            </div>
+
+            <div className="admin-form-group" style={{ marginBottom:'20px' }}>
+              <label>Descripción (opcional)</label>
+              <textarea className="admin-input" rows="3" value={galDesc}
+                onChange={e => setGalDesc(e.target.value)}
+                placeholder="Ej: Exhibición de figuras de la colección 2024..."
+                style={{ resize:'none', marginTop:'6px' }} />
+            </div>
+
+            <div style={{ display:'flex', gap:'10px' }}>
+              <button type="submit" className="btn-primary" disabled={uploadingGal} style={{ flex:1 }}>
+                {uploadingGal ? 'Subiendo...' : '☁️ Subir Foto'}
+              </button>
+              <button type="button" className="btn-outline" onClick={() => setShowGalModal(false)} disabled={uploadingGal}>
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* ── A: NUESTRA IDENTIDAD ──────────────────── */}
+      <div className="admin-sec-header">
+        <h2 className="admin-sec-title">⭐ Nuestra Identidad</h2>
+        <button className="btn-outline btn-sm" onClick={loadAll} style={{ borderColor:'rgba(0,0,0,0.2)', color:'#1a3d4a' }}>🔄 Recargar</button>
+      </div>
+      <div className="admin-identidad-grid" style={{ marginBottom:'48px' }}>
         {identidades.map((item, index) => (
           <div key={item.id} className="admin-identidad-card">
             <div className="aic-header">
               <span className="aic-icon-view">{item.icon}</span>
               <h3 className="aic-id-label">{item.id}</h3>
             </div>
-            
             <div className="admin-form-group">
-              <label>Título Sección</label>
-              <input 
-                type="text" 
-                className="admin-input" 
-                value={item.title} 
-                onChange={e => handleChange(index, 'title', e.target.value)} 
-                required 
-              />
+              <label>Título</label>
+              <input type="text" className="admin-input" value={item.title}
+                onChange={e => handleChange(index, 'title', e.target.value)} />
             </div>
-
-            <div className="admin-form-group" style={{ marginTop: '12px' }}>
+            <div className="admin-form-group" style={{ marginTop:'10px' }}>
               <label>Ícono (Emoji)</label>
-              <input 
-                type="text" 
-                className="admin-input" 
-                value={item.icon} 
-                onChange={e => handleChange(index, 'icon', e.target.value)} 
-                required 
-              />
+              <input type="text" className="admin-input" value={item.icon}
+                onChange={e => handleChange(index, 'icon', e.target.value)} />
             </div>
-
-            <div className="admin-form-group" style={{ marginTop: '12px', flex: 1 }}>
+            <div className="admin-form-group" style={{ marginTop:'10px', flex:1 }}>
               <label>Descripción</label>
-              <textarea 
-                className="admin-input" 
-                rows="4" 
-                value={item.desc} 
-                onChange={e => handleChange(index, 'desc', e.target.value)} 
-                required 
-                style={{ resize: 'none' }}
-              />
+              <textarea className="admin-input" rows="4" value={item.desc}
+                onChange={e => handleChange(index, 'desc', e.target.value)}
+                style={{ resize:'none' }} />
             </div>
-
-            <div className="aic-footer" style={{ marginTop: '20px' }}>
-              <button 
-                className="btn-primary" 
-                onClick={() => handleSaveSingle(index)}
-                disabled={savingId === item.id}
-                style={{ width: '100%', padding: '12px' }}
-              >
+            <div className="aic-footer" style={{ marginTop:'16px' }}>
+              <button className="btn-primary" style={{ width:'100%' }}
+                onClick={() => handleSaveSingle(index)} disabled={savingId === item.id}>
                 {savingId === item.id ? 'Guardando...' : '💾 Guardar'}
               </button>
             </div>
@@ -1191,72 +1286,142 @@ function AdminIdentidad({ adminId }) {
         ))}
       </div>
 
-      {/* --- CONFIGURACION PORTAFOLIO --- */}
-      <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '2px solid rgba(200, 169, 110, 0.4)' }}>
-        <h2 className="admin-sec-title">🖼️ Medios del Portafolio</h2>
-        <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '24px' }}>
-          Pega los enlaces (URLs) directamente para decidir qué imágenes y videos se mostrarán en la página principal del Portafolio.
-        </p>
+      {/* ── B: GALERÍA DE FOTOS ───────────────────── */}
+      <div style={{ borderTop:'2px solid rgba(200,169,110,0.35)', paddingTop:'32px', marginBottom:'40px' }}>
+        <div className="admin-sec-header" style={{ marginBottom:'20px' }}>
+          <div>
+            <h2 className="admin-sec-title">⚜️ Galería de Fotos</h2>
+            <p style={{ color:'#4a3520', fontSize:'0.85rem', marginTop:'4px' }}>
+              Sube las fotos que aparecerán en la sección Galería del Portafolio. Puedes agregar cualquier cantidad.
+            </p>
+          </div>
+          <button className="btn-primary btn-sm" onClick={openGalModal}>➕ Agregar Foto</button>
+        </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) minmax(300px, 1fr)', gap: '40px' }}>
-          
-          {/* GALERIA */}
-          <div className="dest-card">
-            <h3 className="dest-card-title">⚜️ Galería (4 Imágenes)</h3>
-            {[
-              { label: 'Imagen 1', val: pGal1, setter: setPGal1, key: 'portafolio_galeria_1' },
-              { label: 'Imagen 2', val: pGal2, setter: setPGal2, key: 'portafolio_galeria_2' },
-              { label: 'Imagen 3', val: pGal3, setter: setPGal3, key: 'portafolio_galeria_3' },
-              { label: 'Imagen 4', val: pGal4, setter: setPGal4, key: 'portafolio_galeria_4' },
-            ].map((f, i) => (
-              <div key={i} style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>{f.label}</label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <input type="text" className="admin-input" value={f.val} onChange={e => f.setter(e.target.value)} placeholder="https://..." style={{ flex: 1 }} />
-                  <button className="btn-outline btn-sm" onClick={() => handleSaveConfig(f.key, f.val)} disabled={savingPortafolio}>Guardar</button>
+        {galeriaItems.length === 0 ? (
+          <div style={{ textAlign:'center', padding:'40px 20px', background:'rgba(0,0,0,0.06)', borderRadius:'10px', border:'1px dashed rgba(139,90,43,0.35)', color:'#3a2a0f' }}>
+            <div style={{ fontSize:'2.5rem', marginBottom:'8px' }}>📷</div>
+            <p style={{ fontWeight:500 }}>No hay fotos en la galería aún.</p>
+            <button className="btn-outline btn-sm" style={{ marginTop:'12px' }} onClick={openGalModal}>
+              ➕ Agregar primera foto
+            </button>
+          </div>
+        ) : (
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(220px, 1fr))', gap:'16px' }}>
+            {galeriaItems.map(item => (
+              <div key={item.id} style={{ background:'rgba(255,255,255,0.6)', borderRadius:'10px', overflow:'hidden', border:'1px solid rgba(139,90,43,0.25)', position:'relative', boxShadow:'0 2px 8px rgba(0,0,0,0.1)' }}>
+                <img
+                  src={`${window.location.origin.includes('5173') ? 'http://localhost' : ''}/Austral%20Collector/${item.imagen_url}`}
+                  alt={item.descripcion || 'Galería'}
+                  style={{ width:'100%', height:'160px', objectFit:'cover', display:'block' }}
+                  onError={e => { e.target.style.background='#1a3d4a'; e.target.src=''; }}
+                />
+                <div style={{ padding:'12px' }}>
+                  <textarea
+                    className="admin-input"
+                    rows="2"
+                    value={item.descripcion || ''}
+                    onChange={e => {
+                      const upd = galeriaItems.map(g => g.id === item.id ? {...g, descripcion: e.target.value} : g)
+                      setGaleriaItems(upd)
+                    }}
+                    onBlur={() => handleGalDescUpdate(item)}
+                    placeholder="Descripción de la foto..."
+                    style={{ resize:'none', fontSize:'0.78rem', marginBottom:'8px' }}
+                  />
+                  <button
+                    onClick={() => handleGalDelete(item.id)}
+                    style={{ width:'100%', background:'rgba(217,83,79,0.15)', border:'1px solid #d9534f', color:'#d9534f', borderRadius:'6px', padding:'6px', cursor:'pointer', fontSize:'0.82rem' }}>
+                    🗑️ Eliminar
+                  </button>
                 </div>
               </div>
             ))}
           </div>
+        )}
+      </div>
 
-          <div>
-            {/* VIDEOS */}
-            <div className="dest-card" style={{ marginBottom: '20px' }}>
-              <h3 className="dest-card-title">▶ Videos (4 Enlaces YT)</h3>
-              {[
-                { label: 'Video 1', val: pVid1, setter: setPVid1, key: 'portafolio_video_1' },
-                { label: 'Video 2', val: pVid2, setter: setPVid2, key: 'portafolio_video_2' },
-                { label: 'Video 3', val: pVid3, setter: setPVid3, key: 'portafolio_video_3' },
-                { label: 'Video 4', val: pVid4, setter: setPVid4, key: 'portafolio_video_4' },
-              ].map((f, i) => (
-                <div key={i} style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>{f.label}</label>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <input type="text" className="admin-input" value={f.val} onChange={e => f.setter(e.target.value)} placeholder="https://youtube..." style={{ flex: 1 }} />
-                    <button className="btn-outline btn-sm" onClick={() => handleSaveConfig(f.key, f.val)} disabled={savingPortafolio}>Guardar</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* COMUNIDAD */}
-            <div className="dest-card" style={{ marginTop: '20px' }}>
-              <h3 className="dest-card-title">🤝 Banner 'Únete a la comunidad'</h3>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>Imagen para la comunidad</label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <input type="text" className="admin-input" value={pComunidad} onChange={e => setPComunidad(e.target.value)} placeholder="https://..." style={{ flex: 1 }} />
-                  <button className="btn-outline btn-sm" onClick={() => handleSaveConfig('portafolio_comunidad', pComunidad)} disabled={savingPortafolio}>Guardar</button>
+      {/* ── C: VIDEOS DE YOUTUBE ──────────────────── */}
+      <div style={{ borderTop:'2px solid rgba(200,169,110,0.35)', paddingTop:'32px', marginBottom:'40px' }}>
+        <h2 className="admin-sec-title" style={{ marginBottom:'8px' }}>▶ Videos del Portafolio</h2>
+        <p style={{ color:'#4a3520', fontSize:'0.85rem', marginBottom:'20px' }}>
+          Pega hasta 4 enlaces de YouTube. Se mostrarán con su miniatura en la página de Nosotros.
+        </p>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:'16px' }}>
+          {videos.map((url, idx) => {
+            const ytId = getYtId(url)
+            return (
+              <div key={idx} style={{ background:'rgba(255,255,255,0.55)', borderRadius:'10px', overflow:'hidden', border:'1px solid rgba(139,90,43,0.25)', boxShadow:'0 2px 8px rgba(0,0,0,0.1)' }}>
+                {ytId ? (
+                  <img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt={`Video ${idx+1}`}
+                    style={{ width:'100%', height:'140px', objectFit:'cover', display:'block' }} />
+                ) : (
+                  <div style={{ width:'100%', height:'140px', background:'rgba(0,0,0,0.12)', display:'flex', alignItems:'center', justifyContent:'center', color:'#4a3520', fontSize:'2rem' }}>▶</div>
+                )}
+                <div style={{ padding:'12px' }}>
+                  <label style={{ display:'block', fontSize:'0.78rem', color:'#4a3520', fontWeight:600, marginBottom:'6px' }}>Video Slot {idx + 1}</label>
+                  <input type="url" className="admin-input"
+                    value={url}
+                    onChange={e => {
+                      const upd = [...videos]; upd[idx] = e.target.value; setVideos(upd)
+                    }}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    style={{ marginBottom:'8px', fontSize:'0.82rem' }} />
+                  <button
+                    onClick={() => saveVideo(idx)}
+                    disabled={savingVid}
+                    style={{ width:'100%', background:'rgba(45,110,126,0.85)', border:'1px solid rgba(45,110,126,1)', color:'#ffffff', borderRadius:'6px', padding:'7px', cursor:'pointer', fontSize:'0.82rem', fontWeight:600 }}>
+                    {savingVid ? 'Guardando...' : '💾 Guardar'}
+                  </button>
                 </div>
               </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* ── D: IMAGEN COMUNIDAD ───────────────────── */}
+      <div style={{ borderTop:'2px solid rgba(200,169,110,0.35)', paddingTop:'32px' }}>
+        <h2 className="admin-sec-title" style={{ marginBottom:'8px' }}>🤝 Banner "Únete a la Comunidad"</h2>
+        <p style={{ color:'#4a3520', fontSize:'0.85rem', marginBottom:'20px' }}>
+          Imagen que aparece al lado del texto de la sección Comunidad al final del Portafolio.
+        </p>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'28px', alignItems:'start' }}>
+          <div>
+            <div className="admin-form-group" style={{ marginBottom:'16px' }}>
+              <label>Subir imagen (hasta 5MB)</label>
+              <input type="file" accept="image/*" onChange={handleComunidadFile}
+                style={{ display:'block', marginTop:'8px', color:'#1a3d4a' }} />
             </div>
+            <div className="admin-form-group" style={{ marginBottom:'16px' }}>
+              <label>O pegar URL directamente</label>
+              <input type="url" className="admin-input"
+                value={comunidadUrl}
+                onChange={e => { setComunidadUrl(e.target.value); if(!comunidadFile) setComunidadPreview(e.target.value) }}
+                placeholder="https://..." style={{ marginTop:'6px' }} />
+            </div>
+            <button className="btn-primary" onClick={saveComunidad} disabled={savingCom} style={{ width:'100%' }}>
+              {savingCom ? 'Guardando...' : '💾 Guardar Imagen de Comunidad'}
+            </button>
           </div>
-          
+          <div>
+            {comunidadPreview ? (
+              <img src={comunidadPreview.startsWith('uploads/') ? `http://localhost/Austral%20Collector/${comunidadPreview}` : comunidadPreview}
+                alt="Preview"
+                style={{ width:'100%', height:'200px', objectFit:'cover', borderRadius:'10px', border:'1px solid rgba(255,215,0,0.3)' }}
+                onError={e => e.target.style.display='none'} />
+            ) : (
+              <div style={{ width:'100%', height:'200px', background:'rgba(0,0,0,0.07)', borderRadius:'10px', border:'1px dashed rgba(139,90,43,0.35)', display:'flex', alignItems:'center', justifyContent:'center', color:'#3a2a0f', fontSize:'0.85rem', fontWeight:500 }}>
+                Vista previa aquí
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
   )
 }
+
 
 // ── SECCIÓN: Destacados ────────────────────────────────────
 function AdminDestacados({ adminId }) {
@@ -1275,7 +1440,7 @@ function AdminDestacados({ adminId }) {
   const [txtCumple, setTxtCumple] = useState('')
 
   useEffect(() => {
-    fetch(`${API_URL}/destacados.php`)
+    authFetch(`${API_URL}/destacados.php`)
       .then(r => r.json())
       .then(d => {
         if (d.error) { setError(d.error); return; }
@@ -1295,9 +1460,8 @@ function AdminDestacados({ adminId }) {
 
   const handleSave = (clave, valor) => {
     setSaving(true)
-    fetch(`${API_URL}/destacados.php`, {
+    authFetch(`${API_URL}/destacados.php`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ clave, valor, adminId })
     })
       .then(r => r.json())
@@ -1464,7 +1628,7 @@ function AdminActividad() {
     if (fFechaDesde) params.append('fecha_desde', fFechaDesde)
     if (fFechaHasta) params.append('fecha_hasta', fFechaHasta)
 
-    fetch(`${API_URL}/get_activity_log.php?${params.toString()}`)
+    authFetch(`${API_URL}/get_activity_log.php?${params.toString()}`)
       .then(r => r.json())
       .then(d => setLogs(d.logs || []))
       .finally(() => setLoading(false))
@@ -1605,7 +1769,7 @@ function AdminModeracion({ adminId }) {
 
   const loadData = () => {
     setLoading(true)
-    fetch(`${API_URL}/publicaciones.php`)
+    authFetch(`${API_URL}/publicaciones.php`)
       .then(r => r.json())
       .then(d => setPosts(d.data || []))
       .finally(() => setLoading(false))
@@ -1618,9 +1782,8 @@ function AdminModeracion({ adminId }) {
     if (!postToRemove || !deleteReason) return
     
     setIsDeleting(true)
-    fetch(`${API_URL}/publicaciones.php`, {
+    authFetch(`${API_URL}/publicaciones.php`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         id: postToRemove.id,
         tipo: postToRemove.tipo,

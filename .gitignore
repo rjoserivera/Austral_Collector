@@ -25,3 +25,9 @@ dist-ssr
 
 # Database Backups
 db_backup.sql
+
+# TestSprite
+testsprite_tests/
+.testsprite/
+PRD_TestSprite.md
+login_debug.log

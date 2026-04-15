@@ -189,7 +189,7 @@ export default function GaleriaPage() {
             </p>
           </div>
           <div className="galeria-mascot-wrap">
-            <img src="/robot_completo_sin_fondo.png" alt="Mascota" className="galeria-mascot"/>
+            <img src="/robot_sin_fondon.png" alt="Mascota" className="galeria-mascot"/>
           </div>
         </div>
       </section>

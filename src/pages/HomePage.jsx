@@ -275,7 +275,7 @@ export default function HomePage() {
         <div className="hp-hero-inner section-wrapper">
           <div className="hp-hero-mascot-wrap">
             <div className="hp-mascot-glow" aria-hidden="true"/>
-            <img src="/robot_completo_sin_fondo.png" alt="Mascota Robot Austral Collector" className="hp-mascot"/>
+            <img src="/robot_completo_sin_fondon.png" alt="Mascota Robot Austral Collector" className="hp-mascot"/>
           </div>
           <div className="hp-hero-content">
             <h1 className="hp-hero-title">

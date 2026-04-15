@@ -1,20 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import './PortafolioPage.css'
 import { API_URL, BASE_URL } from '../config.js'
-
-/* ─── Mock Data ─────────────────────────────────────────── */
-const GALERIA = [
-  { id: 1, img: '/mock_fig1.png', alt: 'Galería figura 1' },
-  { id: 2, img: '/mock_fig2.png', alt: 'Galería figura 2' },
-  { id: 3, img: '/mock_fig3.png', alt: 'Galería figura 3' },
-  { id: 4, img: '/mock_fig1.png', alt: 'Galería figura 4' },
-]
-
-const VIDEOS_PORTA = [
-  { id: 1, thumb: '/mock_community.png', title: 'Unboxing colección 2024' },
-  { id: 2, thumb: '/mock_community.png', title: 'Restauración de figuras vintage' },
-]
 
 function PlayIcon() {
   return (
@@ -25,57 +11,41 @@ function PlayIcon() {
   )
 }
 
+function getYtId(url) {
+  if (!url) return null
+  const m = url.match(/[?&]v=([^&]+)/)
+  if (m) return m[1]
+  const sl = url.split('/')
+  return sl[sl.length - 1] || null
+}
+
 export default function PortafolioPage() {
-  const [galeriaReal, setGaleriaReal] = useState(GALERIA);
-  const [videosReal, setVideosReal] = useState(VIDEOS_PORTA);
-  const [identidadReal, setIdentidadReal] = useState([]);
-  const [comunidadImg, setComunidadImg] = useState('/mock_community.png');
+  const [galeria, setGaleria]       = useState([])
+  const [videos, setVideos]         = useState([])
+  const [identidad, setIdentidad]   = useState([])
+  const [comunidadImg, setComunidad] = useState('')
+  const [loading, setLoading]        = useState(true)
 
   useEffect(() => {
-    fetch(`${API_URL}/public/home_data.php`)
+    // Galería, videos y comunidad desde el nuevo endpoint
+    fetch(`${API_URL}/public/portafolio_data.php`)
       .then(r => r.json())
       .then(d => {
-        if(d.success) {
-          // Cargar de Configuración Manual primero
-          if (d.data.portafolio) {
-            // Imágenes Galería
-            const gUrls = [];
-            for(let i=1; i<=4; i++) {
-              if (d.data.portafolio[`portafolio_galeria_${i}`]) {
-                 gUrls.push({ id: `pG${i}`, img: d.data.portafolio[`portafolio_galeria_${i}`], alt: `Galería ${i}` });
-              }
-            }
-            if (gUrls.length > 0) setGaleriaReal(gUrls);
-            else if (d.data.ultimas && d.data.ultimas.length > 0) setGaleriaReal(d.data.ultimas.slice(0, 4));
-
-            // Videos
-            const vUrls = [];
-            for(let i=1; i<=4; i++) {
-              if (d.data.portafolio[`portafolio_video_${i}`]) {
-                 vUrls.push({ id: `pV${i}`, link_yt: d.data.portafolio[`portafolio_video_${i}`], title: `Video ${i}` });
-              }
-            }
-            if (vUrls.length > 0) setVideosReal(vUrls);
-            else if (d.data.videos && d.data.videos.length > 0) setVideosReal(d.data.videos.slice(0, 4));
-
-            // Banner Comunidad
-            if (d.data.portafolio['portafolio_comunidad']) {
-               setComunidadImg(d.data.portafolio['portafolio_comunidad']);
-            }
-          }
+        if (d.success) {
+          setGaleria(d.galeria || [])
+          setVideos(d.videos || [])
+          setComunidad(d.comunidad_img || '')
         }
       })
-      .catch(e => console.error("Error loading portafolio data:", e))
+      .catch(e => console.error('Error portafolio_data:', e))
+      .finally(() => setLoading(false))
 
+    // Identidad (sin cambios)
     fetch(`${API_URL}/public/identidad.php`)
       .then(r => r.json())
-      .then(d => {
-        if(d.success) {
-          setIdentidadReal(d.data);
-        }
-      })
-      .catch(e => console.error("Error loading identidad data:", e))
-  }, []);
+      .then(d => { if(d.success) setIdentidad(d.data) })
+      .catch(e => console.error('Error identidad:', e))
+  }, [])
 
   return (
     <div className="portafolio-page">
@@ -89,7 +59,7 @@ export default function PortafolioPage() {
         <div className="pp-hero-inner section-wrapper">
           <div className="pp-hero-mascot-wrap">
             <div className="pp-mascot-glow" aria-hidden="true"/>
-            <img src="/robot_sin_fondo.png" alt="Mascota Robot Austral Collector" className="pp-mascot"/>
+            <img src="/austral_brazos_cruzados.png" alt="Mascota Robot Austral Collector" className="pp-mascot"/>
           </div>
           <div className="pp-hero-content">
             <h1 className="pp-hero-title">
@@ -107,7 +77,7 @@ export default function PortafolioPage() {
       <section className="pp-identidad section-wrapper" id="pp-identidad">
         <h2 className="pp-section-title">⭐ Nuestra Identidad</h2>
         <div className="pp-identidad-grid">
-          {identidadReal.map(item => (
+          {identidad.map(item => (
             <article key={item.id} className="pp-identidad-card card" id={`pp-${item.id}`}>
               <div className="pp-identidad-icon">{item.icon}</div>
               <h3 className="pp-identidad-name">{item.title}</h3>
@@ -123,38 +93,59 @@ export default function PortafolioPage() {
         {/* Galería */}
         <div className="pp-media-block">
           <h2 className="pp-section-title">⚜️ Galería</h2>
-          <div className="pp-galeria-grid">
-            {galeriaReal.map((g, idx) => (
-              <div key={g.id || idx} className="pp-galeria-item card" id={`pp-gal-${g.id || idx}`}>
-                <img src={g.imagen_url ? `${BASE_URL}/${g.imagen_url}` : g.img} alt={g.nombre || g.alt} className="pp-galeria-img" loading="lazy"/>
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="pp-empty-state">Cargando galería...</div>
+          ) : galeria.length === 0 ? (
+            <div className="pp-empty-state">
+              <span className="pp-empty-icon">📷</span>
+              <p>La galería estará disponible pronto.</p>
+            </div>
+          ) : (
+            <div className="pp-galeria-grid" style={{ gridTemplateColumns: galeria.length === 1 ? '1fr' : galeria.length <= 3 ? 'repeat(auto-fill, minmax(200px, 1fr))' : '1fr 1fr' }}>
+              {galeria.map((g, idx) => (
+                <div key={g.id || idx} className="pp-galeria-item card" id={`pp-gal-${g.id || idx}`}>
+                  <img
+                    src={`http://localhost/Austral%20Collector/${g.imagen_url}`}
+                    alt={g.descripcion || `Galería ${idx + 1}`}
+                    className="pp-galeria-img"
+                    loading="lazy"
+                    onError={e => { e.target.src = '/mock_fig1.png' }}
+                  />
+                  {g.descripcion && (
+                    <div className="pp-galeria-desc">{g.descripcion}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Videos */}
         <div className="pp-media-block" id="pp-videos">
           <h2 className="pp-section-title">▶ Videos</h2>
-          <div className="pp-videos-list">
-            {videosReal.map((v, idx) => {
-              let ytid = v.link_yt;
-              if (ytid) {
-                const match = ytid.match(/[?&]v=([^&]+)/);
-                if (match) ytid = match[1];
-                else { const sl = ytid.split('/'); ytid = sl[sl.length-1]; }
-              }
-              const thumbUrl = ytid ? `https://img.youtube.com/vi/${ytid}/0.jpg` : v.thumb;
-              
-              return (
-                <div key={v.id || idx} className="pp-video-thumb card" id={`pp-vid-${v.id || idx}`} onClick={() => v.link_yt ? window.open(v.link_yt, '_blank') : null}>
-                  <img src={thumbUrl} alt={v.titulo || v.title} className="pp-video-img" loading="lazy" onError={(e) => { e.target.src='/mock_community.png' }}/>
-                  <div className="pp-video-overlay">
-                    <PlayIcon/>
+          {loading ? (
+            <div className="pp-empty-state">Cargando videos...</div>
+          ) : videos.length === 0 ? (
+            <div className="pp-empty-state">
+              <span className="pp-empty-icon">🎬</span>
+              <p>Los videos estarán disponibles pronto.</p>
+            </div>
+          ) : (
+            <div className="pp-videos-list">
+              {videos.map((v, idx) => {
+                const ytId = getYtId(v.link_yt)
+                const thumbUrl = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : '/mock_community.png'
+                return (
+                  <div key={v.id || idx} className="pp-video-thumb card" id={`pp-vid-${v.id || idx}`}
+                    onClick={() => v.link_yt ? window.open(v.link_yt, '_blank') : null}>
+                    <img src={thumbUrl} alt={v.titulo || `Video ${idx + 1}`} className="pp-video-img" loading="lazy"
+                      onError={e => { e.target.src = '/mock_community.png' }}/>
+                    <div className="pp-video-overlay"><PlayIcon/></div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -167,11 +158,14 @@ export default function PortafolioPage() {
             <button onClick={() => alert("Función de registro aún no implementada.")} id="pp-btn-comunidad" className="btn-primary pp-comunidad-btn">Unirse</button>
           </div>
           <div className="pp-comunidad-image" aria-hidden="true">
-            <img
-              src={comunidadImg}
-              alt="Comunidad de coleccionistas"
-              className="pp-comunidad-img"
-            />
+            {comunidadImg ? (
+              <img
+                src={comunidadImg.startsWith('uploads/') ? `http://localhost/Austral%20Collector/${comunidadImg}` : comunidadImg}
+                alt="Comunidad de coleccionistas"
+                className="pp-comunidad-img"
+                onError={e => e.target.style.display='none'}
+              />
+            ) : null}
           </div>
         </div>
       </section>

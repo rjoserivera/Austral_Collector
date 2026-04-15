@@ -1,6 +1,7 @@
 <?php
 // db.php - Database Connection Setup
 // Created by Antigravity
+define('JWT_SECRET', 'AustralCollector_Secure_Key_2026_!!');
 
 $host = 'localhost';
 $db   = 'austral_collector_db';

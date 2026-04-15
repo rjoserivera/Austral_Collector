@@ -5,7 +5,7 @@
   background: rgba(30, 77, 90, 0.96);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(200, 169, 110, 0.35);
-  padding: 14px 0;
+  padding: 18px 0;
 }
 
 .navbar-inner {
@@ -22,16 +22,14 @@
 }
 
 .navbar-logo {
-  width: 40px;
-  height: 40px;
+  height: 60px;
+  width: auto;
   object-fit: contain;
-  border-radius: 50%;
-  border: 1.5px solid rgba(200, 169, 110, 0.6);
 }
 
 .navbar-title {
   font-family: var(--font-title);
-  font-size: 1rem;
+  font-size: 1.35rem;
   font-weight: 900;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -126,8 +124,8 @@
 
 @media (max-width: 1024px) {
   .navbar-inner { gap: 12px; }
-  .navbar-logo { width: 32px; height: 32px; }
-  .navbar-title { font-size: 0.8rem; }
+  .navbar-logo { height: 48px; width: auto; }
+  .navbar-title { font-size: 1rem; }
   .navbar-links { gap: 12px; }
   .navbar-links a { font-size: 0.65rem; letter-spacing: 0.05em; }
   #nav-login-btn { padding: 6px 12px; font-size: 0.75rem; }
@@ -148,11 +146,11 @@
     gap: 8px;
   }
   .navbar-logo {
-    width: 28px;
-    height: 28px;
+    height: 40px;
+    width: auto;
   }
   .navbar-title {
-    font-size: 0.75rem;
+    font-size: 0.95rem;
   }
   .navbar-actions { 
     grid-column: 2 / 3;
