@@ -1029,6 +1029,18 @@ function AdminIdentidad({ adminId }) {
   const [loading, setLoading] = useState(true)
   const [savingId, setSavingId] = useState(null)
   
+  // Portafolio States
+  const [pGal1, setPGal1] = useState('')
+  const [pGal2, setPGal2] = useState('')
+  const [pGal3, setPGal3] = useState('')
+  const [pGal4, setPGal4] = useState('')
+  const [pVid1, setPVid1] = useState('')
+  const [pVid2, setPVid2] = useState('')
+  const [pVid3, setPVid3] = useState('')
+  const [pVid4, setPVid4] = useState('')
+  const [pComunidad, setPComunidad] = useState('')
+  const [savingPortafolio, setSavingPortafolio] = useState(false)
+  
   let userId = null;
   try {
     const user = JSON.parse(localStorage.getItem('austral_auth_user') || '{}');
@@ -1037,16 +1049,51 @@ function AdminIdentidad({ adminId }) {
 
   const loadData = () => {
     setLoading(true)
+    // Cargar tarjetas de Identidad
     fetch(`${API_URL}/identidad_admin.php?user_id=${userId}`)
       .then(r => r.json())
       .then(d => {
         if(d.success) setIdentidades(d.data || [])
         else alert(d.error || 'Error al cargar identidad')
       })
+      .catch(e => console.error(e))
+    
+    // Cargar configuración de Portafolio
+    fetch(`${API_URL}/destacados.php`)
+      .then(r => r.json())
+      .then(d => {
+        if(d.config) {
+          setPGal1(d.config.portafolio_galeria_1 || '')
+          setPGal2(d.config.portafolio_galeria_2 || '')
+          setPGal3(d.config.portafolio_galeria_3 || '')
+          setPGal4(d.config.portafolio_galeria_4 || '')
+          setPVid1(d.config.portafolio_video_1 || '')
+          setPVid2(d.config.portafolio_video_2 || '')
+          setPVid3(d.config.portafolio_video_3 || '')
+          setPVid4(d.config.portafolio_video_4 || '')
+          setPComunidad(d.config.portafolio_comunidad || '')
+        }
+      })
+      .catch(e => console.error(e))
       .finally(() => setLoading(false))
   }
 
   useEffect(() => { loadData() }, [])
+
+  const handleSaveConfig = (clave, valor) => {
+    setSavingPortafolio(true)
+    fetch(`${API_URL}/destacados.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clave, valor, adminId })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if(!d.success) alert('❌ Error al guardar.')
+    })
+    .catch(e => alert('❌ Error: ' + e.message))
+    .finally(() => setSavingPortafolio(false))
+  }
 
   const handleChange = (index, field, value) => {
     const updated = [...identidades]
@@ -1142,6 +1189,70 @@ function AdminIdentidad({ adminId }) {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* --- CONFIGURACION PORTAFOLIO --- */}
+      <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '2px solid rgba(200, 169, 110, 0.4)' }}>
+        <h2 className="admin-sec-title">🖼️ Medios del Portafolio</h2>
+        <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '24px' }}>
+          Pega los enlaces (URLs) directamente para decidir qué imágenes y videos se mostrarán en la página principal del Portafolio.
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) minmax(300px, 1fr)', gap: '40px' }}>
+          
+          {/* GALERIA */}
+          <div className="dest-card">
+            <h3 className="dest-card-title">⚜️ Galería (4 Imágenes)</h3>
+            {[
+              { label: 'Imagen 1', val: pGal1, setter: setPGal1, key: 'portafolio_galeria_1' },
+              { label: 'Imagen 2', val: pGal2, setter: setPGal2, key: 'portafolio_galeria_2' },
+              { label: 'Imagen 3', val: pGal3, setter: setPGal3, key: 'portafolio_galeria_3' },
+              { label: 'Imagen 4', val: pGal4, setter: setPGal4, key: 'portafolio_galeria_4' },
+            ].map((f, i) => (
+              <div key={i} style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>{f.label}</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input type="text" className="admin-input" value={f.val} onChange={e => f.setter(e.target.value)} placeholder="https://..." style={{ flex: 1 }} />
+                  <button className="btn-outline btn-sm" onClick={() => handleSaveConfig(f.key, f.val)} disabled={savingPortafolio}>Guardar</button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div>
+            {/* VIDEOS */}
+            <div className="dest-card" style={{ marginBottom: '20px' }}>
+              <h3 className="dest-card-title">▶ Videos (4 Enlaces YT)</h3>
+              {[
+                { label: 'Video 1', val: pVid1, setter: setPVid1, key: 'portafolio_video_1' },
+                { label: 'Video 2', val: pVid2, setter: setPVid2, key: 'portafolio_video_2' },
+                { label: 'Video 3', val: pVid3, setter: setPVid3, key: 'portafolio_video_3' },
+                { label: 'Video 4', val: pVid4, setter: setPVid4, key: 'portafolio_video_4' },
+              ].map((f, i) => (
+                <div key={i} style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>{f.label}</label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input type="text" className="admin-input" value={f.val} onChange={e => f.setter(e.target.value)} placeholder="https://youtube..." style={{ flex: 1 }} />
+                    <button className="btn-outline btn-sm" onClick={() => handleSaveConfig(f.key, f.val)} disabled={savingPortafolio}>Guardar</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* COMUNIDAD */}
+            <div className="dest-card" style={{ marginTop: '20px' }}>
+              <h3 className="dest-card-title">🤝 Banner 'Únete a la comunidad'</h3>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>Imagen para la comunidad</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input type="text" className="admin-input" value={pComunidad} onChange={e => setPComunidad(e.target.value)} placeholder="https://..." style={{ flex: 1 }} />
+                  <button className="btn-outline btn-sm" onClick={() => handleSaveConfig('portafolio_comunidad', pComunidad)} disabled={savingPortafolio}>Guardar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </div>
       </div>
     </div>
   )

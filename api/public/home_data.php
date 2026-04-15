@@ -121,6 +121,10 @@ try {
     $stmtConfigGen = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave IN ('txt_destacado', 'txt_cumple')");
     $globalConfig = $stmtConfigGen->fetchAll(PDO::FETCH_KEY_PAIR);
 
+    // 8. Portafolio custom media
+    $stmtPortaConfig = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave LIKE 'portafolio_%'");
+    $portafolio_config = $stmtPortaConfig->fetchAll(PDO::FETCH_KEY_PAIR);
+
     echo json_encode([
         'success' => true,
         'data' => [
@@ -131,7 +135,8 @@ try {
             'destacado' => $destacado,
             'ultimos_cosplays' => $ultimos_cosplays,
             'cumpleaneros' => $cumpleaneros,
-            'config' => $globalConfig
+            'config' => $globalConfig,
+            'portafolio' => $portafolio_config
         ]
     ]);
 

@@ -29,17 +29,39 @@ export default function PortafolioPage() {
   const [galeriaReal, setGaleriaReal] = useState(GALERIA);
   const [videosReal, setVideosReal] = useState(VIDEOS_PORTA);
   const [identidadReal, setIdentidadReal] = useState([]);
+  const [comunidadImg, setComunidadImg] = useState('/mock_community.png');
 
   useEffect(() => {
     fetch(`${API_URL}/public/home_data.php`)
       .then(r => r.json())
       .then(d => {
         if(d.success) {
-          if (d.data.ultimas && d.data.ultimas.length > 0) {
-            setGaleriaReal(d.data.ultimas.slice(0, 4));
-          }
-          if (d.data.videos && d.data.videos.length > 0) {
-            setVideosReal(d.data.videos.slice(0, 2));
+          // Cargar de Configuración Manual primero
+          if (d.data.portafolio) {
+            // Imágenes Galería
+            const gUrls = [];
+            for(let i=1; i<=4; i++) {
+              if (d.data.portafolio[`portafolio_galeria_${i}`]) {
+                 gUrls.push({ id: `pG${i}`, img: d.data.portafolio[`portafolio_galeria_${i}`], alt: `Galería ${i}` });
+              }
+            }
+            if (gUrls.length > 0) setGaleriaReal(gUrls);
+            else if (d.data.ultimas && d.data.ultimas.length > 0) setGaleriaReal(d.data.ultimas.slice(0, 4));
+
+            // Videos
+            const vUrls = [];
+            for(let i=1; i<=4; i++) {
+              if (d.data.portafolio[`portafolio_video_${i}`]) {
+                 vUrls.push({ id: `pV${i}`, link_yt: d.data.portafolio[`portafolio_video_${i}`], title: `Video ${i}` });
+              }
+            }
+            if (vUrls.length > 0) setVideosReal(vUrls);
+            else if (d.data.videos && d.data.videos.length > 0) setVideosReal(d.data.videos.slice(0, 4));
+
+            // Banner Comunidad
+            if (d.data.portafolio['portafolio_comunidad']) {
+               setComunidadImg(d.data.portafolio['portafolio_comunidad']);
+            }
           }
         }
       })
@@ -108,9 +130,6 @@ export default function PortafolioPage() {
               </div>
             ))}
           </div>
-          <div className="pp-media-footer">
-            <Link to="/galeria" id="pp-btn-galeria" className="btn-primary">Ver Galería Completa</Link>
-          </div>
         </div>
 
         {/* Videos */}
@@ -136,9 +155,6 @@ export default function PortafolioPage() {
               );
             })}
           </div>
-          <div className="pp-media-footer">
-            <Link to="/" id="pp-btn-videos" className="btn-outline">Ver Más Videos</Link>
-          </div>
         </div>
       </section>
 
@@ -152,7 +168,7 @@ export default function PortafolioPage() {
           </div>
           <div className="pp-comunidad-image" aria-hidden="true">
             <img
-              src="/mock_community.png"
+              src={comunidadImg}
               alt="Comunidad de coleccionistas"
               className="pp-comunidad-img"
             />

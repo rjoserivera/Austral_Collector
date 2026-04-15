@@ -57,13 +57,31 @@ foreach ($posts as &$post) {
 }
 unset($post);
 
-$stmtStats = $pdo->prepare(
-    "SELECT COUNT(*) as total_posts,
-     (SELECT COUNT(*) FROM likes WHERE post_id IN (SELECT id FROM posts WHERE user_id = ?)) as total_likes
-     FROM posts WHERE user_id = ?"
-);
-$stmtStats->execute([$user['id'], $user['id']]);
-$stats = $stmtStats->fetch();
+$stats = [
+    'total_posts' => 0,
+    'total_likes' => 0,
+    'average_rating' => 0.0,
+    'total_ratings' => 0,
+    'viewer_rating' => null
+];
+
+// Stats from User ID
+$stats['total_posts'] = $pdo->query("SELECT COUNT(*) FROM posts WHERE user_id = {$user['id']}")->fetchColumn();
+$stats['total_likes'] = $pdo->query("SELECT COUNT(*) FROM likes WHERE post_id IN (SELECT id FROM posts WHERE user_id = {$user['id']})")->fetchColumn();
+
+// Ratings Stats
+$ratingData = $pdo->query("SELECT ROUND(AVG(score), 1) as avg_score, COUNT(*) as count FROM perfil_ratings WHERE rated_user_id = {$user['id']}")->fetch();
+if ($ratingData) {
+    $stats['average_rating'] = $ratingData['avg_score'] ?: 0.0;
+    $stats['total_ratings'] = $ratingData['count'];
+}
+
+// Check viewer rating if viewer is logged in
+if ($viewerId > 0) {
+    $vRating = $pdo->prepare("SELECT score FROM perfil_ratings WHERE rater_id = ? AND rated_user_id = ?");
+    $vRating->execute([$viewerId, $user['id']]);
+    $stats['viewer_rating'] = $vRating->fetchColumn() ?: null;
+}
 
 echo json_encode([
     'success' => true,

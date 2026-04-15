@@ -11,6 +11,7 @@ export default function PerfilPublicoPage() {
   const [offlineError, setOfflineError] = useState(false)
   const [showUpload, setShowUpload] = useState(false)
   const [activeTab, setActiveTab] = useState('figura')
+  const [showRatingModal, setShowRatingModal] = useState(false)
   
   const authUserStr = localStorage.getItem('austral_auth_user')
   let loggedUserName = null;
@@ -111,6 +112,42 @@ export default function PerfilPublicoPage() {
     .catch(e => console.error("Error toggling like:", e))
   }
 
+  const handleRateProfile = (score) => {
+    if (!loggedUserName) return;
+    fetch(`${API_URL}/auth/rate_profile.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ viewer_username: loggedUserName, rated_user_id: user.id, score })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        loadData(); // reload stats and user info dynamically
+      } else {
+        alert(d.error || 'Error al calificar perfil.');
+      }
+    })
+    .catch(e => console.error("Error rating profile:", e))
+  }
+
+  const handleDeleteRating = () => {
+    if (!loggedUserName) return;
+    fetch(`${API_URL}/auth/delete_rating.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ viewer_username: loggedUserName, rated_user_id: user.id })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        loadData(); // reload stats
+      } else {
+        alert(d.error || 'Error al remover calificación.');
+      }
+    })
+    .catch(e => console.error("Error deleting rating:", e))
+  }
+
   if (!user) {
     return <div className="perfil-page" style={{padding: '100px', textAlign: 'center', color: '#aaa'}}>
       Cargando perfil o el usuario no existe...
@@ -140,7 +177,25 @@ export default function PerfilPublicoPage() {
             <img src={user.avatar_url ? `${BASE_URL}/${user.avatar_url}` : '/mock_avatar.png'} alt={user.username} className="perfil-avatar"/>
           </div>
           <div className="perfil-user-details">
-            <h1 className="perfil-name">{user.username}</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <h1 className="perfil-name" style={{ margin: 0 }}>{user.username}</h1>
+              
+              <div 
+                className="perfil-global-rating" 
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: (!isOwner && loggedUserName) ? 'pointer' : 'default' }}
+                onClick={() => { if (!isOwner && loggedUserName) setShowRatingModal(true); }}
+                title={(!isOwner && loggedUserName) ? 'Pulsa para calificar' : ''}
+              >
+                <span style={{ color: '#f1c40f', fontSize: '1.2rem', lineHeight: 1 }}>⭐</span>
+                <strong style={{ fontSize: '1.1rem', color: '#f0e4cc', lineHeight: 1 }}>{user.stats?.average_rating > 0 ? user.stats.average_rating : 'Nuevo'}</strong>
+                <span style={{ fontSize: '0.85rem', color: 'rgba(240, 228, 204, 0.6)'}}>({user.stats?.total_ratings || 0})</span>
+                {!isOwner && loggedUserName && (
+                   <span style={{ fontSize: '0.85rem', marginLeft: '4px', filter: 'grayscale(0.2)' }}>
+                     {user.stats?.viewer_rating ? '✏️' : '📝'}
+                   </span>
+                )}
+              </div>
+            </div>
             <p className="perfil-headline">{user.headline || 'Coleccionista'}</p>
             <div className="perfil-meta">
               <span>🗓️ Se unió en {user.joined}</span>
@@ -153,13 +208,19 @@ export default function PerfilPublicoPage() {
                 </>
               )}
             </div>
+            
+            {/* Rating widget moved next to username header */}
+
             <p className="perfil-bio">{user.biografia || 'Sin biografía disponible.'}</p>
+            
             {isOwner && (
               <div className="perfil-owner-actions">
                 <Link to="/dashboard" className="perfil-btn-outline">✏️ Editar Perfil</Link>
                 <button className="perfil-btn-primary" onClick={() => setShowUpload(true)}>➕ Subir Publicación</button>
               </div>
             )}
+
+            {/* Old inline rating widget removed */}
           </div>
         </section>
 
@@ -211,6 +272,45 @@ export default function PerfilPublicoPage() {
       </div>
 
       {showUpload && <CreatePostModal isOpen={showUpload} onClose={() => setShowUpload(false)} onSuccess={loadData} currentUserId={user.id} />}
+
+      {/* RATING MODAL POPUP */}
+      {showRatingModal && (
+        <div className="prw-modal-overlay" onClick={() => setShowRatingModal(false)} style={{ zIndex: 9999 }}>
+          <div className="prw-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '350px', textAlign: 'center', background: 'radial-gradient(ellipse at center, #2e1a1a 0%, #170d0d 100%)', border: '1px solid var(--color-gold-light)' }}>
+            <button className="prw-modal-close" onClick={() => setShowRatingModal(false)}>✕</button>
+            <h2 style={{ fontFamily: 'var(--font-title)', color: 'var(--color-gold)', marginBottom: '16px', fontSize: '1.8rem' }}>
+               Calificar Perfil
+            </h2>
+            <p style={{ color: 'rgba(240, 228, 204, 0.8)', fontSize: '0.9rem', marginBottom: '24px' }}>
+               {user.stats?.viewer_rating ? `Actualmente calificaste a ${user.username} con ${user.stats.viewer_rating} estrellas. ¿Deseas modificarlo?` : `¿Cuántas estrellas de reputación le darías a la colección de ${user.username}?`}
+            </p>
+
+            <div className="prw-stars" style={{ justifyContent: 'center', marginBottom: '32px' }}>
+              {[1, 2, 3, 4, 5].map(star => (
+                <button
+                  key={star}
+                  className={`rating-star ${user.stats?.viewer_rating >= star ? 'filled' : ''}`}
+                  onClick={() => { handleRateProfile(star); setShowRatingModal(false); }}
+                  title={`Dar ${star} estrellas`}
+                  style={{ fontSize: '2.5rem' }}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+
+            {user.stats?.viewer_rating && (
+              <button 
+                 className="prw-remove-btn" 
+                 style={{ display: 'block', margin: '0 auto', fontSize: '0.85rem' }}
+                 onClick={() => { handleDeleteRating(); setShowRatingModal(false); }}
+              >
+                 Remover mi calificación
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
