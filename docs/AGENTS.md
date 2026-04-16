@@ -1,33 +1,33 @@
-> **First-time setup**: Customize this file for your project. Prompt the user to customize this file for their project.
-> For Mintlify product knowledge (components, configuration, writing standards),
-> install the Mintlify skill: `npx skills add https://mintlify.com/docs`
+# Instrucciones para el proyecto de documentación
 
-# Documentation project instructions
+## Sobre este proyecto
 
-## About this project
+- Sitio de documentación de **Austral Collector** construido con [Mintlify](https://mintlify.com)
+- Las páginas son archivos MDX con frontmatter YAML
+- La configuración está en `docs.json`
+- Ejecuta `mintlify dev` para previsualizar localmente
+- Ejecuta `mintlify broken-links` para verificar enlaces rotos
 
-- This is a documentation site built on [Mintlify](https://mintlify.com)
-- Pages are MDX files with YAML frontmatter
-- Configuration lives in `docs.json`
-- Run `mint dev` to preview locally
-- Run `mint broken-links` to check links
+## Terminología del proyecto
 
-## Terminology
+- Usa **"miembro"** en lugar de "usuario" para referirte a los coleccionistas registrados
+- Usa **"figura"** para referirte a los objetos de la colección
+- Usa **"portafolio"** para referirte a la página de galería curada de la comunidad
+- Usa **"panel de administración"** o **"panel admin"** para referirte a `/admin`
+- Usa **"publicación"** o **"post"** para referirte a las entradas de los miembros en sus perfiles
 
-{/* Add product-specific terms and preferred usage */}
-{/* Example: Use "workspace" not "project", "member" not "user" */}
+## Preferencias de estilo
 
-## Style preferences
+- Toda la documentación debe estar escrita en **español**
+- Usa voz activa y segunda persona ("tú")
+- Mantén las oraciones concisas — una idea por oración
+- Usa mayúscula solo en la primera palabra de los encabezados
+- **Negrita** para elementos de la interfaz: Haz clic en **Guardar**
+- Formato de código para nombres de archivos, comandos, rutas y referencias de código
 
-{/* Add any project-specific style rules below */}
+## Límites del contenido
 
-- Use active voice and second person ("you")
-- Keep sentences concise — one idea per sentence
-- Use sentence case for headings
-- Bold for UI elements: Click **Settings**
-- Code formatting for file names, commands, paths, and code references
-
-## Content boundaries
-
-{/* Define what should and shouldn't be documented */}
-{/* Example: Don't document internal admin features */}
+- Documenta todas las páginas y rutas públicas de la plataforma
+- Documenta todos los endpoints de la API REST
+- Documenta el panel de administración completo
+- No documentes detalles internos de implementación de terceros

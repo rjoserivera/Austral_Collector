@@ -15,7 +15,7 @@
         "tab": "Documentación",
         "groups": [
           {
-            "group": "Introducción",
+            "group": "Primeros pasos",
             "pages": [
               "index",
               "instalacion",
@@ -34,7 +34,7 @@
         "tab": "Referencia de API",
         "groups": [
           {
-            "group": "API",
+            "group": "API REST",
             "pages": [
               "api/introduccion",
               "api/autenticacion",
@@ -50,6 +50,11 @@
           "anchor": "Comunidad",
           "href": "https://www.australcollector.com",
           "icon": "users"
+        },
+        {
+          "anchor": "GitHub",
+          "href": "https://github.com/tu-usuario/austral-collector",
+          "icon": "github"
         }
       ]
     }
