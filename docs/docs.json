@@ -1,0 +1,76 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Austral Collector",
+  "locale": "es",
+  "colors": {
+    "primary": "#C9A84C",
+    "light": "#E8CD82",
+    "dark": "#A07830"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentación",
+        "groups": [
+          {
+            "group": "Introducción",
+            "pages": [
+              "index",
+              "instalacion",
+              "arquitectura"
+            ]
+          },
+          {
+            "group": "Panel de Administración",
+            "pages": [
+              "admin/panel"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Referencia de API",
+        "groups": [
+          {
+            "group": "API",
+            "pages": [
+              "api/introduccion",
+              "api/autenticacion",
+              "api/figuras"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Comunidad",
+          "href": "https://www.australcollector.com",
+          "icon": "users"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Soporte",
+        "href": "mailto:contacto@australcollector.com"
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "facebook": "https://www.facebook.com/AustralCollector",
+      "instagram": "https://www.instagram.com/austral.collector",
+      "youtube": "https://www.youtube.com/@AustralCollector"
+    }
+  }
+}

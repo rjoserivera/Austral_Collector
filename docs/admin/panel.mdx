@@ -1,0 +1,134 @@
+---
+title: Panel de Administración
+description: Guía de uso del panel de control exclusivo para administradores de Austral Collector.
+---
+
+## Acceso
+
+El panel de administración está disponible en la ruta `/admin`. Solo los usuarios con rol `admin` pueden acceder.
+
+Al intentar acceder sin ser administrador, el sistema redirige automáticamente a `/login`.
+
+<Warning>Nunca compartas las credenciales de administrador. El panel tiene acceso completo a todos los datos de la plataforma.</Warning>
+
+---
+
+## Secciones del Panel
+
+### 📊 Dashboard General
+
+Vista inicial con métricas en tiempo real:
+
+| Métrica | Descripción |
+|---|---|
+| Total de usuarios | Número de miembros registrados |
+| Usuarios activos | Miembros con sesión reciente |
+| Total de figuras | Colecciones registradas |
+| Total de posts | Publicaciones de la comunidad |
+| Mensajes de contacto | Formularios recibidos sin leer |
+
+También incluye un **registro de actividad** con las últimas acciones realizadas en el sistema.
+
+---
+
+### 👥 Gestión de Usuarios
+
+Accede a la lista completa de usuarios con opciones de:
+
+- **Crear usuario** — Alta de nuevo miembro con todos sus datos
+- **Editar usuario** — Modificar nombre, email, rol y estado
+- **Activar / Desactivar** — Bloquear acceso sin eliminar la cuenta
+- **Enviar clave temporal** — Genera y envía una contraseña temporal por email
+
+**Campos del usuario:**
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `username` | string | Nombre de usuario único |
+| `email` | string | Correo electrónico |
+| `nombre` | string | Nombre real |
+| `apellido` | string | Apellido |
+| `fecha_nacimiento` | date | Fecha de nacimiento |
+| `role` | enum | `admin` o `member` |
+| `is_active` | boolean | Estado de la cuenta |
+
+---
+
+### 📰 Gestión de Publicaciones
+
+Visualiza y modera todas las publicaciones de los miembros:
+
+- Ver publicaciones de cualquier usuario
+- Eliminar publicaciones inapropiadas
+- Buscar por usuario o contenido
+
+---
+
+### 📅 Eventos
+
+Crea y gestiona los eventos de la comunidad que aparecen en la página principal.
+
+**Campos de un evento:**
+
+| Campo | Descripción |
+|---|---|
+| `titulo` | Nombre del evento |
+| `descripcion` | Descripción detallada |
+| `fecha` | Fecha del evento |
+| `imagen_url` | URL de imagen del evento |
+| `link` | Enlace externo (opcional) |
+
+Los eventos aparecen en el componente `NoticiasEventos` de la HomePage.
+
+---
+
+### 🖼️ Galería del Portafolio
+
+Configura las imágenes que se muestran en la página **Portafolio** (`/portafolio`).
+
+- Subir imágenes a la galería curada
+- Agregar descripción a cada imagen
+- Reordenar o eliminar imágenes existentes
+- Cambiar la imagen del **banner de comunidad**
+
+---
+
+### 🎬 Videos de la Comunidad
+
+Configura los videos de YouTube que se muestran en la HomePage y en el Portafolio.
+
+- Ingresar URLs de YouTube para cada slot
+- Hasta **4 videos** configurables
+- Los videos se muestran como embeds en la plataforma
+
+---
+
+### 🎨 Identidad Visual (Admin)
+
+Actualiza los elementos de identidad visual del sitio:
+
+| Elemento | Descripción |
+|---|---|
+| Logo principal | Imagen del logo de la plataforma |
+| Mascota | Imagen de la mascota de Austral Collector |
+| Banner hero | Imagen principal del HeroBanner |
+
+---
+
+### 👑 Miembro Destacado
+
+Selecciona manualmente el coleccionista que aparece como **"Miembro Destacado del Mes"** en la página principal.
+
+- Busca por nombre de usuario
+- Al seleccionarlo, se muestra su avatar, nombre y estadísticas en el HomePage
+
+---
+
+### 📧 Sistema de Correos
+
+El panel utiliza un sistema de correos configurado en `api/admin/mailer.php` para:
+
+- Enviar claves temporales a usuarios
+- Recibir mensajes del formulario de contacto
+
+<Note>Revisa la configuración SMTP en `mailer.php` antes de usar el sistema de correos en producción.</Note>

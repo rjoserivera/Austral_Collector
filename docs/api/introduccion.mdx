@@ -1,0 +1,94 @@
+---
+title: Introducción a la API
+description: La API REST de Austral Collector está construida en PHP y sirve como backend para el frontend React.
+---
+
+## Base URL
+
+| Entorno | URL |
+|---|---|
+| Desarrollo local | `http://localhost/Austral%20Collector/api` |
+| Red local | `http://192.168.X.X/Austral%20Collector/api` |
+| Producción | `https://www.australcollector.com/api` |
+
+---
+
+## Autenticación
+
+La API usa **JWT (JSON Web Tokens)**. Para los endpoints protegidos, debes incluir el token en el header `Authorization`:
+
+```
+Authorization: Bearer <tu-token-jwt>
+```
+
+El token se obtiene al hacer login en `/api/auth/login.php`.
+
+---
+
+## Estructura de Endpoints
+
+```
+api/
+├── auth/
+│   ├── login.php              # POST - Iniciar sesión
+│   ├── publicar_post.php      # POST - Crear publicación
+│   ├── editar_post.php        # PUT  - Editar publicación
+│   ├── toggle_like.php        # POST - Dar/quitar like a figura
+│   ├── rate_profile.php       # POST - Valorar perfil de otro miembro
+│   ├── delete_rating.php      # DELETE - Eliminar valoración
+│   ├── update_profile.php     # PUT  - Actualizar perfil propio
+│   ├── reordenar_posts.php    # POST - Reordenar publicaciones
+│   ├── enviar_clave_temporal.php # POST - Enviar clave temporal por email
+│   └── jwt_helper.php         # (Librería interna JWT)
+├── admin/
+│   ├── usuarios.php           # CRUD de usuarios (solo admin)
+│   ├── publicaciones.php      # Gestión de publicaciones (solo admin)
+│   ├── eventos.php            # CRUD de eventos
+│   ├── galeria_portafolio.php # Configuración galería del portafolio
+│   ├── videos.php             # Configuración de videos
+│   ├── destacados.php         # Miembro destacado
+│   ├── identidad_admin.php    # Logo, mascota e identidad visual
+│   ├── get_stats.php          # Estadísticas del dashboard admin
+│   ├── get_activity_log.php   # Registro de actividad
+│   ├── mailer.php             # Sistema de envío de correos
+│   └── enviar_mensaje.php     # Endpoint de formulario de contacto
+├── figures.php                # GET - Figuras de la colección
+├── events.php                 # GET - Eventos públicos
+├── index.php                  # Punto de entrada general
+└── db.php                     # Conexión a la base de datos
+```
+
+---
+
+## Formato de Respuesta
+
+Todos los endpoints devuelven JSON con `Content-Type: application/json`.
+
+**Respuesta exitosa:**
+```json
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+**Respuesta de error:**
+```json
+{
+  "error": "Descripción del error"
+}
+```
+
+---
+
+## CORS
+
+Todos los endpoints están configurados para aceptar peticiones desde cualquier origen (útil en desarrollo local):
+
+```php
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: *');
+```
+
+<Warning>En producción, reemplaza `*` por tu dominio real para mejorar la seguridad.</Warning>

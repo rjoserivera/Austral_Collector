@@ -1,0 +1,166 @@
+---
+title: Figuras y Publicaciones
+description: Endpoints para gestionar figuras de la colección y publicaciones de los miembros.
+---
+
+## Figuras
+
+### GET /figures.php
+
+Devuelve la lista de figuras de la colección.
+
+**Sin parámetros — lista completa:**
+```
+GET /api/figures.php
+```
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Mazinger Z — Shogun Warriors",
+      "year": 1978,
+      "description": "Rara figura de plástico duro de la línea Shogun Warriors de Mattel.",
+      "image_url": null,
+      "images": [],
+      "global_likes": 342,
+      "contributor": "RetroTech_AR"
+    }
+  ],
+  "source": "mock"
+}
+```
+
+**Con parámetro `id` — figura específica:**
+```
+GET /api/figures.php?id=1
+```
+
+```json
+{
+  "id": 1,
+  "name": "Mazinger Z — Shogun Warriors",
+  "year": 1978,
+  "description": "Rara figura de plástico duro de la línea Shogun Warriors de Mattel.",
+  "image_url": null,
+  "images": [],
+  "global_likes": 342,
+  "contributor": "RetroTech_AR"
+}
+```
+
+**Error (figura no encontrada — 404):**
+```json
+{
+  "error": "Figura no encontrada"
+}
+```
+
+### POST /auth/toggle_like.php
+
+Da o quita un like a una figura. Requiere autenticación.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Body:**
+```json
+{
+  "figure_id": 1
+}
+```
+
+**Respuesta:**
+```json
+{
+  "liked": true,
+  "total_likes": 343
+}
+```
+
+---
+
+## Publicaciones (Posts)
+
+### POST /auth/publicar_post.php
+
+Crea una nueva publicación en el perfil del usuario.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Body (multipart/form-data para subir imágenes):**
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `titulo` | string | Título de la publicación |
+| `descripcion` | string | Texto descriptivo |
+| `imagenes[]` | file[] | Hasta 5 imágenes (opcional) |
+
+**Respuesta:**
+```json
+{
+  "success": true,
+  "post_id": 42
+}
+```
+
+### PUT /auth/editar_post.php
+
+Edita una publicación existente del usuario autenticado.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Body:**
+```json
+{
+  "post_id": 42,
+  "titulo": "Nuevo título",
+  "descripcion": "Descripción actualizada"
+}
+```
+
+### POST /auth/reordenar_posts.php
+
+Cambia el orden de las publicaciones en el perfil del usuario.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Body:**
+```json
+{
+  "orden": [3, 1, 2, 5, 4]
+}
+```
+
+El array contiene los IDs de publicaciones en el nuevo orden deseado.
+
+---
+
+## Valoraciones de Perfil
+
+### POST /auth/rate_profile.php
+
+Valora el perfil público de otro miembro (de 1 a 5 estrellas).
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Body:**
+```json
+{
+  "target_user_id": 7,
+  "rating": 5
+}
+```
+
+### DELETE /auth/delete_rating.php
+
+Elimina una valoración previa dada a otro miembro.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Body:**
+```json
+{
+  "target_user_id": 7
+}
+```

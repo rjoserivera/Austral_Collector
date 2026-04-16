@@ -1,0 +1,97 @@
+---
+title: Autenticación
+description: Endpoints de inicio de sesión, gestión de sesión y seguridad con JWT.
+---
+
+## POST /auth/login.php
+
+Autentica a un usuario y devuelve un token JWT.
+
+**Body (JSON):**
+```json
+{
+  "username": "mi_usuario",
+  "password": "mi_contraseña"
+}
+```
+
+**Respuesta exitosa (200):**
+```json
+{
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+  "user": {
+    "id": 1,
+    "username": "mi_usuario",
+    "role": "admin",
+    "nombre": "José",
+    "apellido": "Rivera",
+    "email": "jose@ejemplo.com",
+    "avatar_url": null
+  },
+  "require_pass_change": false
+}
+```
+
+**Respuestas de error:**
+
+| Código | Descripción |
+|---|---|
+| 401 | Credenciales incorrectas |
+| 400 | Faltan campos requeridos |
+| 403 | Usuario desactivado |
+
+<Note>Si `require_pass_change` es `true`, el frontend mostrará el modal de cambio de contraseña obligatorio antes de permitir el acceso.</Note>
+
+---
+
+## POST /auth/enviar_clave_temporal.php
+
+Envía una contraseña temporal al correo del usuario. Solo disponible para administradores.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Body (JSON):**
+```json
+{
+  "userId": 5
+}
+```
+
+**Respuesta exitosa:**
+```json
+{
+  "success": true,
+  "message": "Clave temporal enviada al correo del usuario."
+}
+```
+
+---
+
+## PUT /auth/update_profile.php
+
+Actualiza el perfil del usuario autenticado.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Body (JSON) — campos opcionales:**
+```json
+{
+  "nombre": "José",
+  "apellido": "Rivera",
+  "email": "nuevo@correo.com",
+  "avatar_url": "https://url-del-avatar.com/imagen.jpg",
+  "password_actual": "contraseña_actual",
+  "password_nueva": "nueva_contraseña"
+}
+```
+
+<Note>Para cambiar la contraseña, debes incluir `password_actual` y `password_nueva`. Si solo actualizas datos de perfil, puedes omitirlos.</Note>
+
+---
+
+## Roles de Usuario
+
+| Rol | Nivel de Acceso |
+|---|---|
+| `admin` | Acceso completo al panel de administración |
+| `member` | Dashboard personal, publicaciones, votos |

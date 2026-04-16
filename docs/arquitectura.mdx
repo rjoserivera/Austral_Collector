@@ -1,0 +1,152 @@
+---
+title: Arquitectura del Proyecto
+description: Estructura de carpetas, páginas, componentes y flujo de datos de Austral Collector.
+---
+
+## Visión General
+
+Austral Collector es una aplicación **SPA (Single Page Application)** construida con React y Vite. El frontend se comunica con un backend PHP a través de una API REST. La autenticación se maneja mediante JWT almacenado en `localStorage`.
+
+```
+Austral Collector/
+├── api/                    # Backend PHP (API REST)
+│   ├── auth/               # Endpoints autenticados (login, posts, perfiles)
+│   ├── admin/              # Endpoints exclusivos del administrador
+│   ├── db.php              # Conexión PDO a MySQL
+│   ├── figures.php         # CRUD de figuras
+│   ├── events.php          # Eventos públicos
+│   └── index.php           # Punto de entrada de la API
+├── src/                    # Frontend React
+│   ├── components/         # Componentes reutilizables
+│   ├── pages/              # Páginas completas de la aplicación
+│   ├── hooks/              # Custom hooks de React
+│   ├── utils/              # Utilidades (sync offline, etc.)
+│   ├── assets/             # Imágenes y recursos estáticos internos
+│   ├── config.js           # URLs de API y helper authFetch
+│   ├── App.jsx             # Rutas principales
+│   └── main.jsx            # Punto de entrada React
+├── public/                 # Archivos públicos (logos, imágenes, íconos)
+├── docs/                   # Esta documentación (Mintlify)
+├── db_backup.sql           # Esquema y datos iniciales de la BD
+└── vite.config.js          # Configuración de Vite + PWA
+```
+
+---
+
+## Rutas de la Aplicación
+
+| Ruta | Página | Acceso |
+|---|---|---|
+| `/` | `HomePage` | Público |
+| `/portafolio` | `PortafolioPage` | Público |
+| `/galeria` | `GaleriaPage` | Público |
+| `/miembros` | `MiembrosPage` | Público |
+| `/perfil/:id` | `PerfilPublicoPage` | Público |
+| `/contacto` | `ContactoPage` | Público |
+| `/login` | `LoginPage` | Público |
+| `/dashboard` | `DashboardPage` | Requiere login |
+| `/admin` | `AdminPage` | Solo administradores |
+
+---
+
+## Páginas
+
+### 🏠 HomePage
+Página principal de la plataforma. Contiene:
+- **HeroBanner** — Banner animado con llamada a la acción
+- **UltimasFiguras** — Carrusel de las figuras más recientes
+- **FigurasMasVotadas** — Top colecciones por votos
+- **MiembroDestacado** — Miembro más activo del mes
+- **NoticiasEventos** — Últimas noticias y eventos de la comunidad
+- **VideosComunidad** — Videos curados del canal de YouTube
+- **CTAFinal** — Llamada de acción para registrarse
+
+### 🖼️ GaleriaPage
+Galería completa de figuras con:
+- Búsqueda y filtros por categoría y año
+- Tarjetas de figura con imagen, nombre, año y likes
+- Modal de detalle con galería de fotos, descripción y botón de like
+
+### 👥 MiembrosPage
+Lista de todos los coleccionistas registrados con:
+- Avatar, nombre de usuario y rol
+- Enlace al perfil público de cada miembro
+
+### 👤 PerfilPublicoPage
+Perfil público de un coleccionista:
+- Información personal, avatar y estadísticas
+- Publicaciones del usuario (posts con imágenes)
+- Sistema de valoración (estrellas) por otros miembros
+
+### 📁 PortafolioPage
+Página "Nosotros" / Portafolio de la comunidad:
+- Galería curada de imágenes configurada por el administrador
+- Videos destacados de la comunidad
+- Banner de comunidad
+
+### 📊 DashboardPage
+Panel personal del usuario autenticado:
+- Feed de publicaciones propias y de la comunidad
+- Crear nuevas publicaciones con imágenes
+- Ver y gestionar likes y comentarios
+
+### 📞 ContactoPage
+Formulario de contacto que envía correos electrónicos vía el sistema de mailer del backend.
+
+### 🔑 LoginPage
+Formulario de inicio de sesión con validación JWT. Incluye manejo de clave temporal con modal de cambio forzado.
+
+---
+
+## Componentes Principales
+
+| Componente | Descripción |
+|---|---|
+| `NavBar` | Barra de navegación con menú responsive y estado de sesión |
+| `Footer` | Pie de página con redes sociales y links |
+| `HeroBanner` | Banner hero animado con partículas |
+| `UltimasFiguras` | Carrusel de figuras recientes |
+| `FigurasMasVotadas` | Lista de figuras más votadas |
+| `MiembroDestacado` | Tarjeta del miembro destacado |
+| `NoticiasEventos` | Grid de noticias y eventos |
+| `VideosComunidad` | Grid de videos de YouTube |
+| `CTAFinal` | Sección de llamada a la acción |
+| `PostModal` | Modal para ver publicaciones en detalle |
+| `CreatePostModal` | Modal para crear nuevas publicaciones |
+| `PasswordChangeForm` | Formulario de cambio de contraseña |
+
+---
+
+## Autenticación y JWT
+
+El sistema de autenticación usa tokens JWT. Al iniciar sesión exitosamente:
+
+1. El backend devuelve un `token` JWT y datos del usuario
+2. El frontend guarda en `localStorage`:
+   - `austral_auth_token` — Token JWT
+   - `austral_auth_user` — Datos del usuario (JSON)
+   - `austral_auth_role` — Rol del usuario (`admin` o `member`)
+
+El helper `authFetch()` en `src/config.js` inyecta automáticamente el token en cada petición:
+
+```js
+export function authFetch(url, options = {}) {
+  const token = localStorage.getItem('austral_auth_token');
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+  };
+  return fetch(url, { ...options, headers });
+}
+```
+
+---
+
+## Soporte Offline (PWA)
+
+La aplicación es una **PWA instalable** con soporte offline:
+
+- **vite-plugin-pwa** genera el Service Worker automáticamente
+- Las publicaciones creadas sin conexión se guardan en **IndexedDB** con la librería `idb`
+- Al recuperar la conexión, `syncOfflinePosts()` las sincroniza automáticamente con el servidor

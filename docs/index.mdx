@@ -1,0 +1,79 @@
+---
+title: Bienvenido a Austral Collector
+description: Plataforma de coleccionismo chileno con temática Dark-Fantasy y Steampunk.
+---
+
+import { Card, CardGroup } from '@mintlify/components'
+
+<img
+  className="block dark:hidden"
+  src="/logo/light.svg"
+  alt="Austral Collector"
+/>
+<img
+  className="hidden dark:block"
+  src="/logo/dark.svg"
+  alt="Austral Collector"
+/>
+
+## ¿Qué es Austral Collector?
+
+**Austral Collector** es una plataforma web comunitaria para coleccionistas chilenos de figuras antiguas, juguetes vintage y objetos de colección. Está diseñada con una estética **Dark-Fantasy y Steampunk**, con animaciones fluidas, carruseles infinitos, modales interactivos y diseño completamente adaptable a dispositivos móviles.
+
+La plataforma permite a los miembros registrados publicar sus colecciones, votar figuras, interactuar con la comunidad y acceder a un panel de administración completo.
+
+## Stack Tecnológico
+
+| Capa | Tecnología |
+|---|---|
+| Frontend | React 19 + Vite 8 |
+| Estilos | Vanilla CSS (Dark-Fantasy theme) |
+| Routing | React Router DOM v7 |
+| Backend | PHP 8 + PDO |
+| Base de datos | MySQL (via XAMPP) |
+| Autenticación | JWT (JSON Web Tokens) |
+| PWA | vite-plugin-pwa |
+| Offline | IndexedDB (idb) |
+
+## Módulos Principales
+
+<CardGroup cols={2}>
+  <Card
+    title="Instalación"
+    icon="wrench"
+    href="/instalacion"
+  >
+    Configura el entorno de desarrollo local con XAMPP, Node.js y la base de datos.
+  </Card>
+  <Card
+    title="Arquitectura"
+    icon="sitemap"
+    href="/arquitectura"
+  >
+    Estructura del proyecto, páginas, componentes y flujo de datos.
+  </Card>
+  <Card
+    title="Referencia de API"
+    icon="code"
+    href="/api/introduccion"
+  >
+    Endpoints PHP del backend: autenticación, figuras, usuarios, publicaciones y más.
+  </Card>
+  <Card
+    title="Panel de Administración"
+    icon="shield"
+    href="/admin/panel"
+  >
+    Gestión de usuarios, publicaciones, eventos, galería y configuración del sitio.
+  </Card>
+</CardGroup>
+
+## Características Destacadas
+
+- 🎨 **Diseño Dark-Fantasy / Steampunk** con tipografías variables y paleta dorada
+- 🖼️ **Galería de figuras** con votos, comentarios y perfiles públicos de coleccionistas
+- 📰 **Dashboard de usuario** con publicaciones, likes y actividad
+- 🛡️ **Panel Admin completo** con control de usuarios, eventos, galería y portafolio
+- 📱 **PWA** instalable, con soporte offline vía IndexedDB
+- 🔒 **Autenticación JWT** con roles (admin / miembro)
+- 📧 **Sistema de correos** para clave temporal y contacto
