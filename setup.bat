@@ -19,7 +19,7 @@ echo [OK] Node.js detectado.
 
 echo.
 echo [2/4] Instalando dependencias del Frontend (NPM)...
-call npm install
+call npm install --legacy-peer-deps
 if %errorlevel% neq 0 (
     echo [ERROR] Hubo un problema instalando las dependencias de Node.
     pause

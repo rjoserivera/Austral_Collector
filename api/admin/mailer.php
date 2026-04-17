@@ -6,7 +6,7 @@
 
 function sendModerationEmail($toEmail, $username, $postName, $postType, $motivo) {
     $adminEmail = "austral.cadmin@gmail.com";
-    $appPassword = "sqek pnpi tejo qfqy";
+    $appPassword = "rbyk xfwv penr hkkf";
     $subject = "Notificación de Moderación — Austral Collector";
     
     // Contenido del correo en HTML
@@ -89,12 +89,13 @@ function sendModerationEmail($toEmail, $username, $postName, $postType, $motivo)
         $smtpResponse .= $sendCommand($socket, "DATA");
         
         fputs($socket, implode("\r\n", $headers) . "\r\n\r\n" . $messageBody . "\r\n.\r\n");
-        $smtpResponse .= $getResponse($socket);
+        $finalResponse = $getResponse($socket);
+        $smtpResponse .= $finalResponse;
         
         $smtpResponse .= $sendCommand($socket, "QUIT");
         fclose($socket);
         
-        if (strpos($smtpResponse, "250 ") !== false || strpos($smtpResponse, "235 ") !== false) {
+        if (strpos($finalResponse, "250 ") !== false) {
             $mailed = true;
         }
 
@@ -118,7 +119,7 @@ function sendModerationEmail($toEmail, $username, $postName, $postType, $motivo)
 
 function sendTempKeyEmail($toEmail, $username, $tempKey) {
     $adminEmail = "austral.cadmin@gmail.com";
-    $appPassword = "sqek pnpi tejo qfqy";
+    $appPassword = "rbyk xfwv penr hkkf";
     $subject = "Tu Clave Temporal — Austral Collector";
     
     $messageBody = "
@@ -193,12 +194,15 @@ function sendTempKeyEmail($toEmail, $username, $tempKey) {
         $smtpResponse .= $sendCommand($socket, "DATA");
         
         fputs($socket, implode("\r\n", $headers) . "\r\n\r\n" . $messageBody . "\r\n.\r\n");
-        $smtpResponse .= $getResponse($socket);
+        $finalResponse = $getResponse($socket);
+        $smtpResponse .= $finalResponse;
         
         $smtpResponse .= $sendCommand($socket, "QUIT");
         fclose($socket);
         
-        if (strpos($smtpResponse, "250 ") !== false) $mailed = true;
+        if (strpos($finalResponse, "250 ") !== false) {
+            $mailed = true;
+        }
 
     } catch (Exception $e) {
         $smtpResponse .= "ERROR: " . $e->getMessage();
@@ -218,7 +222,7 @@ function sendTempKeyEmail($toEmail, $username, $tempKey) {
 
 function sendCustomEmail($toEmail, $username, $subject, $messageText) {
     $adminEmail = "austral.cadmin@gmail.com";
-    $appPassword = "sqek pnpi tejo qfqy";
+    $appPassword = "rbyk xfwv penr hkkf";
     
     $messageBody = "
     <html>
@@ -286,12 +290,15 @@ function sendCustomEmail($toEmail, $username, $subject, $messageText) {
         $smtpResponse .= $sendCommand($socket, "DATA");
         
         fputs($socket, implode("\r\n", $headers) . "\r\n\r\n" . $messageBody . "\r\n.\r\n");
-        $smtpResponse .= $getResponse($socket);
+        $finalResponse = $getResponse($socket);
+        $smtpResponse .= $finalResponse;
         
         $smtpResponse .= $sendCommand($socket, "QUIT");
         fclose($socket);
         
-        if (strpos($smtpResponse, "250 ") !== false) $mailed = true;
+        if (strpos($finalResponse, "250 ") !== false) {
+            $mailed = true;
+        }
 
     } catch (Exception $e) {
         $smtpResponse .= "ERROR: " . $e->getMessage();

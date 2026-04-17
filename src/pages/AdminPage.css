@@ -453,6 +453,13 @@
 }
 .tipo-usuario::before { content: '👤 '; font-size: 0.8rem; margin-right: 4px; }
 
+.tipo-identidad {
+  background: rgba(255, 193, 7, 0.15);
+  color: #b38600;
+  border-color: rgba(255, 193, 7, 0.4);
+}
+.tipo-identidad::before { content: '⭐ '; font-size: 0.8rem; margin-right: 4px; }
+
 /* Inline Select Badge update */
 .badge-select {
   /* ... existing styles ... */

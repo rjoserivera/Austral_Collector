@@ -8,7 +8,7 @@ import PostModal from '../components/PostModal'
 // URL base para la API (a través del proxy de Vite)
 const API_URL = '/api/admin'
 
-const getLogConfig = async (tipo) => {
+const getLogConfig = (tipo) => {
   const t = (tipo || '').toLowerCase();
   const config = {
     'login':   { label: 'LOGIN',   icon: '🟢', class: 'tipo-login' },
@@ -19,6 +19,7 @@ const getLogConfig = async (tipo) => {
     'cosplay': { label: 'COSPLAY', icon: '🎭', class: 'tipo-cosplay' },
     'admin':   { label: 'ADMIN',   icon: '🛡️', class: 'tipo-admin' },
     'usuario': { label: 'USUARIO', icon: '👤', class: 'tipo-usuario' },
+    'identidad':{ label: 'IDENTIDAD', icon: '⭐', class: 'tipo-identidad' },
   };
   return config[t] || { label: t.toUpperCase(), icon: '⚪', class: '' };
 };
@@ -333,7 +334,7 @@ function AdminUsuarios({ adminId }) {
 
   const sendTempKey = async (user) => {
     if (!await confirmDialog(`¿Generar y enviar clave temporal a ${user.email || 'sin email'}?`)) return
-    fetch(`http://localhost/Austral%20Collector/api/auth/enviar_clave_temporal.php`, {
+    fetch(`http://localhost/Austral_Collector/api/auth/enviar_clave_temporal.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: user.id })
@@ -1420,7 +1421,7 @@ function AdminIdentidad({ adminId }) {
                 }}
               >
                 <img
-                  src={`${window.location.origin.includes('5173') ? 'http://localhost' : ''}/Austral%20Collector/${item.imagen_url}`}
+                  src={`${window.location.origin.includes('5173') ? 'http://localhost' : ''}/Austral_Collector/${item.imagen_url}`}
                   alt={item.descripcion || 'Galería'}
                   style={{ width:'100%', height:'160px', objectFit:'cover', display:'block', pointerEvents:'none' }}
                   onError={e => { e.target.style.background='#1a3d4a'; e.target.src=''; }}
@@ -1574,7 +1575,7 @@ function AdminIdentidad({ adminId }) {
           </div>
           <div>
             {comunidadPreview ? (
-              <img src={comunidadPreview.startsWith('uploads/') ? `http://localhost/Austral%20Collector/${comunidadPreview}` : comunidadPreview}
+              <img src={comunidadPreview.startsWith('uploads/') ? `http://localhost/Austral_Collector/${comunidadPreview}` : comunidadPreview}
                 alt="Preview"
                 style={{ width:'100%', height:'200px', objectFit:'cover', borderRadius:'10px', border:'1px solid rgba(255,215,0,0.3)' }}
                 onError={e => e.target.style.display='none'} />

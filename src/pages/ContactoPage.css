@@ -115,6 +115,17 @@
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
 }
 
+/* ── CONTENIDO PRINCIPAL ──────────────── */
+.contacto-content-row {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.contacto-panel {
+  flex: 1;
+}
+
 /* ── FORMS ───────────────────────────────────────────── */
 .contacto-form-new {
   display: flex;
@@ -261,4 +272,5 @@
   .contacto-hero-row { flex-direction: column; text-align: center; margin-left: 0; }
   .contacto-title-main { font-size: 2.2rem; }
   .card-distressed, .card-distressed-sub { padding: 20px 16px; }
+  .contacto-content-row { flex-direction: column; }
 }

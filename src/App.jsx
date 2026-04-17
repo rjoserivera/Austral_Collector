@@ -11,6 +11,7 @@ import PerfilPublicoPage from './pages/PerfilPublicoPage'
 import AdminPage from './pages/AdminPage'
 import ContactoPage from './pages/ContactoPage'
 import LoginPage from './pages/LoginPage'
+import VirtualAssistant from './components/VirtualAssistant'
 import PasswordChangeForm from './components/PasswordChangeForm'
 import { API_URL } from './config.js'
 import { syncOfflinePosts } from './utils/offlineSync.js'
@@ -69,6 +70,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
       </Routes>
 
+      {location.pathname !== '/admin' && <VirtualAssistant />}
       <Footer />
 
       {/* Modal GLobal: Forzar cambio de contraseña */}

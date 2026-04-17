@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost/Austral%20Collector',
+        target: 'http://localhost/Austral_Collector',
         changeOrigin: true,
       }
     }

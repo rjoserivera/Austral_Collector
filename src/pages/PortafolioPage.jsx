@@ -114,7 +114,7 @@ export default function PortafolioPage() {
                   style={{ cursor: 'zoom-in' }}
                 >
                   <img
-                    src={`http://localhost/Austral%20Collector/${g.imagen_url}`}
+                    src={`http://localhost/Austral_Collector/${g.imagen_url}`}
                     alt={g.descripcion || `Galería ${idx + 1}`}
                     className="pp-galeria-img"
                     loading="lazy"
@@ -173,7 +173,7 @@ export default function PortafolioPage() {
           <div className="pp-comunidad-image" aria-hidden="true">
             {comunidadImg ? (
               <img
-                src={comunidadImg.startsWith('uploads/') ? `http://localhost/Austral%20Collector/${comunidadImg}` : comunidadImg}
+                src={comunidadImg.startsWith('uploads/') ? `http://localhost/Austral_Collector/${comunidadImg}` : comunidadImg}
                 alt="Comunidad de coleccionistas"
                 className="pp-comunidad-img"
                 onError={e => e.target.style.display='none'}
@@ -189,7 +189,7 @@ export default function PortafolioPage() {
           <div className="pp-modal-content" onClick={e => e.stopPropagation()}>
             <button className="pp-modal-close" onClick={() => setSelectedImg(null)}>×</button>
             <img 
-              src={`http://localhost/Austral%20Collector/${selectedImg.imagen_url}`} 
+              src={`http://localhost/Austral_Collector/${selectedImg.imagen_url}`} 
               alt="Zoom imagen" 
               className="pp-modal-img" 
             />
