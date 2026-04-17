@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { toast, confirmDialog } from '../contexts/NotificationContext.jsx'
 import { useParams, Link } from 'react-router-dom'
 import './PerfilPublicoPage.css'
 import { API_URL, BASE_URL } from '../config.js'
@@ -85,7 +86,7 @@ export default function PerfilPublicoPage() {
 
   const handleLike = (postId, tipo) => {
     if (!loggedUserName) {
-      alert('Debes iniciar sesión para dar me gusta.')
+      toast.info('Debes iniciar sesión para dar me gusta.')
       return
     }
 
@@ -106,7 +107,7 @@ export default function PerfilPublicoPage() {
            return { ...prev, collection: newCollection }
         })
       } else {
-        alert(d.error || 'Error al procesar el like.')
+        toast.error(d.error || 'Error al procesar el like.')
       }
     })
     .catch(e => console.error("Error toggling like:", e))
@@ -124,7 +125,7 @@ export default function PerfilPublicoPage() {
       if (d.success) {
         loadData(); // reload stats and user info dynamically
       } else {
-        alert(d.error || 'Error al calificar perfil.');
+        toast.error(d.error || 'Error al calificar perfil.');
       }
     })
     .catch(e => console.error("Error rating profile:", e))
@@ -142,7 +143,7 @@ export default function PerfilPublicoPage() {
       if (d.success) {
         loadData(); // reload stats
       } else {
-        alert(d.error || 'Error al remover calificación.');
+        toast.error(d.error || 'Error al remover calificación.');
       }
     })
     .catch(e => console.error("Error deleting rating:", e))

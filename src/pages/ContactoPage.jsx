@@ -17,15 +17,15 @@ export default function ContactoPage() {
     .then(r => r.json())
     .then(d => {
       if (d.success) {
-        alert('🚀 Mensaje enviado. Te contactaremos pronto al correo que incluiste.');
+        toast.info('🚀 Mensaje enviado. Te contactaremos pronto al correo que incluiste.');
         document.querySelector('.contacto-form-new').reset();
       } else {
-        alert('❌ Error al enviar el correo: ' + d.error);
+        toast.error('❌ Error al enviar el correo: ' + d.error);
       }
     })
     .catch(err => {
       console.error(err);
-      alert('❌ Error de red al intentar enviar el mensaje.');
+      toast.error('❌ Error de red al intentar enviar el mensaje.');
     });
   }
 

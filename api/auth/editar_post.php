@@ -3,6 +3,7 @@
 // Accepts multipart/form-data
 
 require_once '../db.php';
+require_once '../image_utils.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -42,6 +43,7 @@ if (!empty($_FILES['images']['name'][0])) {
         $filename = uniqid('post_', true) . '.' . $ext;
         $dest = $uploadDir . $filename;
         if (move_uploaded_file($_FILES['images']['tmp_name'][$i], $dest)) {
+            addWatermark($dest);
             $newFiles[] = 'uploads/posts/' . $filename;
         }
     }

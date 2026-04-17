@@ -686,6 +686,11 @@
 }
 .admin-input:focus {
   border-color: #dfc08a;
+  background: rgba(10,30,40,0.80);
+}
+.admin-input::placeholder {
+  color: rgba(240,228,204,0.65);
+  opacity: 1; /* Asegura que no sea demasiado transparente */
 }
 .admin-form-actions {
   display: flex;

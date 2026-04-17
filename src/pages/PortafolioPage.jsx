@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { toast, confirmDialog } from '../contexts/NotificationContext.jsx'
 import './PortafolioPage.css'
 import { API_URL, BASE_URL } from '../config.js'
 
@@ -25,6 +26,8 @@ export default function PortafolioPage() {
   const [identidad, setIdentidad]   = useState([])
   const [comunidadImg, setComunidad] = useState('')
   const [loading, setLoading]        = useState(true)
+  const [selectedImg, setSelectedImg] = useState(null)
+  const [selectedVideo, setSelectedVideo] = useState(null)
 
   useEffect(() => {
     // Galería, videos y comunidad desde el nuevo endpoint
@@ -68,7 +71,7 @@ export default function PortafolioPage() {
             </h1>
             <p className="pp-hero-subtitle">Portafolio Austral Collector</p>
             <div className="gold-divider" style={{ width: '220px', margin: '14px 0 22px' }}/>
-            <button onClick={() => alert("Función de registro aún no implementada.")} id="pp-btn-unirse" className="btn-primary pp-hero-btn">Unirse</button>
+            <button onClick={() => toast.info("Función de registro aún no implementada.")} id="pp-btn-unirse" className="btn-primary pp-hero-btn">Unirse</button>
           </div>
         </div>
       </section>
@@ -88,11 +91,11 @@ export default function PortafolioPage() {
         </div>
       </section>
 
-      {/* ── GALERÍA + VIDEOS SPLIT ────────────────────────── */}
+      {/* ── MEDIA: GALERÍA + VIDEOS ───────────────────────── */}
       <section className="pp-media section-wrapper" id="pp-galeria">
-        {/* Galería */}
+        {/* Galería de Fotografías */}
         <div className="pp-media-block">
-          <h2 className="pp-section-title">⚜️ Galería</h2>
+          <h2 className="pp-section-title">⚜️ Galería de Fotografías</h2>
           {loading ? (
             <div className="pp-empty-state">Cargando galería...</div>
           ) : galeria.length === 0 ? (
@@ -101,9 +104,15 @@ export default function PortafolioPage() {
               <p>La galería estará disponible pronto.</p>
             </div>
           ) : (
-            <div className="pp-galeria-grid" style={{ gridTemplateColumns: galeria.length === 1 ? '1fr' : galeria.length <= 3 ? 'repeat(auto-fill, minmax(200px, 1fr))' : '1fr 1fr' }}>
+            <div className="pp-galeria-grid" style={{ gridTemplateColumns: galeria.length === 1 ? '1fr' : galeria.length <= 3 ? 'repeat(auto-fill, minmax(200px, 1fr))' : 'repeat(auto-fill, minmax(220px, 1fr))' }}>
               {galeria.map((g, idx) => (
-                <div key={g.id || idx} className="pp-galeria-item card" id={`pp-gal-${g.id || idx}`}>
+                <div 
+                  key={g.id || idx} 
+                  className="pp-galeria-item card" 
+                  id={`pp-gal-${g.id || idx}`}
+                  onClick={() => setSelectedImg(g)}
+                  style={{ cursor: 'zoom-in' }}
+                >
                   <img
                     src={`http://localhost/Austral%20Collector/${g.imagen_url}`}
                     alt={g.descripcion || `Galería ${idx + 1}`}
@@ -111,9 +120,9 @@ export default function PortafolioPage() {
                     loading="lazy"
                     onError={e => { e.target.src = '/mock_fig1.png' }}
                   />
-                  {g.descripcion && (
-                    <div className="pp-galeria-desc">{g.descripcion}</div>
-                  )}
+                  <div className="pp-galeria-desc">
+                    {g.descripcion || '\u00A0'}
+                  </div>
                 </div>
               ))}
             </div>
@@ -131,16 +140,20 @@ export default function PortafolioPage() {
               <p>Los videos estarán disponibles pronto.</p>
             </div>
           ) : (
-            <div className="pp-videos-list">
+            <div className="pp-videos-grid">
               {videos.map((v, idx) => {
                 const ytId = getYtId(v.link_yt)
                 const thumbUrl = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : '/mock_community.png'
                 return (
-                  <div key={v.id || idx} className="pp-video-thumb card" id={`pp-vid-${v.id || idx}`}
-                    onClick={() => v.link_yt ? window.open(v.link_yt, '_blank') : null}>
-                    <img src={thumbUrl} alt={v.titulo || `Video ${idx + 1}`} className="pp-video-img" loading="lazy"
-                      onError={e => { e.target.src = '/mock_community.png' }}/>
-                    <div className="pp-video-overlay"><PlayIcon/></div>
+                  <div key={v.id || idx} className="pp-video-card card" id={`pp-vid-${v.id || idx}`}>
+                    <div className="pp-video-thumb" onClick={() => setSelectedVideo(ytId)}>
+                      <img src={thumbUrl} alt={v.titulo || `Video ${idx + 1}`} className="pp-video-img" loading="lazy"
+                        onError={e => { e.target.src = '/mock_community.png' }}/>
+                      <div className="pp-video-overlay"><PlayIcon/></div>
+                    </div>
+                    <div className="pp-video-info">
+                      <p className="pp-v-info-desc">{v.descripcion || '\u00A0'}</p>
+                    </div>
                   </div>
                 )
               })}
@@ -155,7 +168,7 @@ export default function PortafolioPage() {
           <div className="pp-comunidad-content">
             <h2 className="pp-comunidad-title">Únete a la Comunidad</h2>
             <p className="pp-comunidad-desc">Comparte tu colección con otros apasionados.</p>
-            <button onClick={() => alert("Función de registro aún no implementada.")} id="pp-btn-comunidad" className="btn-primary pp-comunidad-btn">Unirse</button>
+            <button onClick={() => toast.info("Función de registro aún no implementada.")} id="pp-btn-comunidad" className="btn-primary pp-comunidad-btn">Unirse</button>
           </div>
           <div className="pp-comunidad-image" aria-hidden="true">
             {comunidadImg ? (
@@ -169,6 +182,53 @@ export default function PortafolioPage() {
           </div>
         </div>
       </section>
+
+      {/* ── LIGHTBOX MODAL (IMAGEN) ───────────────────────── */}
+      {selectedImg && (
+        <div className="pp-modal-overlay" onClick={() => setSelectedImg(null)}>
+          <div className="pp-modal-content" onClick={e => e.stopPropagation()}>
+            <button className="pp-modal-close" onClick={() => setSelectedImg(null)}>×</button>
+            <img 
+              src={`http://localhost/Austral%20Collector/${selectedImg.imagen_url}`} 
+              alt="Zoom imagen" 
+              className="pp-modal-img" 
+            />
+            {selectedImg.descripcion && (
+              <div className="pp-modal-info">
+                <p className="pp-modal-desc">{selectedImg.descripcion}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── VIDEO MODAL (YOUTUBE) ─────────────────────────── */}
+      {selectedVideo && (
+        <div className="pp-modal-overlay" onClick={() => setSelectedVideo(null)} style={{ background: 'rgba(5, 1, 1, 0.94)' }}>
+          <div className="pp-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '1000px' }}>
+            <button className="pp-modal-close" onClick={() => setSelectedVideo(null)} style={{ top: '-45px' }}>✕</button>
+            <div style={{ width: '100%', aspectRatio: '16/9', background: '#000', borderRadius: '8px 8px 0 0', overflow: 'hidden', border: '1.5px solid rgba(201, 168, 76, 0.4)', borderBottom: 'none', boxShadow: '0 15px 50px rgba(0,0,0,0.8)' }}>
+              <iframe 
+                width="100%" 
+                height="100%" 
+                src={`https://www.youtube.com/embed/${selectedVideo}?autoplay=1`} 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
+                allowFullScreen>
+              </iframe>
+            </div>
+            {/* Descripción del video con el mismo estilo que las fotos */}
+            {(() => {
+              const vObj = videos.find(v => getYtId(v.link_yt) === selectedVideo);
+              return vObj && vObj.descripcion ? (
+                <div className="pp-modal-info">
+                  <p className="pp-modal-desc">{vObj.descripcion}</p>
+                </div>
+              ) : null;
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* ── FOOTER ───────────────────────────────────────── */}
       <footer className="pp-footer">

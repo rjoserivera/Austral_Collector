@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { toast, confirmDialog } from '../contexts/NotificationContext.jsx'
 import { Link, useNavigate } from 'react-router-dom'
 import './DashboardPage.css'
 import CreatePostModal from '../components/CreatePostModal'
@@ -36,7 +37,7 @@ export default function DashboardPage() {
   const userRole = localStorage.getItem('austral_auth_role')
   const navigate = useNavigate()
 
-  const loadData = () => {
+  const loadData = async () => {
     if (!localStorage.getItem('austral_auth_user')) { navigate('/login'); return; }
     fetch(`${API_URL}/public/perfil_data.php?username=${userName}`)
       .then(r => r.json())
@@ -80,21 +81,21 @@ export default function DashboardPage() {
       .then(r => r.json())
       .then(d => {
         if (d.success) {
-          alert('Perfil actualizado correctamente.')
+          toast.success('Perfil actualizado correctamente.')
           setAvatarFile(null)
           setBannerFile(null)
           if (d.avatar_url) setAvatar(`${BASE_URL}/${d.avatar_url}`)
           if (d.banner_url) setBanner(`${BASE_URL}/${d.banner_url}`)
         } else {
-          alert('Error: ' + (d.error || 'No se pudo guardar.'))
+          toast.error('Error: ' + (d.error || 'No se pudo guardar.'))
         }
       })
-      .catch(e => alert('Error: ' + e.message))
+      .catch(e => toast.error('Error: ' + e.message))
       .finally(() => setSaving(false))
   }
 
-  const handleDelete = (fig) => {
-    if (!window.confirm(`¿Eliminar "${fig.nombre}"? Esta acción no se puede deshacer.`)) return
+  const handleDelete = async (fig) => {
+    if (!await confirmDialog(`¿Eliminar "${fig.nombre}"? Esta acción no se puede deshacer.`)) return
     fetch(`${API_URL}/auth/eliminar_post.php`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -103,9 +104,9 @@ export default function DashboardPage() {
       .then(r => r.json())
       .then(d => {
         if (d.success) loadData()
-        else alert('Error: ' + (d.error || 'No se pudo eliminar.'))
+        else toast.error('Error: ' + (d.error || 'No se pudo eliminar.'))
       })
-      .catch(e => alert('Error: ' + e.message))
+      .catch(e => toast.error('Error: ' + e.message))
   }
 
   // --- Drag & Drop variables para reordenar la colección ---

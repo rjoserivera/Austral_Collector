@@ -121,22 +121,27 @@ try {
     $stmtConfigGen = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave IN ('txt_destacado', 'txt_cumple')");
     $globalConfig = $stmtConfigGen->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    // 8. Portafolio custom media
+    // 9. Portafolio custom media
     $stmtPortaConfig = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave LIKE 'portafolio_%'");
     $portafolio_config = $stmtPortaConfig->fetchAll(PDO::FETCH_KEY_PAIR);
+
+    // 10. Secciones Promocionales del Home
+    $stmtPromos = $pdo->query("SELECT * FROM hp_promociones WHERE activo = 1 ORDER BY orden ASC, id ASC");
+    $promos = $stmtPromos->fetchAll();
 
     echo json_encode([
         'success' => true,
         'data' => [
-            'ultimas' => $ultimas,
-            'votadas' => $votadas,
-            'videos' => $videos,
-            'eventos' => $eventos,
-            'destacado' => $destacado,
-            'ultimos_cosplays' => $ultimos_cosplays,
-            'cumpleaneros' => $cumpleaneros,
-            'config' => $globalConfig,
-            'portafolio' => $portafolio_config
+            'ultimas'         => $ultimas,
+            'votadas'         => $votadas,
+            'videos'          => $videos,
+            'eventos'         => $eventos,
+            'destacado'       => $destacado,
+            'ultimos_cosplays'=> $ultimos_cosplays,
+            'cumpleaneros'    => $cumpleaneros,
+            'config'          => $globalConfig,
+            'portafolio'      => $portafolio_config,
+            'promos'          => $promos
         ]
     ]);
 

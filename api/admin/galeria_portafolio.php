@@ -58,6 +58,22 @@ try {
 
     } elseif ($method === 'PUT') {
         $data = json_decode(file_get_contents('php://input'), true);
+        
+        // --- Option A: Bulk Update (Reorder) ---
+        if (isset($data['action']) && $data['action'] === 'reorder' && is_array($data['items'])) {
+            $pdo->beginTransaction();
+            foreach ($data['items'] as $item) {
+                if (isset($item['id'], $item['orden'])) {
+                    $stmt = $pdo->prepare("UPDATE galeria_portafolio SET orden = ? WHERE id = ?");
+                    $stmt->execute([intval($item['orden']), intval($item['id'])]);
+                }
+            }
+            $pdo->commit();
+            echo json_encode(['success' => true]);
+            exit;
+        }
+
+        // --- Option B: Single Item Update (Description/Order) ---
         $id = intval($data['id'] ?? 0);
         $descripcion = trim($data['descripcion'] ?? '');
         $orden = intval($data['orden'] ?? 0);

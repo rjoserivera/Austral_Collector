@@ -62,8 +62,13 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <img src="/logo_cabeza_sin_fondo.PNG" alt="Logo" className="login-logo" />
-        <h1 className="login-title">Acceso al Códice</h1>
+        <Link to="/" className="login-brand">
+          <img src="/logo_sin_fondo.png" alt="Austral Collector Logo" className="login-logo" />
+          <div className="login-brand-text">
+            <span className="title-austral">Austral</span> <span className="title-collector">Collector</span>
+          </div>
+        </Link>
+        <h1 className="login-title" style={{ marginTop: '0.5rem' }}>Acceso al Códice</h1>
         <p className="login-subtitle" style={{ color: '#f0e4cc !important' }}>Ingresa tus credenciales para continuar tu travesía.</p>
 
 

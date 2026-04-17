@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { toast, confirmDialog } from '../contexts/NotificationContext.jsx'
 import { Link, Navigate } from 'react-router-dom'
 import './AdminPage.css'
 import { BASE_URL, authFetch } from '../config.js'
@@ -7,7 +8,7 @@ import PostModal from '../components/PostModal'
 // URL base para la API (a través del proxy de Vite)
 const API_URL = '/api/admin'
 
-const getLogConfig = (tipo) => {
+const getLogConfig = async (tipo) => {
   const t = (tipo || '').toLowerCase();
   const config = {
     'login':   { label: 'LOGIN',   icon: '🟢', class: 'tipo-login' },
@@ -30,6 +31,7 @@ const NAV = [
   { id: 'destacados', icon: '🏆', label: 'Contenido Destacado' },
   { id: 'eventos',    icon: '📢', label: 'Noticias y Eventos' },
   { id: 'identidad',  icon: '⭐', label: 'Identidad y Nosotros' },
+  { id: 'hp_promos',  icon: '🌟', label: 'Promociones Home' },
   { id: 'actividad',  icon: '📋', label: 'Log de Actividad' },
 ]
 
@@ -39,11 +41,13 @@ export default function AdminPage() {
   const userNameRaw = localStorage.getItem('austral_auth_user');
   let adminId = null;
   let userName = 'Administrador';
+  let adminAvatar = null;
   try { 
     if (userNameRaw) {
       const uObj = JSON.parse(userNameRaw);
       userName = uObj.username || userNameRaw;
       adminId = uObj.id;
+      adminAvatar = uObj.avatar_url || null;
     }
   } catch(e) { userName = userNameRaw; }
 
@@ -79,7 +83,12 @@ export default function AdminPage() {
         </nav>
 
         <div className="admin-sidebar-footer">
-          <img src="/logo_cabeza_sin_fondo.PNG" alt="Admin" className="asf-avatar" />
+          <img
+            src={adminAvatar ? `${BASE_URL}/${adminAvatar}` : '/logo_cabeza_sin_fondo.PNG'}
+            alt={userName}
+            className="asf-avatar"
+            onError={e => { e.currentTarget.src = '/logo_cabeza_sin_fondo.PNG' }}
+          />
           <div>
             <strong className="asf-name">{userName}</strong>
             <span className="asf-role">🛡️ Admin</span>
@@ -100,14 +109,15 @@ export default function AdminPage() {
         </header>
 
         <div className="admin-main-body">
-          {activeTab === 'inicio' && <AdminInicio />}
-          {activeTab === 'usuarios' && <AdminUsuarios adminId={adminId} />}
-          {activeTab === 'videos' && <AdminVideos adminId={adminId} />}
-          {activeTab === 'eventos' && <AdminEventos adminId={adminId} />}
+          {activeTab === 'inicio'     && <AdminInicio />}
+          {activeTab === 'usuarios'   && <AdminUsuarios adminId={adminId} />}
+          {activeTab === 'videos'     && <AdminVideos adminId={adminId} />}
+          {activeTab === 'eventos'    && <AdminEventos adminId={adminId} />}
           {activeTab === 'destacados' && <AdminDestacados adminId={adminId} />}
-          {activeTab === 'identidad' && <AdminIdentidad adminId={adminId} />}
-          {activeTab === 'actividad' && <AdminActividad adminId={adminId} />}
+          {activeTab === 'identidad'  && <AdminIdentidad adminId={adminId} />}
+          {activeTab === 'actividad'  && <AdminActividad adminId={adminId} />}
           {activeTab === 'moderacion' && <AdminModeracion adminId={adminId} />}
+          {activeTab === 'hp_promos'  && <AdminPromos adminId={adminId} />}
         </div>
       </main>
     </div>
@@ -255,18 +265,18 @@ function AdminUsuarios({ adminId }) {
   const copyToClipboard = () => {
     if (!formData.password) return;
     navigator.clipboard.writeText(formData.password)
-      .then(() => alert('Contraseña copiada al portapapeles 📋'))
+      .then(() => toast.info('Contraseña copiada al portapapeles 📋'))
       .catch(err => console.error('Error al copiar:', err));
   }
 
   const submitForm = (e) => {
     e.preventDefault()
     if (!formData.username || !formData.email || (formMode === 'create' && !formData.password)) {
-      alert('Usuario, email y contraseña (en creación) son obligatorios.')
+      toast.info('Usuario, email y contraseña (en creación) son obligatorios.')
       return
     }
     if (formMode === 'create' && formData.password.length < 6) {
-      alert('La contraseña debe tener al menos 6 caracteres.')
+      toast.info('La contraseña debe tener al menos 6 caracteres.')
       return
     }
     
@@ -285,12 +295,12 @@ function AdminUsuarios({ adminId }) {
           // Si es creación, mostrar modal de éxito con la clave
           setKeyResult(d)
         } else {
-          alert('Usuario actualizado correctamente.')
+          toast.success('Usuario actualizado correctamente.')
         }
         setFormMode(null)
         loadData()
       } else {
-        alert(d.error)
+        toast.error(d.error)
       }
     })
     .finally(() => setIsSaving(false))
@@ -304,12 +314,12 @@ function AdminUsuarios({ adminId }) {
     .then(r => r.json())
     .then(d => {
       if(d.success) loadData()
-      else alert(d.error)
+      else toast.error(d.error)
     })
   }
   
-  const toggleStatus = (id, action) => {
-    if(!window.confirm(`¿Seguro que deseas aplicar esta acción?`)) return
+  const toggleStatus = async (id, action) => {
+    if(!await confirmDialog(`¿Seguro que deseas aplicar esta acción?`)) return
     authFetch(`${API_URL}/usuarios.php`, {
       method: 'PUT',
       body: JSON.stringify({ id, action, adminId })
@@ -317,12 +327,12 @@ function AdminUsuarios({ adminId }) {
     .then(r => r.json())
     .then(d => {
       if(d.success) loadData()
-      else alert(d.error)
+      else toast.error(d.error)
     })
   }
 
-  const sendTempKey = (user) => {
-    if (!window.confirm(`¿Generar y enviar clave temporal a ${user.email || 'sin email'}?`)) return
+  const sendTempKey = async (user) => {
+    if (!await confirmDialog(`¿Generar y enviar clave temporal a ${user.email || 'sin email'}?`)) return
     fetch(`http://localhost/Austral%20Collector/api/auth/enviar_clave_temporal.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -333,15 +343,15 @@ function AdminUsuarios({ adminId }) {
       if (d.success) {
         setKeyResult(d)
       } else {
-        alert('Error: ' + d.error)
+        toast.error('Error: ' + d.error)
       }
     })
-    .catch(e => alert('Error de conexión: ' + e.message))
+    .catch(e => toast.error('Error de conexión: ' + e.message))
   }
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault()
-    if (!messageForm.asunto || !messageForm.mensaje) return alert('Por favor llena todos los campos.')
+    if (!messageForm.asunto || !messageForm.mensaje) return toast.info('Por favor llena todos los campos.')
     
     setIsSendingMsg(true)
     authFetch(`${API_URL}/enviar_mensaje.php`, {
@@ -356,14 +366,14 @@ function AdminUsuarios({ adminId }) {
     .then(r => r.json())
     .then(d => {
       if (d.success) {
-        alert(d.message || 'Mensaje enviado con éxito.')
+        toast.success(d.message || 'Mensaje enviado con éxito.')
         setMessageModal(null)
         setMessageForm({ asunto: '', mensaje: '' })
       } else {
-        alert('Error: ' + d.error)
+        toast.error('Error: ' + d.error)
       }
     })
-    .catch(e => alert('Error: ' + e.message))
+    .catch(e => toast.error('Error: ' + e.message))
     .finally(() => setIsSendingMsg(false))
   }
 
@@ -637,7 +647,7 @@ function AdminVideos({ adminId }) {
 
   const handleVideoSubmit = (e) => {
     e.preventDefault()
-    if (!videoForm.titulo || !videoForm.link) return alert('Campos obligatorios')
+    if (!videoForm.titulo || !videoForm.link) return toast.info('Campos obligatorios')
     
     setSaving(true)
     authFetch(`${API_URL}/videos.php`, {
@@ -652,15 +662,15 @@ function AdminVideos({ adminId }) {
     .finally(() => setSaving(false))
   }
 
-  const handleDelete = (id) => {
-    if(!window.confirm(`¿Eliminar video?`)) return
+  const handleDelete = async (id) => {
+    if(!await confirmDialog(`¿Eliminar video?`)) return
     authFetch(`${API_URL}/videos.php`, {
       method: 'DELETE',
       body: JSON.stringify({ id, adminId })
     }).then(() => loadData())
   }
 
-  const toggleDest = (id) => {
+  const toggleDest = async (id) => {
     authFetch(`${API_URL}/videos.php`, {
       method: 'PUT',
       body: JSON.stringify({ id })
@@ -854,15 +864,15 @@ function AdminEventos({ adminId }) {
         resetForm()
         loadData()
       } else {
-        alert(d.error)
+        toast.error(d.error)
       }
     })
-    .catch(error => alert("Error al guardar: " + error.message))
+    .catch(error => toast.error("Error al guardar: " + error.message))
     .finally(() => setSaving(false))
   }
 
-  const handleDelete = (evtId) => {
-    if(!window.confirm('¿Eliminar esta noticia/evento?')) return
+  const handleDelete = async (evtId) => {
+    if(!await confirmDialog('¿Eliminar esta noticia/evento?')) return
     authFetch(`${API_URL}/eventos.php`, {
       method: 'DELETE',
       body: JSON.stringify({ id: evtId, adminId })
@@ -870,12 +880,12 @@ function AdminEventos({ adminId }) {
     .then(r => r.json())
     .then(d => {
       if(d.success) loadData()
-      else alert(d.error)
+      else toast.error(d.error)
     })
-    .catch(error => alert("Error al eliminar: " + error.message))
+    .catch(error => toast.error("Error al eliminar: " + error.message))
   }
 
-  const handleEdit = (ev) => {
+  const handleEdit = async (ev) => {
     setId(ev.id);
     setTitulo(ev.titulo);
     setFechaDisplay(ev.fecha_display || '');
@@ -1033,14 +1043,19 @@ function AdminIdentidad({ adminId }) {
   const [uploadingGal, setUploadingGal] = useState(false)
 
   // Videos
-  const [videos, setVideos] = useState(['', '', '', ''])
-  const [savingVid, setSavingVid] = useState(false)
+  const [videos, setVideos] = useState([])
+  const [savingVidId, setSavingVidId] = useState(null)
+  const [addingVid, setAddingVid] = useState(false)
+  const [draggedVidIndex, setDraggedVidIndex] = useState(null)
 
   // Comunidad
   const [comunidadFile, setComunidadFile] = useState(null)
   const [comunidadPreview, setComunidadPreview] = useState('')
   const [comunidadUrl, setComunidadUrl] = useState('')
   const [savingCom, setSavingCom] = useState(false)
+
+  // Arrastre
+  const [draggedIndex, setDraggedIndex] = useState(null)
 
   let userId = null
   try {
@@ -1060,16 +1075,15 @@ function AdminIdentidad({ adminId }) {
       .then(r => r.json()).then(d => { if(d.success) setGaleriaItems(d.items || []) })
       .catch(e => console.error(e))
 
-    // Config (videos + comunidad)
+    // Videos dinámicos
+    authFetch(`${API_URL}/videos_portafolio.php`)
+      .then(r => r.json()).then(d => { if(d.success) setVideos(d.videos || []) })
+      .catch(e => console.error(e))
+
+    // Config (comunidad)
     authFetch(`${API_URL}/destacados.php`)
       .then(r => r.json()).then(d => {
         if(d.config) {
-          setVideos([
-            d.config.portafolio_video_1 || '',
-            d.config.portafolio_video_2 || '',
-            d.config.portafolio_video_3 || '',
-            d.config.portafolio_video_4 || '',
-          ])
           setComunidadUrl(d.config.portafolio_comunidad || '')
           setComunidadPreview(d.config.portafolio_comunidad || '')
         }
@@ -1093,8 +1107,8 @@ function AdminIdentidad({ adminId }) {
       method: 'PUT',
       body: JSON.stringify({ user_id: userId, identidades: [item] })
     }).then(r => r.json()).then(d => {
-      if(d.success) alert(`✅ ${item.title} actualizado!`)
-      else alert('Error: ' + d.error)
+      if(d.success) toast.success(`✅ ${item.title} actualizado!`)
+      else toast.error('Error: ' + d.error)
     }).finally(() => setSavingId(null))
   }
 
@@ -1108,7 +1122,7 @@ function AdminIdentidad({ adminId }) {
   }
   const handleGalUpload = (e) => {
     e.preventDefault()
-    if (!galFile) return alert('Selecciona una imagen.')
+    if (!galFile) return toast.info('Selecciona una imagen.')
     setUploadingGal(true)
     const token = localStorage.getItem('austral_auth_token')
     const fd = new FormData()
@@ -1121,38 +1135,114 @@ function AdminIdentidad({ adminId }) {
       body: fd
     }).then(r => r.json()).then(d => {
       if(d.success) { setShowGalModal(false); loadAll() }
-      else alert('Error: ' + d.error)
-    }).catch(e => alert('Error: ' + e.message)).finally(() => setUploadingGal(false))
+      else toast.error('Error: ' + d.error)
+    }).catch(e => toast.error('Error: ' + e.message)).finally(() => setUploadingGal(false))
   }
-  const handleGalDelete = (id) => {
-    if(!window.confirm('¿Eliminar esta foto de la galería?')) return
+  const handleGalDelete = async (id) => {
+    if(!await confirmDialog('¿Eliminar esta foto de la galería?')) return
     authFetch(`${API_URL}/galeria_portafolio.php`, {
       method: 'DELETE',
       body: JSON.stringify({ id })
     }).then(r => r.json()).then(d => {
       if(d.success) loadAll()
-      else alert('Error: ' + d.error)
+      else toast.error('Error: ' + d.error)
     })
   }
-  const handleGalDescUpdate = (item) => {
+  const handleGalDescUpdate = async (item) => {
     authFetch(`${API_URL}/galeria_portafolio.php`, {
       method: 'PUT',
       body: JSON.stringify({ id: item.id, descripcion: item.descripcion, orden: item.orden })
     }).then(r => r.json()).then(d => {
-      if(!d.success) alert('Error al guardar descripción.')
+      if(!d.success) toast.error('Error al guardar descripción.')
     })
   }
 
-  // ── Video helpers ──
-  const saveVideo = (idx) => {
-    setSavingVid(true)
-    authFetch(`${API_URL}/destacados.php`, {
-      method: 'POST',
-      body: JSON.stringify({ clave: `portafolio_video_${idx + 1}`, valor: videos[idx], adminId })
-    }).then(r => r.json()).then(d => {
-      if(!d.success) alert('❌ Error al guardar video.')
-    }).catch(e => alert('❌ ' + e.message)).finally(() => setSavingVid(false))
+  // --- Reordenar (Drag & Drop) ---
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = 'move'
   }
+  const handleDragEnd = () => {
+    setDraggedIndex(null)
+    saveGalleryOrder()
+  }
+  const handleDragEnter = (index) => {
+    if (draggedIndex === null || draggedIndex === index) return
+    const newItems = [...galeriaItems]
+    const draggedItem = newItems[draggedIndex]
+    newItems.splice(draggedIndex, 1)
+    newItems.splice(index, 0, draggedItem)
+    setDraggedIndex(index)
+    setGaleriaItems(newItems)
+  }
+  const saveGalleryOrder = () => {
+    const itemsOrder = galeriaItems.map((item, idx) => ({ id: item.id, orden: idx }))
+    authFetch(`${API_URL}/galeria_portafolio.php`, {
+      method: 'PUT',
+      body: JSON.stringify({ action: 'reorder', items: itemsOrder })
+    }).then(r => r.json()).then(d => {
+      if(!d.success) console.error("Error reordering:", d.error)
+    }).catch(e => console.error(e))
+  }
+
+  // ── Video helpers ──
+  const addNewVideo = () => {
+    setAddingVid(true)
+    authFetch(`${API_URL}/videos_portafolio.php`, {
+      method: 'POST',
+      body: JSON.stringify({ titulo: 'Nuevo Video', link_yt: '', descripcion: '', orden: videos.length })
+    }).then(r => r.json()).then(d => {
+      if(d.success) loadAll()
+      else toast.error('Error al añadir video.')
+    }).finally(() => setAddingVid(false))
+  }
+  const deleteVideo = async (id) => {
+    if(!await confirmDialog('¿Eliminar este video del portafolio?')) return
+    authFetch(`${API_URL}/videos_portafolio.php`, {
+      method: 'DELETE',
+      body: JSON.stringify({ id })
+    }).then(r => r.json()).then(d => {
+      if(d.success) loadAll()
+      else toast.error('Error al eliminar.')
+    })
+  }
+  const saveVideoData = (vid) => {
+    setSavingVidId(vid.id)
+    authFetch(`${API_URL}/videos_portafolio.php`, {
+      method: 'PUT',
+      body: JSON.stringify(vid)
+    }).then(r => r.json()).then(d => {
+      if(d.success) toast.success(`✅ ${vid.titulo} guardado!`)
+      else toast.error('❌ Error al guardar.')
+    }).catch(e => toast.error('❌ ' + e.message)).finally(() => setSavingVidId(null))
+  }
+  const handleVideoChange = (id, field, value) => {
+    setVideos(prev => prev.map(v => v.id === id ? {...v, [field]: value} : v))
+  }
+  
+  // Reordenar Videos
+  const handleVidDragStart = (e, index) => {
+    setDraggedVidIndex(index)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+  const handleVidDragEnd = () => {
+    setDraggedVidIndex(null)
+    const itemsOrder = videos.map((v, idx) => ({ id: v.id, orden: idx }))
+    authFetch(`${API_URL}/videos_portafolio.php`, {
+      method: 'PUT',
+      body: JSON.stringify({ action: 'reorder', items: itemsOrder })
+    })
+  }
+  const handleVidDragEnter = (index) => {
+    if (draggedVidIndex === null || draggedVidIndex === index) return
+    const newItems = [...videos]
+    const draggedItem = newItems[draggedVidIndex]
+    newItems.splice(draggedVidIndex, 1)
+    newItems.splice(index, 0, draggedItem)
+    setDraggedVidIndex(index)
+    setVideos(newItems)
+  }
+
   const getYtId = (url) => {
     if (!url) return null
     const m = url.match(/[?&]v=([^&]+)/)
@@ -1171,40 +1261,39 @@ function AdminIdentidad({ adminId }) {
   const saveComunidad = () => {
     setSavingCom(true)
     if (comunidadFile) {
-      // Upload file
+      // Usamos el nuevo servicio subir_general.php para que NO se guarde en la galería
       const token = localStorage.getItem('austral_auth_token')
       const fd = new FormData()
       fd.append('imagen', comunidadFile)
-      fd.append('descripcion', 'Banner comunidad')
-      fd.append('orden', 999)
-      fetch(`${API_URL}/galeria_portafolio.php`, {
+
+      fetch(`${API_URL}/subir_general.php`, {
         method: 'POST',
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         body: fd
       }).then(r => r.json()).then(d => {
         if(d.success) {
-          // Save URL to config
+          // Guardar la URL resultante en la configuración (destacados.php)
           return authFetch(`${API_URL}/destacados.php`, {
             method: 'POST',
             body: JSON.stringify({ clave: 'portafolio_comunidad', valor: d.imagen_url, adminId })
           }).then(r => r.json()).then(() => {
             setComunidadUrl(d.imagen_url)
             setComunidadFile(null)
-            alert('✅ Imagen de comunidad guardada.')
+            toast.success('✅ Imagen de comunidad guardada (Banner actualizado).')
           })
         } else {
-          alert('Error: ' + d.error)
+          toast.error('Error: ' + d.error)
         }
-      }).catch(e => alert('Error: ' + e.message)).finally(() => setSavingCom(false))
+      }).catch(e => toast.error('Error: ' + e.message)).finally(() => setSavingCom(false))
     } else {
-      // Save URL directly
+      // Si el usuario pegó una URL directamente
       authFetch(`${API_URL}/destacados.php`, {
         method: 'POST',
         body: JSON.stringify({ clave: 'portafolio_comunidad', valor: comunidadUrl, adminId })
       }).then(r => r.json()).then(d => {
-        if(d.success) { setComunidadPreview(comunidadUrl); alert('✅ Guardado.') }
-        else alert('❌ Error al guardar.')
-      }).catch(e => alert('❌ ' + e.message)).finally(() => setSavingCom(false))
+        if(d.success) { setComunidadPreview(comunidadUrl); toast.success('✅ URL de Banner guardada.') }
+        else toast.error('❌ Error al guardar.')
+      }).catch(e => toast.error('❌ ' + e.message)).finally(() => setSavingCom(false))
     }
   }
 
@@ -1308,15 +1397,35 @@ function AdminIdentidad({ adminId }) {
           </div>
         ) : (
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(220px, 1fr))', gap:'16px' }}>
-            {galeriaItems.map(item => (
-              <div key={item.id} style={{ background:'rgba(255,255,255,0.6)', borderRadius:'10px', overflow:'hidden', border:'1px solid rgba(139,90,43,0.25)', position:'relative', boxShadow:'0 2px 8px rgba(0,0,0,0.1)' }}>
+            {galeriaItems.map((item, idx) => (
+              <div 
+                key={item.id} 
+                draggable
+                onDragStart={(e) => handleDragStart(e, idx)}
+                onDragEnter={() => handleDragEnter(idx)}
+                onDragEnd={handleDragEnd}
+                onDragOver={(e) => e.preventDefault()}
+                style={{ 
+                  background:'rgba(255,255,255,0.6)', 
+                  borderRadius:'10px', 
+                  overflow:'hidden', 
+                  border:'1px solid rgba(139,90,43,0.25)', 
+                  position:'relative', 
+                  boxShadow:'0 2px 8px rgba(0,0,0,0.1)',
+                  cursor: 'grab',
+                  opacity: draggedIndex === idx ? 0.3 : 1,
+                  transform: draggedIndex === idx ? 'scale(0.95)' : 'none',
+                  transition: 'all 0.2s ease',
+                  userSelect: 'none'
+                }}
+              >
                 <img
                   src={`${window.location.origin.includes('5173') ? 'http://localhost' : ''}/Austral%20Collector/${item.imagen_url}`}
                   alt={item.descripcion || 'Galería'}
-                  style={{ width:'100%', height:'160px', objectFit:'cover', display:'block' }}
+                  style={{ width:'100%', height:'160px', objectFit:'cover', display:'block', pointerEvents:'none' }}
                   onError={e => { e.target.style.background='#1a3d4a'; e.target.src=''; }}
                 />
-                <div style={{ padding:'12px' }}>
+                <div style={{ padding:'12px' }} onMouseDown={e => e.stopPropagation()}>
                   <textarea
                     className="admin-input"
                     rows="2"
@@ -1330,7 +1439,7 @@ function AdminIdentidad({ adminId }) {
                     style={{ resize:'none', fontSize:'0.78rem', marginBottom:'8px' }}
                   />
                   <button
-                    onClick={() => handleGalDelete(item.id)}
+                    onClick={(e) => { e.stopPropagation(); handleGalDelete(item.id); }}
                     style={{ width:'100%', background:'rgba(217,83,79,0.15)', border:'1px solid #d9534f', color:'#d9534f', borderRadius:'6px', padding:'6px', cursor:'pointer', fontSize:'0.82rem' }}>
                     🗑️ Eliminar
                   </button>
@@ -1343,36 +1452,95 @@ function AdminIdentidad({ adminId }) {
 
       {/* ── C: VIDEOS DE YOUTUBE ──────────────────── */}
       <div style={{ borderTop:'2px solid rgba(200,169,110,0.35)', paddingTop:'32px', marginBottom:'40px' }}>
-        <h2 className="admin-sec-title" style={{ marginBottom:'8px' }}>▶ Videos del Portafolio</h2>
-        <p style={{ color:'#4a3520', fontSize:'0.85rem', marginBottom:'20px' }}>
-          Pega hasta 4 enlaces de YouTube. Se mostrarán con su miniatura en la página de Nosotros.
-        </p>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:'16px' }}>
-          {videos.map((url, idx) => {
-            const ytId = getYtId(url)
+        <div className="admin-sec-header" style={{ marginBottom:'20px' }}>
+          <div>
+            <h2 className="admin-sec-title">▶ Videos del Portafolio</h2>
+            <p style={{ color:'#4a3520', fontSize:'0.85rem', marginTop:'4px' }}>
+              Gestiona los videos de la página de Nosotros. Puedes añadir títulos y descripciones.
+            </p>
+          </div>
+          <button className="btn-primary btn-sm" onClick={addNewVideo} disabled={addingVid}>
+            {addingVid ? 'Añadiendo...' : '➕ Añadir Video'}
+          </button>
+        </div>
+
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(320px, 1fr))', gap:'20px' }}>
+          {videos.map((v, idx) => {
+            const ytId = getYtId(v.link_yt)
             return (
-              <div key={idx} style={{ background:'rgba(255,255,255,0.55)', borderRadius:'10px', overflow:'hidden', border:'1px solid rgba(139,90,43,0.25)', boxShadow:'0 2px 8px rgba(0,0,0,0.1)' }}>
+              <div 
+                key={v.id} 
+                draggable
+                onDragStart={(e) => handleVidDragStart(e, idx)}
+                onDragEnter={() => handleVidDragEnter(idx)}
+                onDragEnd={handleVidDragEnd}
+                onDragOver={(e) => e.preventDefault()}
+                style={{ 
+                  background:'rgba(255,255,255,0.7)', 
+                  borderRadius:'12px', 
+                  overflow:'hidden', 
+                  border:'1px solid rgba(139,90,43,0.35)', 
+                  boxShadow: draggedVidIndex === idx ? '0 10px 25px rgba(0,0,0,0.2)' : '0 2px 10px rgba(0,0,0,0.1)',
+                  cursor: 'grab',
+                  opacity: draggedVidIndex === idx ? 0.4 : 1,
+                  transform: draggedVidIndex === idx ? 'scale(1.02)' : 'scale(1)',
+                  transition: 'all 0.2s',
+                  position: 'relative'
+                }}
+              >
+                {/* Drag Handle Indicator */}
+                <div style={{ 
+                  position:'absolute', 
+                  top:'10px', 
+                  left:'10px', 
+                  background:'rgba(255,255,255,0.85)', 
+                  borderRadius:'4px', 
+                  padding:'4px 8px', 
+                  zIndex:10, 
+                  fontSize:'0.9rem',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  pointerEvents: 'none'
+                }}>
+                  ⠿
+                </div>
                 {ytId ? (
-                  <img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt={`Video ${idx+1}`}
-                    style={{ width:'100%', height:'140px', objectFit:'cover', display:'block' }} />
+                  <img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt={v.titulo}
+                    style={{ width:'100%', height:'180px', objectFit:'cover', display:'block', pointerEvents: 'none' }} />
                 ) : (
-                  <div style={{ width:'100%', height:'140px', background:'rgba(0,0,0,0.12)', display:'flex', alignItems:'center', justifyContent:'center', color:'#4a3520', fontSize:'2rem' }}>▶</div>
+                  <div style={{ width:'100%', height:'180px', background:'rgba(0,0,0,0.12)', display:'flex', alignItems:'center', justifyContent:'center', color:'#4a3520', fontSize:'2.5rem' }}>🎬</div>
                 )}
-                <div style={{ padding:'12px' }}>
-                  <label style={{ display:'block', fontSize:'0.78rem', color:'#4a3520', fontWeight:600, marginBottom:'6px' }}>Video Slot {idx + 1}</label>
-                  <input type="url" className="admin-input"
-                    value={url}
-                    onChange={e => {
-                      const upd = [...videos]; upd[idx] = e.target.value; setVideos(upd)
-                    }}
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    style={{ marginBottom:'8px', fontSize:'0.82rem' }} />
-                  <button
-                    onClick={() => saveVideo(idx)}
-                    disabled={savingVid}
-                    style={{ width:'100%', background:'rgba(45,110,126,0.85)', border:'1px solid rgba(45,110,126,1)', color:'#ffffff', borderRadius:'6px', padding:'7px', cursor:'pointer', fontSize:'0.82rem', fontWeight:600 }}>
-                    {savingVid ? 'Guardando...' : '💾 Guardar'}
-                  </button>
+                <div style={{ padding:'16px' }} onMouseDown={e => e.stopPropagation()}>
+                  <div className="admin-form-group">
+                    <label style={{ color: '#2e1f0f', fontWeight: '800', marginBottom: '8px', display: 'block' }}>URL de YouTube</label>
+                    <input type="url" className="admin-input"
+                      value={v.link_yt}
+                      onChange={e => handleVideoChange(v.id, 'link_yt', e.target.value)}
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      style={{ marginBottom:'10px', fontSize:'0.82rem' }} />
+                  </div>
+
+                  <div className="admin-form-group">
+                    <label style={{ color: '#2e1f0f', fontWeight: '800', marginBottom: '8px', display: 'block' }}>Descripción del Video</label>
+                    <textarea className="admin-input" rows="3"
+                      value={v.descripcion || ''}
+                      onChange={e => handleVideoChange(v.id, 'descripcion', e.target.value)}
+                      placeholder="Explica qué se muestra en este video..."
+                      style={{ resize:'none', marginBottom:'14px', fontSize:'0.82rem' }} />
+                  </div>
+
+                  <div style={{ display:'flex', gap:'8px' }}>
+                    <button
+                      onClick={() => saveVideoData(v)}
+                      disabled={savingVidId === v.id}
+                      style={{ flex:1, background:'var(--color-gold)', border:'none', color:'#1a3d4a', borderRadius:'6px', padding:'8px', cursor:'pointer', fontSize:'0.82rem', fontWeight:700 }}>
+                      {savingVidId === v.id ? '...' : '💾 Guardar'}
+                    </button>
+                    <button
+                      onClick={() => deleteVideo(v.id)}
+                      style={{ background:'rgba(217,83,79,0.1)', border:'1px solid #d9534f', color:'#d9534f', borderRadius:'6px', padding:'8px', cursor:'pointer', fontSize:'0.82rem' }}>
+                      🗑️
+                    </button>
+                  </div>
                 </div>
               </div>
             )
@@ -1466,10 +1634,10 @@ function AdminDestacados({ adminId }) {
     })
       .then(r => r.json())
       .then(d => {
-        if (d.success) alert('✅ Guardado correctamente.')
-        else alert('❌ Error al guardar.')
+        if (d.success) toast.success('✅ Guardado correctamente.')
+        else toast.error('❌ Error al guardar.')
       })
-      .catch(e => alert('❌ ' + e.message))
+      .catch(e => toast.error('❌ ' + e.message))
       .finally(() => setSaving(false))
   }
 
@@ -1777,7 +1945,7 @@ function AdminModeracion({ adminId }) {
 
   useEffect(() => { loadData() }, [])
 
-  const handleDelete = (e) => {
+  const handleDelete = async (e) => {
     e.preventDefault()
     if (!postToRemove || !deleteReason) return
     
@@ -1794,15 +1962,15 @@ function AdminModeracion({ adminId }) {
     .then(r => r.json())
     .then(d => {
       if (d.success) {
-        alert('Publicación eliminada correctamente. Correo de advertencia enviado.')
+        toast.success('Publicación eliminada correctamente. Correo de advertencia enviado.')
         setPostToRemove(null)
         setDeleteReason('')
         loadData()
       } else {
-        alert('Error: ' + d.error)
+        toast.error('Error: ' + d.error)
       }
     })
-    .catch(e => alert(e.message))
+    .catch(e => toast.info(e.message))
     .finally(() => setIsDeleting(false))
   }
 
@@ -1931,6 +2099,260 @@ function AdminModeracion({ adminId }) {
         onLike={() => {}} 
         onTagClick={() => {}} 
       />
+    </div>
+  )
+}
+
+// ── SECCIÓN: Promociones Home ─────────────────────────────────
+const PROMOS_API = '/api/admin'
+
+function AdminPromos({ adminId }) {
+  const [promos, setPromos] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [imgPreview, setImgPreview] = useState(null)
+
+  const emptyForm = { id: null, titulo: '', link_url: '', orden: 0 }
+  const [form, setForm] = useState(emptyForm)
+  const [imgFile, setImgFile] = useState(null)
+
+  const loadData = () => {
+    setLoading(true)
+    authFetch(`${PROMOS_API}/promos.php`)
+      .then(r => r.json())
+      .then(d => setPromos(d.promos || []))
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => { loadData() }, [])
+
+  const handleImgChange = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setImgFile(file)
+    const reader = new FileReader()
+    reader.onload = ev => setImgPreview(ev.target.result)
+    reader.readAsDataURL(file)
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!form.titulo || !form.link_url) return toast.info('Nombre y Link son obligatorios.')
+    if (!imgFile && !form.id) return toast.info('La Imagen es obligatoria.')
+    setSaving(true)
+
+    const fd = new FormData()
+    Object.entries(form).forEach(([k, v]) => fd.append(k, v))
+    fd.append('adminId', adminId)
+    if (imgFile) fd.append('imagen', imgFile)
+
+    try {
+      const token = localStorage.getItem('austral_auth_token')
+      const r = await fetch(`${PROMOS_API}/promos.php`, {
+        method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        body: fd
+      })
+      const d = await r.json()
+      if (d.success) {
+        setShowForm(false)
+        setForm(emptyForm)
+        setImgFile(null)
+        setImgPreview(null)
+        loadData()
+      } else {
+        toast.error(d.error || 'Error al guardar.')
+      }
+    } catch(err) {
+      toast.error('Error de conexión: ' + err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const toggleActivo = async (id) => {
+    authFetch(`${PROMOS_API}/promos.php`, {
+      method: 'PUT',
+      body: JSON.stringify({ id, action: 'toggle_activo' })
+    }).then(() => loadData())
+  }
+
+  const handleDelete = async (id) => {
+    if (!await confirmDialog('¿Eliminar esta promoción?')) return
+    authFetch(`${PROMOS_API}/promos.php`, {
+      method: 'DELETE',
+      body: JSON.stringify({ id, adminId })
+    }).then(() => loadData())
+  }
+
+  const handleEdit = (p) => {
+    setForm({
+      id: p.id,
+      titulo: p.titulo,
+      link_url: p.link_url,
+      orden: p.orden
+    })
+    setImgPreview(p.imagen_url ? `${BASE_URL}/${p.imagen_url}` : null)
+    setImgFile(null)
+    setShowForm(true)
+  }
+
+  return (
+    <div className="admin-section">
+      <div className="admin-sec-header">
+        <h2 className="admin-sec-title">🌟 Promociones del Home</h2>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button className="btn-primary btn-sm" onClick={() => { setShowForm(true); setForm(emptyForm); setImgPreview(null); setImgFile(null); }}>
+            ➕ Agregar Promoción
+          </button>
+        </div>
+      </div>
+
+      <div style={{ padding: '12px 18px', background: 'rgba(45,110,126,0.1)', border: '1px solid rgba(45,110,126,0.3)', borderRadius: '10px', marginBottom: '24px', color: 'rgba(240,228,204,0.85)' }}>
+        <strong style={{ color: '#dfc08a' }}>Nota:</strong> Las promociones que agregues aquí se mostrarán automáticamente de forma simultánea en las 3 secciones de prueba del Home (Carrusel, Panel Lateral y Tarjetas Inferiores).
+      </div>
+
+      {/* Modal de formulario */}
+      {showForm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <form
+            onSubmit={handleSubmit}
+            style={{ width: '560px', maxHeight: '90vh', overflowY: 'auto', background: '#0d2830', border: '1px solid var(--color-gold)', borderRadius: '14px', padding: '2rem', boxShadow: '0 20px 60px rgba(0,0,0,0.7)' }}
+          >
+            <h3 style={{ borderBottom: '1px solid rgba(255,215,0,0.3)', paddingBottom: '12px', marginBottom: '22px', color: '#ffd700', fontSize: '1.3rem' }}>
+              {form.id ? '✏️ Editar Promoción' : '🌟 Nueva Promoción'}
+            </h3>
+
+            <div className="admin-form-group">
+              <label>Nombre de la Promoción (control interno) *</label>
+              <input type="text" className="admin-input" required placeholder="Ej: Tienda Oficial"
+                value={form.titulo} onChange={e => setForm({...form, titulo: e.target.value})} />
+            </div>
+
+            <div className="admin-form-group">
+              <label>URL de destino (link externo) *</label>
+              <input type="url" className="admin-input" required placeholder="https://..."
+                value={form.link_url} onChange={e => setForm({...form, link_url: e.target.value})} />
+            </div>
+
+            <div className="admin-form-row">
+              <div className="admin-form-group">
+                <label>Orden (número bajo = primero)</label>
+                <input type="number" className="admin-input" min="0" max="99"
+                  value={form.orden} onChange={e => setForm({...form, orden: e.target.value})} />
+              </div>
+              <div className="admin-form-group">
+                <label>Imagen / Logo {form.id ? '(Opcional)' : '*'}</label>
+                <input type="file" className="admin-input" accept="image/*"
+                  required={!form.id}
+                  onChange={handleImgChange}
+                  style={{ padding: '6px' }}
+                />
+              </div>
+            </div>
+
+            {imgPreview && (
+              <div style={{ marginBottom: '16px', textAlign: 'center' }}>
+                <img src={imgPreview} alt="Preview" style={{ maxHeight: '100px', maxWidth: '100%', borderRadius: '8px', border: '1px solid rgba(201,168,76,0.3)' }} />
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              <button type="submit" className="btn-primary" disabled={saving} style={{ flex: 1 }}>
+                {saving ? 'Guardando...' : '💾 Guardar Promoción'}
+              </button>
+              <button type="button" className="btn-outline" onClick={() => setShowForm(false)} disabled={saving}>
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Tabla */}
+      {loading ? <Loading /> : (
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead><tr>
+              <th>Imagen</th>
+              <th>Nombre</th>
+              <th>Enlace</th>
+              <th style={{ textAlign: 'center' }}>Orden</th>
+              <th style={{ textAlign: 'center' }}>Activo</th>
+              <th style={{ textAlign: 'center' }}>Acciones</th>
+            </tr></thead>
+            <tbody>
+              {promos.length === 0 && (
+                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '24px', color: '#aaa' }}>No tienes promociones registradas. Usa el botón "Agregar Promoción".</td></tr>
+              )}
+              {promos.map(p => (
+                <tr key={p.id}>
+                  <td>
+                    {p.imagen_url
+                      ? <img src={`${BASE_URL}/${p.imagen_url}`} alt={p.titulo} style={{ width: '44px', height: '44px', objectFit: 'cover', borderRadius: '6px', border: '1px solid rgba(201,168,76,0.3)' }} />
+                      : <span style={{ color: '#aaa', fontSize: '0.75rem' }}>Sin imagen</span>
+                    }
+                  </td>
+                  <td><strong>{p.titulo}</strong></td>
+                  <td>
+                    <a href={p.link_url} target="_blank" rel="noreferrer"
+                      style={{ color: '#4ac9e3', fontSize: '0.75rem', textDecoration: 'underline', wordBreak: 'break-all', maxWidth: '140px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                    >{p.link_url}</a>
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <span style={{ fontFamily: 'var(--font-heading)', fontWeight: '700', color: '#dfc08a' }}>{p.orden}</span>
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                      <button
+                        className={`act-btn ${parseInt(p.activo) ? 'act-gold' : ''}`}
+                        onClick={() => toggleActivo(p.id)}
+                        title={parseInt(p.activo) ? 'Desactivar' : 'Activar'}
+                        style={{
+                          width: '36px', height: '36px', fontSize: '1.1rem',
+                          background: parseInt(p.activo) ? '#ffd700' : 'rgba(255,255,255,0.08)',
+                          border: '1px solid rgba(201,168,76,0.4)',
+                          borderRadius: '8px', cursor: 'pointer',
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center'
+                        }}
+                      >
+                        {parseInt(p.activo) ? '✅' : '⚪'}
+                      </button>
+                      <button
+                        className="act-btn"
+                        onClick={() => handleEdit(p)}
+                        title="Editar"
+                        style={{
+                          width: '36px', height: '36px', fontSize: '1.1rem',
+                          background: 'rgba(45,110,126,0.3)', border: '1px solid rgba(45,110,126,0.5)',
+                          color: '#fff', borderRadius: '8px', cursor: 'pointer',
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center'
+                        }}
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className="act-btn act-red"
+                        onClick={() => handleDelete(p.id)}
+                        title="Eliminar"
+                        style={{
+                          width: '36px', height: '36px', fontSize: '1.1rem',
+                          background: '#c0392b', border: '1px solid #000',
+                          color: '#fff', borderRadius: '8px', cursor: 'pointer',
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center'
+                        }}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }

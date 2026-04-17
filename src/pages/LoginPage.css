@@ -42,25 +42,59 @@
   backdrop-filter: blur(10px);
 }
 
+.login-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2rem;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.login-brand:hover {
+  transform: scale(1.05);
+}
+
 .login-logo {
-  max-width: 120px;
-  margin-bottom: 1.5rem;
-  filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+  max-width: 140px;
+  height: auto;
+  filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.4));
+}
+
+.login-brand-text {
+  font-family: var(--font-title);
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: flex;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.title-austral {
+  color: #a8d4e0;
+}
+
+.title-collector {
+  color: #8b2020;
 }
 
 .login-title {
   font-family: var(--font-title);
   color: #dfc08a;
-  font-size: 2.2rem;
+  font-size: 1.6rem;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 2px;
 }
 
 .login-subtitle {
-  color: #f0e4cc !important;
-  font-size: 0.95rem;
+  color: rgba(240, 228, 204, 0.7) !important;
+  font-size: 0.85rem;
   margin-bottom: 2rem;
+  font-style: italic;
 }
 
 .login-tabs {

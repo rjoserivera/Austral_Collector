@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { toast, confirmDialog } from '../contexts/NotificationContext.jsx'
 import './CreatePostModal.css'
 import { API_URL, BASE_URL } from '../config.js'
 import { savePostOffline, fileToBase64 } from '../utils/offlineSync'
@@ -25,8 +26,10 @@ export default function CreatePostModal({ isOpen, onClose, onSuccess, currentUse
   const dragItem = useRef(null)
   const dragOverItem = useRef(null)
 
-  // Pre-fill form when editing
+  // Pre-fill form when editing; reset cleanly when opening for a new post
   useEffect(() => {
+    if (!isOpen) return  // don't reset while the modal is closed
+
     if (editingPost) {
       setTipo(editingPost.tipo || 'figura')
       setNombre(editingPost.nombre || '')
@@ -57,6 +60,7 @@ export default function CreatePostModal({ isOpen, onClose, onSuccess, currentUse
       }
       setImages(loadedImages)
     } else {
+      // New post — always clear everything when modal opens
       setTipo('figura')
       setNombre('')
       setAnio('')
@@ -64,7 +68,7 @@ export default function CreatePostModal({ isOpen, onClose, onSuccess, currentUse
       setHashtags([])
       setImages([])
     }
-  }, [editingPost])
+  }, [isOpen, editingPost])
 
   // Cargar hashtags existentes para sugerencias
   useEffect(() => {
@@ -141,7 +145,7 @@ export default function CreatePostModal({ isOpen, onClose, onSuccess, currentUse
     const newImages = []
     files.forEach(file => {
       if (file.size > 5 * 1024 * 1024) {
-        alert(`La imagen ${file.name} supera los 5MB.`)
+        toast.info(`La imagen ${file.name} supera los 5MB.`)
         return
       }
       newImages.push({
@@ -199,11 +203,11 @@ export default function CreatePostModal({ isOpen, onClose, onSuccess, currentUse
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!nombre) {
-      alert('El nombre es obligatorio.')
+      toast.info('El nombre es obligatorio.')
       return
     }
     if (images.length === 0) {
-      alert('Debes agregar al menos una imagen (portada).')
+      toast.info('Debes agregar al menos una imagen (portada).')
       return
     }
 
@@ -235,11 +239,11 @@ export default function CreatePostModal({ isOpen, onClose, onSuccess, currentUse
         }
 
         await savePostOffline(offlineData)
-        alert('🌐 Sin Conexión: Tu publicación ha sido guardada en la memoria local. Se subirá automáticamente cuando recuperes el internet.')
+        toast.info('🌐 Sin Conexión: Tu publicación ha sido guardada en la memoria local. Se subirá automáticamente cuando recuperes el internet.')
         onSuccess()
         onClose()
       } catch (err) {
-        alert('Error al guardar localmente: ' + err.message)
+        toast.error('Error al guardar localmente: ' + err.message)
       } finally {
         setIsSubmitting(false)
       }
@@ -289,10 +293,10 @@ export default function CreatePostModal({ isOpen, onClose, onSuccess, currentUse
           onSuccess()
           onClose()
         } else {
-          alert('Error: ' + (d.error || 'Error desconocido al guardar.'))
+          toast.error('Error: ' + (d.error || 'Error desconocido al guardar.'))
         }
       })
-      .catch(e => alert(e.message))
+      .catch(e => toast.info(e.message))
       .finally(() => setIsSubmitting(false))
   }
 

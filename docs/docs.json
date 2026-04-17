@@ -19,7 +19,8 @@
             "pages": [
               "index",
               "instalacion",
-              "arquitectura"
+              "arquitectura",
+              "flowchart"
             ]
           },
           {

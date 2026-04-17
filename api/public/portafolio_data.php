@@ -9,26 +9,13 @@ try {
     $stmt = $pdo->query("SELECT * FROM galeria_portafolio ORDER BY orden ASC, id ASC");
     $galeria = $stmt->fetchAll();
 
-    // 2. Configuración (videos + imagen comunidad)
-    $stmt2 = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave LIKE 'portafolio_%'");
-    $configRows = $stmt2->fetchAll();
-    $config = [];
-    foreach ($configRows as $row) {
-        $config[$row['clave']] = $row['valor'];
-    }
+    // 2. Videos dinámicos (Nueva Tabla)
+    $stmtV = $pdo->query("SELECT * FROM videos_portafolio ORDER BY orden ASC, id ASC");
+    $videos = $stmtV->fetchAll();
 
-    // Armar lista de videos
-    $videos = [];
-    for ($i = 1; $i <= 4; $i++) {
-        $key = "portafolio_video_{$i}";
-        if (!empty($config[$key])) {
-            $videos[] = [
-                'id'      => $i,
-                'link_yt' => $config[$key],
-                'titulo'  => "Video {$i}"
-            ];
-        }
-    }
+    // 3. Configuración (imagen comunidad)
+    $stmt2 = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave = 'portafolio_comunidad'");
+    $config = $stmt2->fetch();
 
     echo json_encode([
         'success'       => true,

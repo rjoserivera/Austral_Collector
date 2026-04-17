@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { toast, confirmDialog } from '../contexts/NotificationContext.jsx'
 import './GaleriaPage.css'
 import PostModal from '../components/PostModal'
 import { API_URL, BASE_URL } from '../config.js'
@@ -106,7 +107,7 @@ export default function GaleriaPage() {
 
   const handleLike = (id) => {
     if (!currentUser) {
-      alert('Debes iniciar sesión para dar me gusta.')
+      toast.info('Debes iniciar sesión para dar me gusta.')
       return
     }
 
@@ -130,7 +131,7 @@ export default function GaleriaPage() {
           }))
         }
       } else {
-        alert(d.error || 'Error al procesar el like.')
+        toast.error(d.error || 'Error al procesar el like.')
       }
     })
     .catch(e => console.error("Error toggling like:", e))
