@@ -26,14 +26,15 @@ git clone https://ruta-de-tu-repositorio.git
 ```
 *(Luego, asegúrate de entrar en la carpeta clonada con `cd Austral Collector`)*
 
-### 2. Instalar las Dependencias (Solo la primera vez)
-Como esto está construido sobre React (Vite.js) y React-Router, las carpetas pesadas no se suben a Git (`node_modules`). Para instalarlas mágicamente, corre este comando:
+### 2. Instalación Automática (Un solo paso)
+Para configurar todo automáticamente (Node, Python y avisos de DB), simplemente ejecuta el archivo setup:
 ```bash
-npm install
+setup.bat
 ```
+*(Este comando instalará las dependencias de React y Python por ti).*
 
 ### 3. Iniciar el Servidor de Desarrollo
-Una vez que `npm install` haya finalizado al 100%, debes levantar el entorno visual con la terminal:
+Una vez que el setup haya finalizado, puedes levantar el entorno visual:
 ```bash
 npm run dev
 ```
