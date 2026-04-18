@@ -2202,7 +2202,7 @@ function AdminPromos({ adminId }) {
   return (
     <div className="admin-section">
       <div className="admin-sec-header">
-        <h2 className="admin-sec-title">🌟 Promociones del Home</h2>
+        <h2 className="admin-sec-title">🌟 Promociones</h2>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <button className="btn-primary btn-sm" onClick={() => { setShowForm(true); setForm(emptyForm); setImgPreview(null); setImgFile(null); }}>
             ➕ Agregar Promoción
@@ -2298,11 +2298,11 @@ function AdminPromos({ adminId }) {
                   <td><strong>{p.titulo}</strong></td>
                   <td>
                     <a href={p.link_url} target="_blank" rel="noreferrer"
-                      style={{ color: '#4ac9e3', fontSize: '0.75rem', textDecoration: 'underline', wordBreak: 'break-all', maxWidth: '140px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      style={{ color: '#1e4d5a', fontWeight: 'bold', fontSize: '0.75rem', textDecoration: 'underline', wordBreak: 'break-all', maxWidth: '140px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                     >{p.link_url}</a>
                   </td>
                   <td style={{ textAlign: 'center' }}>
-                    <span style={{ fontFamily: 'var(--font-heading)', fontWeight: '700', color: '#dfc08a' }}>{p.orden}</span>
+                    <span style={{ fontFamily: 'var(--font-heading)', fontWeight: '700', color: '#1e4d5a', fontSize: '1.1rem' }}>{p.orden}</span>
                   </td>
                   <td style={{ textAlign: 'center' }}>
                     <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
@@ -2320,6 +2320,10 @@ function AdminPromos({ adminId }) {
                       >
                         {parseInt(p.activo) ? '✅' : '⚪'}
                       </button>
+                    </div>
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
                       <button
                         className="act-btn"
                         onClick={() => handleEdit(p)}

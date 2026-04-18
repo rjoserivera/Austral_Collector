@@ -68,6 +68,9 @@ export default function MiembrosPage() {
                 <div className="mi-card-stat" title="Total de Me Gusta recibidos">
                   <span>{m.total_likes}</span> ❤️
                 </div>
+                <div className="mi-card-stat" title="Puntuación de la comunidad">
+                  <span>{m.total_ratings}</span> ⭐
+                </div>
               </div>
             </div>
           </article>

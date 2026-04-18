@@ -13,7 +13,8 @@ try {
                 u.role, 
                 u.biografia,
                 (SELECT COUNT(*) FROM posts WHERE user_id = u.id) as total_posts,
-                (SELECT COUNT(*) FROM likes WHERE post_id IN (SELECT id FROM posts WHERE user_id = u.id)) as total_likes
+                (SELECT COUNT(*) FROM likes WHERE post_id IN (SELECT id FROM posts WHERE user_id = u.id)) as total_likes,
+                (SELECT COUNT(*) FROM perfil_ratings WHERE rated_user_id = u.id) as total_ratings
             FROM usuarios u
             WHERE u.is_active = 1
             ORDER BY u.created_at DESC";

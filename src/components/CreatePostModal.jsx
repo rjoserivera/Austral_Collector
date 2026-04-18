@@ -290,6 +290,7 @@ export default function CreatePostModal({ isOpen, onClose, onSuccess, currentUse
       .then(r => r.json())
       .then(d => {
         if (d.success) {
+          toast.success(isEditing ? '¡Publicación editada correctamente!' : '¡Publicación subida con éxito! 🎉')
           onSuccess()
           onClose()
         } else {

@@ -21,7 +21,7 @@ try {
         'success'       => true,
         'galeria'       => $galeria,
         'videos'        => $videos,
-        'comunidad_img' => $config['portafolio_comunidad'] ?? '',
+        'comunidad_img' => $config['valor'] ?? '',
     ]);
 
 } catch (PDOException $e) {

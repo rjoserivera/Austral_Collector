@@ -679,64 +679,12 @@ export default function HomePage() {
           </div>
 
 
-          {/* ── Sidebar Promos ── */}
-          {data.promos?.length > 0 && (
-            <div className="hp-sidebar-panel card" id="sidebar-promos">
-              <div className="hp-sidebar-promos" style={{ marginTop: '12px' }}>
-                {data.promos.map(p => (
-                  <a
-                    key={p.id}
-                    href={p.link_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hp-sidebar-promo-link"
-                    title={p.titulo}
-                    style={{ padding: 0, border: 'none', background: 'transparent' }}
-                  >
-                    {p.imagen_url
-                      ? <img src={`${BASE_URL}/${p.imagen_url}`} alt={p.titulo} style={{ width: '100%', height: 'auto', borderRadius: '10px', display: 'block', border: '1px solid rgba(45,110,126,0.2)' }} />
-                      : <div style={{ width: '100%', padding: '20px', textAlign: 'center', background: 'rgba(45,110,126,0.1)', borderRadius: '10px', border: '1px solid rgba(45,110,126,0.2)', color: '#dfc08a' }}>🔗 {p.titulo}</div>
-                    }
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
+
 
         </aside>
       </div>
 
-      {/* ── FEATURED BOTTOM SECTION (CARRUSEL INFERIOR) ──────────────────────── */}
-      {data.promos?.length > 0 && (
-        <section className="hp-partners-section">
-          <div className="section-wrapper">
-          <div className="hp-partners-track-wrap">
-              <div className="hp-partners-track">
-                {(() => {
-                  const multiplyCount = Math.max(1, Math.ceil(12 / data.promos.length));
-                  const loopHalf = Array(multiplyCount).fill(data.promos).flat();
-                  const fullTrack = [...loopHalf, ...loopHalf];
-                  return fullTrack.map((p, i) => (
-                    <a
-                      key={`partner-bottom-${p.id}-${i}`}
-                      className="hp-partner-chip"
-                      href={p.link_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={p.titulo}
-                    >
-                      {p.imagen_url
-                        ? <img src={`${BASE_URL}/${p.imagen_url}`} alt={p.titulo} />
-                        : <span style={{ width: '28px', height: '28px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '6px', background: 'rgba(45,110,126,0.12)', border: '1px solid rgba(45,110,126,0.25)' }}>🔗</span>
-                      }
-                    </a>
-                  ));
-                })()}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+
 
       <PostModal 
         post={selectedPost} 

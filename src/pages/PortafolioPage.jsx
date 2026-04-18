@@ -71,7 +71,7 @@ export default function PortafolioPage() {
             </h1>
             <p className="pp-hero-subtitle">Portafolio Austral Collector</p>
             <div className="gold-divider" style={{ width: '220px', margin: '14px 0 22px' }}/>
-            <button onClick={() => toast.info("Función de registro aún no implementada.")} id="pp-btn-unirse" className="btn-primary pp-hero-btn">Unirse</button>
+            <button onClick={() => window.location.href='/login?mode=register'} id="pp-btn-unirse" className="btn-primary pp-hero-btn" style={{ padding: "12px 32px", fontSize: "0.95rem", fontWeight: "800", letterSpacing: "0.1em", background: "var(--color-red)", boxShadow: "0 8px 32px rgba(139, 32, 32, 0.5)", color: "#ffffff" }}>Unirse</button>
           </div>
         </div>
       </section>
@@ -168,12 +168,12 @@ export default function PortafolioPage() {
           <div className="pp-comunidad-content">
             <h2 className="pp-comunidad-title">Únete a la Comunidad</h2>
             <p className="pp-comunidad-desc">Comparte tu colección con otros apasionados.</p>
-            <button onClick={() => toast.info("Función de registro aún no implementada.")} id="pp-btn-comunidad" className="btn-primary pp-comunidad-btn">Unirse</button>
+            <button onClick={() => window.location.href='/login?mode=register'} id="pp-btn-comunidad" className="btn-primary pp-comunidad-btn" style={{ textAlign: "center", textDecoration: "none", display: "inline-block", padding: "14px 40px", fontSize: "1.1rem", fontWeight: "800", letterSpacing: "0.05em", background: "var(--color-red)", boxShadow: "0 8px 30px rgba(139, 32, 32, 0.5)", color: "#ffffff" }}>Unirse a la Comunidad</button>
           </div>
           <div className="pp-comunidad-image" aria-hidden="true">
             {comunidadImg ? (
               <img
-                src={comunidadImg.startsWith('uploads/') ? `http://localhost/Austral_Collector/${comunidadImg}` : comunidadImg}
+                src={comunidadImg.startsWith('uploads/') ? `${BASE_URL}/${comunidadImg}` : comunidadImg}
                 alt="Comunidad de coleccionistas"
                 className="pp-comunidad-img"
                 onError={e => e.target.style.display='none'}
