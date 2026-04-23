@@ -25,20 +25,23 @@ Plataforma web comunitaria para coleccionistas chilenos de figuras vintage, jugu
 - [XAMPP](https://www.apachefriends.org/) con Apache y MySQL activos
 
 ### 1. Clonar el repositorio
+Es muy importante que la carpeta se llame exactamente `Austral_Collector` para que las rutas de la API en XAMPP funcionen correctamente.
 ```bash
-git clone https://github.com/tu-usuario/austral-collector.git
-cd "austral-collector"
+git clone https://github.com/tu-usuario/austral-collector.git Austral_Collector
+cd Austral_Collector
 ```
 
 ### 2. Instalar dependencias
+Puedes usar el instalador automático que configurará Node.js y Python:
 ```bash
-npm install
+setup.bat
 ```
+(O manualmente con `npm install --legacy-peer-deps`)
 
 ### 3. Configurar la base de datos
 - Abre `http://localhost/phpmyadmin`
 - Crea una base de datos llamada `austral_collector_db`
-- Importa el archivo `db_backup.sql` que está en la raíz del proyecto
+- Importa el archivo `austral_collector_backup.sql` que debes subir a la raíz del proyecto.
 
 ### 4. Iniciar el servidor de desarrollo
 ```bash

@@ -48,8 +48,8 @@ npm run dev
 **Tecnología Usada:** React + Vite + Vanilla CSS.
 
 - **Frontend (Visual): 100% Completado.** Carruseles, modales emergentes oscuros, paneles laterales, tipografías variables, etc.
-- **Datos (Mock Data):** Por el momento, la carga de Figuras, Usuarios y Noticias funciona mediante **Mock Arrays** (Datos simulados falsos incrustados en los componentes de las páginas) alojados en las carpetas `src/pages` y `src/components`. NO requiere base de datos de MySQL para arrancar y lucirse.
-- **Backend (PHP/MySQL):** Aún no se conecta mediante API `fetch()` al servidor XAMPP, el enlazado será el último paso.
-- Todos los assets visuales (fotos, logos, mascotas) viven seguros en la carpeta `/public` y están referenciados de manera relativa, por lo que **funcionan de maravilla en cualquier computadora que ejecute estos comandos**.
+- **Backend (PHP/MySQL):** Ya está conectado mediante llamadas API a la base de datos de XAMPP.
+- Para que los datos dinámicos carguen correctamente (usuarios, figuras, galería), **es obligatorio tener XAMPP encendido e importar la base de datos** (`austral_collector_backup.sql`).
+- Todos los assets visuales fijos (fotos, logos, mascotas) viven seguros en la carpeta `/public`.
 
 🏆 **¡Que disfrutes tu recorrido por el coleccionismo oscuro y los juguetes de tu infancia!**
