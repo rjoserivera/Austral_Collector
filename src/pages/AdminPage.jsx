@@ -283,7 +283,7 @@ function AdminUsuarios({ adminId }) {
     const fd = new FormData()
     fd.append('badge', file)
     fd.append('user_id', userId)
-    const res = await fetch(`${API_URL}/admin/verificacion_badge.php`, {
+    const res = await fetch(`${API_URL}/verificacion_badge.php`, {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: fd
@@ -364,7 +364,7 @@ function AdminUsuarios({ adminId }) {
 
   const sendTempKey = async (user) => {
     if (!await confirmDialog(`¿Generar y enviar clave temporal a ${user.email || 'sin email'}?`)) return
-    fetch(`http://localhost/Austral_Collector/api/auth/enviar_clave_temporal.php`, {
+    fetch(`${BASE_URL}/api/auth/enviar_clave_temporal.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: user.id })
