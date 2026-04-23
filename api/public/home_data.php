@@ -15,6 +15,7 @@ try {
 
     // 1. Latest posts (Ultimas) - Only Figuras
     $stmtUltimas = $pdo->prepare("SELECT p.*, u.username as autor, u.avatar_url as autor_avatar,
+        u.verification_type as autor_verification_type, u.verification_badge as autor_verification_badge,
         (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as total_likes,
         (SELECT 1 FROM likes WHERE user_id = ? AND post_id = p.id) as userLiked
         FROM posts p JOIN usuarios u ON p.user_id = u.id 
@@ -25,6 +26,7 @@ try {
 
     // 2. Most voted (Votadas) - Only Figuras
     $stmtVotadas = $pdo->prepare("SELECT p.*, u.username as autor, u.avatar_url as autor_avatar,
+        u.verification_type as autor_verification_type, u.verification_badge as autor_verification_badge,
         (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as total_likes,
         (SELECT 1 FROM likes WHERE user_id = ? AND post_id = p.id) as userLiked
         FROM posts p JOIN usuarios u ON p.user_id = u.id 
@@ -86,6 +88,7 @@ try {
 
     // 6. Latest Cosplays
     $stmtCosplay = $pdo->prepare("SELECT p.*, u.username as autor, u.avatar_url as autor_avatar,
+        u.verification_type as autor_verification_type, u.verification_badge as autor_verification_badge,
         (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as total_likes,
         (SELECT 1 FROM likes WHERE user_id = ? AND post_id = p.id) as userLiked
         FROM posts p JOIN usuarios u ON p.user_id = u.id WHERE p.tipo = 'cosplay' ORDER BY p.created_at DESC LIMIT 4");

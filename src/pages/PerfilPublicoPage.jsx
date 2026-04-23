@@ -5,6 +5,7 @@ import './PerfilPublicoPage.css'
 import { API_URL, BASE_URL } from '../config.js'
 import CreatePostModal from '../components/CreatePostModal'
 import { getOfflinePosts } from '../utils/offlineSync'
+import VerifiedBadge from '../components/VerifiedBadge'
 
 export default function PerfilPublicoPage() {
   const { id } = useParams()
@@ -179,7 +180,10 @@ export default function PerfilPublicoPage() {
           </div>
           <div className="perfil-user-details">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              <h1 className="perfil-name" style={{ margin: 0 }}>{user.username}</h1>
+              <h1 className="perfil-name" style={{ margin: 0 }}>
+                {user.username}
+                <VerifiedBadge type={user.verification_type} badgeUrl={user.verification_badge} size={26} />
+              </h1>
               
               <div 
                 className="perfil-global-rating" 

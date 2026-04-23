@@ -85,10 +85,10 @@ export default function AdminPage() {
 
         <div className="admin-sidebar-footer">
           <img
-            src={adminAvatar ? `${BASE_URL}/${adminAvatar}` : '/logo_cabeza_sin_fondo.PNG'}
+            src={adminAvatar ? `${BASE_URL}/${adminAvatar}` : '/logo_sin_fondo.png'}
             alt={userName}
             className="asf-avatar"
-            onError={e => { e.currentTarget.src = '/logo_cabeza_sin_fondo.PNG' }}
+            onError={e => { e.currentTarget.src = '/logo_sin_fondo.png' }}
           />
           <div>
             <strong className="asf-name">{userName}</strong>
@@ -208,18 +208,21 @@ function AdminUsuarios({ adminId }) {
   const [usuarios, setUsuarios] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [keyResult, setKeyResult] = useState(null) // { username, temp_pass, email, mail_sent }
-  const [messageModal, setMessageModal] = useState(null) // { user_id, username, email, mass: bool }
+  const [keyResult, setKeyResult] = useState(null)
+  const [messageModal, setMessageModal] = useState(null)
   const [messageForm, setMessageForm] = useState({ asunto: '', mensaje: '' })
   const [isSendingMsg, setIsSendingMsg] = useState(false)
-  
+
   // Form handling (Create / Edit)
-  const [formMode, setFormMode] = useState(null) // null | 'create' | 'edit'
+  const [formMode, setFormMode] = useState(null)
   const [editingId, setEditingId] = useState(null)
-  
+  const [badgeFile, setBadgeFile] = useState(null)     // File object for external badge
+  const [badgePreview, setBadgePreview] = useState(null) // object URL preview
+
   const initialForm = {
     username: '', email: '', password: '', role: 'user',
-    nombre: '', apellido: '', fecha_nacimiento: '', is_active: 1
+    nombre: '', apellido: '', fecha_nacimiento: '', is_active: 1,
+    verification_type: 'none', verification_badge: null
   }
   const [formData, setFormData] = useState(initialForm)
   const [isSaving, setIsSaving] = useState(false)
@@ -236,6 +239,8 @@ function AdminUsuarios({ adminId }) {
 
   const openForm = (mode, user = null) => {
     setFormMode(mode)
+    setBadgeFile(null)
+    setBadgePreview(null)
     if (mode === 'edit' && user) {
       setEditingId(user.id)
       setFormData({
@@ -246,8 +251,11 @@ function AdminUsuarios({ adminId }) {
         fecha_nacimiento: user.fecha_nacimiento || '',
         role: user.role,
         is_active: user.is_active,
-        password: '' // empty so we don't overwrite if not typed
+        password: '',
+        verification_type: user.verification_type || 'none',
+        verification_badge: user.verification_badge || null
       })
+      if (user.verification_badge) setBadgePreview(`http://localhost/Austral_Collector/${user.verification_badge}`)
     } else {
       setEditingId(null)
       setFormData(initialForm)
@@ -270,7 +278,20 @@ function AdminUsuarios({ adminId }) {
       .catch(err => console.error('Error al copiar:', err));
   }
 
-  const submitForm = (e) => {
+  const uploadBadge = async (userId, file) => {
+    const token = localStorage.getItem('austral_auth_token')
+    const fd = new FormData()
+    fd.append('badge', file)
+    fd.append('user_id', userId)
+    const res = await fetch(`${API_URL}/admin/verificacion_badge.php`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: fd
+    })
+    return res.json()
+  }
+
+  const submitForm = async (e) => {
     e.preventDefault()
     if (!formData.username || !formData.email || (formMode === 'create' && !formData.password)) {
       toast.info('Usuario, email y contraseña (en creación) son obligatorios.')
@@ -280,20 +301,26 @@ function AdminUsuarios({ adminId }) {
       toast.info('La contraseña debe tener al menos 6 caracteres.')
       return
     }
-    
+
     setIsSaving(true)
-    const payload = formMode === 'create' ? { ...formData, adminId } : { id: editingId, action: 'update_user', ...formData, adminId }
+    const payload = formMode === 'create'
+      ? { ...formData, adminId }
+      : { id: editingId, action: 'update_user', ...formData, adminId }
     const method = formMode === 'create' ? 'POST' : 'PUT'
-    
-    authFetch(`${API_URL}/usuarios.php`, {
-      method,
-      body: JSON.stringify(payload)
-    })
-    .then(r => r.json())
-    .then(d => {
-      if(d.success) {
-        if(formMode === 'create') {
-          // Si es creación, mostrar modal de éxito con la clave
+
+    try {
+      const res = await authFetch(`${API_URL}/usuarios.php`, { method, body: JSON.stringify(payload) })
+      const d = await res.json()
+      if (d.success) {
+        // Upload badge if external type + file selected
+        const targetId = formMode === 'create' ? d.id : editingId
+        if (formData.verification_type === 'external' && badgeFile && targetId) {
+          const bRes = await uploadBadge(targetId, badgeFile)
+          if (!bRes.success) toast.error('Usuario guardado, pero error al subir el badge: ' + bRes.error)
+          setBadgeFile(null)
+          setBadgePreview(null)
+        }
+        if (formMode === 'create') {
           setKeyResult(d)
         } else {
           toast.success('Usuario actualizado correctamente.')
@@ -303,8 +330,11 @@ function AdminUsuarios({ adminId }) {
       } else {
         toast.error(d.error)
       }
-    })
-    .finally(() => setIsSaving(false))
+    } catch(err) {
+      toast.error('Error de conexión: ' + err.message)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const updateFieldInline = (id, field, value) => {
@@ -522,6 +552,56 @@ function AdminUsuarios({ adminId }) {
                 </div>
               )}
             </div>
+
+            {/* ── Verificación ── */}
+            <div className="admin-form-row" style={{ alignItems: 'flex-start' }}>
+              <div className="admin-form-group">
+                <label>✅ Tipo de Verificación</label>
+                <select
+                  className="admin-select"
+                  value={formData.verification_type}
+                  onChange={e => {
+                    const vt = e.target.value
+                    setFormData({...formData, verification_type: vt, verification_badge: vt !== 'external' ? null : formData.verification_badge})
+                    if (vt !== 'external') { setBadgeFile(null); setBadgePreview(null) }
+                  }}
+                >
+                  <option value="none">Sin verificación</option>
+                  <option value="austral">⭐ Austral Collection (oficial)</option>
+                  <option value="external">🔗 Colaborador Externo</option>
+                </select>
+              </div>
+              {formData.verification_type === 'external' && (
+                <div className="admin-form-group">
+                  <label>🖼️ Badge del Colaborador (PNG/JPG, máx 2MB)</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    {badgePreview && (
+                      <img
+                        src={badgePreview}
+                        alt="Badge preview"
+                        style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: '50%', border: '2px solid var(--color-gold)', background: '#0d2830' }}
+                      />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      className="admin-input"
+                      style={{ flex: 1 }}
+                      onChange={e => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          setBadgeFile(file)
+                          setBadgePreview(URL.createObjectURL(file))
+                        }
+                      }}
+                    />
+                  </div>
+                  {formData.verification_badge && !badgeFile && (
+                    <span style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '4px', display: 'block' }}>Badge actual guardado ✓</span>
+                  )}
+                </div>
+              )}
+            </div>
             
             <div className="admin-form-actions">
               <button type="button" className="btn-outline btn-sm" onClick={() => setFormMode(null)} disabled={isSaving} style={{ borderColor: 'rgba(255,255,255,0.4)', color: '#fff' }}>
@@ -552,8 +632,16 @@ function AdminUsuarios({ adminId }) {
               <tr key={u.id}>
                 <td className="td-id">#{u.id}</td>
                 <td>
-                  <Link to={`/perfil/${u.id}`} className="admin-user-link" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <strong>{u.username}</strong>
+                  <Link to={`/perfil/${u.username}`} className="admin-user-link" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <strong style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      {u.username}
+                      {u.verification_type === 'austral' && (
+                        <img src="/logo_head.png" alt="Verificado" title="Verificado por Austral Collector" style={{ width: 16, height: 16, objectFit: 'contain', filter: 'drop-shadow(0 0 3px gold)' }} />
+                      )}
+                      {u.verification_type === 'external' && u.verification_badge && (
+                        <img src={`http://localhost/Austral_Collector/${u.verification_badge}`} alt="Externo" title="Colaborador Externo" style={{ width: 16, height: 16, objectFit: 'contain', borderRadius: '50%' }} />
+                      )}
+                    </strong>
                     {(u.nombre || u.apellido) && <div className="td-muted" style={{ fontSize: '0.7rem' }}>{u.nombre} {u.apellido}</div>}
                   </Link>
                 </td>

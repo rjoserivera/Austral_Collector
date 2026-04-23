@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './PostModal.css'
 import { API_URL, BASE_URL } from '../config.js'
+import VerifiedBadge from './VerifiedBadge'
 
 // Formatea la fecha en español: ej. "1 abr 2026 · 13:16"
 function formatDate(dateStr) {
@@ -104,7 +105,10 @@ export default function PostModal({ post, isOpen, onClose, onLike, onTagClick, i
                 {/* Perfil del Autor */}
                 <div className="pm-home-autor" title="Ir al perfil" style={{ cursor: 'pointer' }} onClick={handleAuthorClick}>
                   <img src={post.autor_avatar ? `${BASE_URL}/${post.autor_avatar}` : '/mock_avatar.png'} alt="Autor" className="pm-author-avatar-home" />
-                  <span className="pm-author-name-home">{post.autor_username || post.autor || 'Coleccionista'}</span>
+                  <span className="pm-author-name-home">
+                    {post.autor_username || post.autor || 'Coleccionista'}
+                    <VerifiedBadge type={post.autor_verification_type} badgeUrl={post.autor_verification_badge} size={16} />
+                  </span>
                 </div>
 
                 {/* Me gusta & Ver en Galeria */}
@@ -143,7 +147,10 @@ export default function PostModal({ post, isOpen, onClose, onLike, onTagClick, i
               <div className="pm-user-row" style={{ cursor: 'pointer' }} onClick={handleAuthorClick}>
                 <img src={post.autor_avatar ? `${BASE_URL}/${post.autor_avatar}` : '/mock_avatar.png'} alt="Autor" className="pm-author-avatar" />
                 <div className="pm-author-info">
-                  <span className="pm-author-name">{post.autor_username || post.autor || 'Coleccionista'}</span>
+                  <span className="pm-author-name">
+                    {post.autor_username || post.autor || 'Coleccionista'}
+                    <VerifiedBadge type={post.autor_verification_type} badgeUrl={post.autor_verification_badge} size={17} />
+                  </span>
                   <span className="pm-post-time">{formatDate(post.created_at || post.createdAt)}</span>
                 </div>
               </div>

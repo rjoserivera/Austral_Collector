@@ -80,7 +80,7 @@ function addWatermark($targetPath)
 
     // ── 4. Composite watermark onto target image ─────────────
     $margin = 12;
-    $destX  = $tw - $newWmW - $margin;
+    $destX  = $margin;
     $destY  = $th - $newWmH - $margin;
 
     imagealphablending($target, true);

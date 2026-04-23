@@ -12,6 +12,8 @@ try {
                 u.avatar_url, 
                 u.role, 
                 u.biografia,
+                u.verification_type,
+                u.verification_badge,
                 (SELECT COUNT(*) FROM posts WHERE user_id = u.id) as total_posts,
                 (SELECT COUNT(*) FROM likes WHERE post_id IN (SELECT id FROM posts WHERE user_id = u.id)) as total_likes,
                 (SELECT COUNT(*) FROM perfil_ratings WHERE rated_user_id = u.id) as total_ratings

@@ -11,8 +11,14 @@ if (empty($username)) {
     exit;
 }
 
-$stmt = $pdo->prepare("SELECT * FROM usuarios WHERE username = ?");
-$stmt->execute([$username]);
+// Accept either a username string or a numeric ID
+if (is_numeric($username)) {
+    $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE id = ?");
+    $stmt->execute([(int)$username]);
+} else {
+    $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE username = ?");
+    $stmt->execute([$username]);
+}
 $user = $stmt->fetch();
 
 if (!$user) {
@@ -86,18 +92,20 @@ if ($viewerId > 0) {
 echo json_encode([
     'success' => true,
     'data' => [
-        'id'              => $user['id'],
-        'username'        => $user['username'],
-        'email'           => $user['email'],
-        'nombre'          => $user['nombre'],
-        'apellido'        => $user['apellido'],
-        'biografia'       => $user['biografia'],
-        'avatar_url'      => $user['avatar_url'],
-        'banner_url'      => $user['banner_url'],
-        'role'            => $user['role'],
-        'fecha_nacimiento' => $user['fecha_nacimiento'],
-        'stats'           => $stats,
-        'collection'      => $posts
+        'id'                 => $user['id'],
+        'username'           => $user['username'],
+        'email'              => $user['email'],
+        'nombre'             => $user['nombre'],
+        'apellido'           => $user['apellido'],
+        'biografia'          => $user['biografia'],
+        'avatar_url'         => $user['avatar_url'],
+        'banner_url'         => $user['banner_url'],
+        'role'               => $user['role'],
+        'fecha_nacimiento'   => $user['fecha_nacimiento'],
+        'verification_type'  => $user['verification_type']  ?? 'none',
+        'verification_badge' => $user['verification_badge'] ?? null,
+        'stats'              => $stats,
+        'collection'         => $posts
     ]
 ]);
 ?>

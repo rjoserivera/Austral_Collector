@@ -1,0 +1,65 @@
+/* VerifiedBadge.css — Insignia de verificación */
+
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin-left: 5px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.verified-badge img {
+  display: block;
+  object-fit: contain;
+  border-radius: 50%;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  cursor: default;
+}
+
+/* Tipo Austral: con brillo dorado */
+.verified-badge.type-austral img {
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.7));
+}
+
+.verified-badge.type-austral:hover img {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 1));
+}
+
+/* Tipo External: con brillo teal */
+.verified-badge.type-external img {
+  filter: drop-shadow(0 0 4px rgba(45, 110, 126, 0.7));
+  border-radius: 50%;
+}
+
+.verified-badge.type-external:hover img {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 8px rgba(45, 200, 220, 0.9));
+}
+
+/* Tooltip */
+.verified-badge::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 20, 30, 0.95);
+  color: #f0e4cc;
+  font-size: 0.72rem;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+  padding: 4px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  z-index: 9999;
+}
+
+.verified-badge:hover::after {
+  opacity: 1;
+}

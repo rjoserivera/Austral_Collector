@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL, BASE_URL } from '../config.js'
 import './MiembrosPage.css'
+import VerifiedBadge from '../components/VerifiedBadge'
 
 export default function MiembrosPage() {
   const [miembros, setMiembros] = useState([])
@@ -56,6 +57,7 @@ export default function MiembrosPage() {
             <div className="mi-card-body">
               <div className="mi-card-name-row">
                 <h3 className="mi-card-name" title={m.username}>{m.username}</h3>
+                <VerifiedBadge type={m.verification_type} badgeUrl={m.verification_badge} size={18} />
                 {m.role === 'admin' && <span className="mi-card-role-badge">Admin</span>}
               </div>
               <p className="mi-card-headline" title={m.headline}>{m.headline || 'Coleccionista'}</p>
