@@ -33,6 +33,7 @@ const NAV = [
   { id: 'eventos',    icon: '📢', label: 'Noticias y Eventos' },
   { id: 'identidad',  icon: '⭐', label: 'Identidad y Nosotros' },
   { id: 'hp_promos',  icon: '🌟', label: 'Promociones Home' },
+  { id: 'mascota',    icon: '🤖', label: 'Asistente Virtual' },
   { id: 'actividad',  icon: '📋', label: 'Log de Actividad' },
 ]
 
@@ -119,6 +120,7 @@ export default function AdminPage() {
           {activeTab === 'actividad'  && <AdminActividad adminId={adminId} />}
           {activeTab === 'moderacion' && <AdminModeracion adminId={adminId} />}
           {activeTab === 'hp_promos'  && <AdminPromos adminId={adminId} />}
+          {activeTab === 'mascota'    && <AdminMascota adminId={adminId} />}
         </div>
       </main>
     </div>
@@ -2448,4 +2450,120 @@ function AdminPromos({ adminId }) {
       )}
     </div>
   )
+}
+
+// ── SECCIÓN: Asistente Virtual (Mascota) ─────────────────
+function AdminMascota({ adminId }) {
+  const [texts, setTexts] = useState({
+    inicio: '',
+    nosotros: '',
+    galeria: '',
+    miembros: '',
+    contacto: ''
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    authFetch(`${API_URL}/mascot_texts.php`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.data) {
+          setTexts({
+            inicio: d.data.inicio || '',
+            nosotros: d.data.nosotros || '',
+            galeria: d.data.galeria || '',
+            miembros: d.data.miembros || '',
+            contacto: d.data.contacto || ''
+          });
+        }
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleChange = (field, value) => {
+    setTexts(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    setSaving(true);
+    authFetch(`${API_URL}/mascot_texts.php`, {
+      method: 'PUT',
+      body: JSON.stringify({ ...texts, adminId })
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) toast.success('Textos de la mascota guardados correctamente.');
+        else toast.error('Error al guardar: ' + d.error);
+      })
+      .catch(e => toast.error('Error: ' + e.message))
+      .finally(() => setSaving(false));
+  };
+
+  if (loading) return <Loading />;
+
+  return (
+    <div className="admin-section">
+      <div className="admin-sec-header">
+        <h2 className="admin-sec-title">🤖 Diálogos del Asistente Virtual</h2>
+      </div>
+      <p style={{ color: '#aaa', marginBottom: '20px' }}>
+        Configura lo que dice la mascota de Austral Collector dependiendo de la página en la que se encuentre el usuario. Puedes usar saltos de línea para separar el texto o HTML básico.
+      </p>
+
+      <form onSubmit={handleSave} className="admin-form-card" style={{ maxWidth: '800px' }}>
+        <div className="admin-form-group" style={{ marginBottom: '15px' }}>
+          <label>Página de Inicio</label>
+          <textarea 
+            className="admin-input" 
+            rows="3" 
+            value={texts.inicio} 
+            onChange={(e) => handleChange('inicio', e.target.value)} 
+            placeholder="Ej: ¡Hola! Bienvenido a Austral Collector."
+          />
+        </div>
+        <div className="admin-form-group" style={{ marginBottom: '15px' }}>
+          <label>Página Nosotros / Identidad</label>
+          <textarea 
+            className="admin-input" 
+            rows="3" 
+            value={texts.nosotros} 
+            onChange={(e) => handleChange('nosotros', e.target.value)} 
+          />
+        </div>
+        <div className="admin-form-group" style={{ marginBottom: '15px' }}>
+          <label>Página Galería / Post</label>
+          <textarea 
+            className="admin-input" 
+            rows="3" 
+            value={texts.galeria} 
+            onChange={(e) => handleChange('galeria', e.target.value)} 
+          />
+        </div>
+        <div className="admin-form-group" style={{ marginBottom: '15px' }}>
+          <label>Página Miembros / Perfiles</label>
+          <textarea 
+            className="admin-input" 
+            rows="3" 
+            value={texts.miembros} 
+            onChange={(e) => handleChange('miembros', e.target.value)} 
+          />
+        </div>
+        <div className="admin-form-group" style={{ marginBottom: '20px' }}>
+          <label>Página de Contacto</label>
+          <textarea 
+            className="admin-input" 
+            rows="3" 
+            value={texts.contacto} 
+            onChange={(e) => handleChange('contacto', e.target.value)} 
+          />
+        </div>
+
+        <button type="submit" className="btn-primary" disabled={saving}>
+          {saving ? 'Guardando...' : '💾 Guardar Textos'}
+        </button>
+      </form>
+    </div>
+  );
 }

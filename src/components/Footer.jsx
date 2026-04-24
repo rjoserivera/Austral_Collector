@@ -1,7 +1,18 @@
 import './Footer.css'
+import { toast } from '../contexts/NotificationContext.jsx'
 
 export default function Footer() {
   const year = new Date().getFullYear()
+  const authUserStr = localStorage.getItem('austral_auth_user')
+  let currentUser = null
+  try { if (authUserStr) currentUser = JSON.parse(authUserStr) } catch(e) { currentUser = null }
+
+  const handleUnirseClick = (e) => {
+    if (currentUser) {
+      e.preventDefault();
+      toast.info('Usted ya ha iniciado sesión');
+    }
+  }
 
   return (
     <footer className="site-footer" id="footer">
@@ -13,7 +24,7 @@ export default function Footer() {
             <div className="footer-quick-links-horizontal">
               <a href="/galeria" className="footer-quick-link">Galería</a>
               <a href="/miembros" className="footer-quick-link">Miembros</a>
-              <a href="/login" className="footer-quick-link">Unirse</a>
+              <a href="/login" className="footer-quick-link" onClick={handleUnirseClick}>Unirse</a>
               <a href="/contacto" className="footer-quick-link">Contacto</a>
             </div>
           </div>

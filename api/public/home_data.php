@@ -24,6 +24,18 @@ try {
     $stmtUltimas->execute([$viewerId]);
     $ultimas = $stmtUltimas->fetchAll();
 
+    // Enrich ultimas
+    foreach ($ultimas as &$post) {
+        $post['imagenes_extra'] = isset($post['imagenes_extra'])
+            ? json_decode($post['imagenes_extra'], true) ?? []
+            : [];
+        
+        $hStmt = $pdo->prepare("SELECT h.nombre FROM hashtags h JOIN post_hashtags ph ON ph.hashtag_id = h.id WHERE ph.post_id = ?");
+        $hStmt->execute([$post['id']]);
+        $post['hashtags'] = $hStmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+    unset($post);
+
     // 2. Most voted (Votadas) - Only Figuras
     $stmtVotadas = $pdo->prepare("SELECT p.*, u.username as autor, u.avatar_url as autor_avatar,
         u.verification_type as autor_verification_type, u.verification_badge as autor_verification_badge,
@@ -34,6 +46,18 @@ try {
         ORDER BY total_likes DESC LIMIT 6");
     $stmtVotadas->execute([$viewerId]);
     $votadas = $stmtVotadas->fetchAll();
+
+    // Enrich votadas
+    foreach ($votadas as &$post) {
+        $post['imagenes_extra'] = isset($post['imagenes_extra'])
+            ? json_decode($post['imagenes_extra'], true) ?? []
+            : [];
+        
+        $hStmt = $pdo->prepare("SELECT h.nombre FROM hashtags h JOIN post_hashtags ph ON ph.hashtag_id = h.id WHERE ph.post_id = ?");
+        $hStmt->execute([$post['id']]);
+        $post['hashtags'] = $hStmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+    unset($post);
 
     // 3. Featured videos
     // Try to get specific IDs from configuration
@@ -80,9 +104,23 @@ try {
     $destacado = null;
     if ($destacadoUser) {
         unset($destacadoUser['password']);
-        $stmtStats = $pdo->prepare("SELECT (SELECT COUNT(*) FROM posts WHERE user_id = ?) as posts, (SELECT COUNT(*) FROM likes WHERE post_id IN (SELECT id FROM posts WHERE user_id = ?)) as likes");
-        $stmtStats->execute([$destacadoUser['id'], $destacadoUser['id']]);
+        
+        // Extended stats including ratings
+        // Using positional parameters to avoid issues with named parameter reuse
+        $stmtStats = $pdo->prepare("
+            SELECT 
+                (SELECT COUNT(*) FROM posts WHERE user_id = ?) as posts, 
+                (SELECT COUNT(*) FROM likes WHERE post_id IN (SELECT id FROM posts WHERE user_id = ?)) as likes,
+                (SELECT ROUND(AVG(score), 1) FROM perfil_ratings WHERE rated_user_id = ?) as average_rating,
+                (SELECT COUNT(*) FROM perfil_ratings WHERE rated_user_id = ?) as total_ratings
+        ");
+        $stmtStats->execute([$destacadoUser['id'], $destacadoUser['id'], $destacadoUser['id'], $destacadoUser['id']]);
         $stats = $stmtStats->fetch();
+        
+        // Fallback for nulls
+        $stats['average_rating'] = isset($stats['average_rating']) ? (float)$stats['average_rating'] : 0.0;
+        $stats['total_ratings']   = isset($stats['total_ratings'])   ? (int)$stats['total_ratings']   : 0;
+        
         $destacado = ['user' => $destacadoUser, 'stats' => $stats];
     }
 
@@ -94,6 +132,18 @@ try {
         FROM posts p JOIN usuarios u ON p.user_id = u.id WHERE p.tipo = 'cosplay' ORDER BY p.created_at DESC LIMIT 4");
     $stmtCosplay->execute([$viewerId]);
     $ultimos_cosplays = $stmtCosplay->fetchAll();
+
+    // Enrich cosplays
+    foreach ($ultimos_cosplays as &$post) {
+        $post['imagenes_extra'] = isset($post['imagenes_extra'])
+            ? json_decode($post['imagenes_extra'], true) ?? []
+            : [];
+        
+        $hStmt = $pdo->prepare("SELECT h.nombre FROM hashtags h JOIN post_hashtags ph ON ph.hashtag_id = h.id WHERE ph.post_id = ?");
+        $hStmt->execute([$post['id']]);
+        $post['hashtags'] = $hStmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+    unset($post);
 
     // 7. Cumpleaneros: Buscar si hay alguien de cumpleaños este mes y que no haya pasado
     $stmtCumple = $pdo->query("
@@ -114,9 +164,19 @@ try {
     $cumpleaneros = [];
     foreach ($rawCumple as $u) {
         unset($u['password']);
-        $stmtStatsC = $pdo->prepare("SELECT (SELECT COUNT(*) FROM posts WHERE user_id = ?) as posts, (SELECT COUNT(*) FROM likes WHERE post_id IN (SELECT id FROM posts WHERE user_id = ?)) as likes");
-        $stmtStatsC->execute([$u['id'], $u['id']]);
+        $stmtStatsC = $pdo->prepare("
+            SELECT 
+                (SELECT COUNT(*) FROM posts WHERE user_id = ?) as posts, 
+                (SELECT COUNT(*) FROM likes WHERE post_id IN (SELECT id FROM posts WHERE user_id = ?)) as likes,
+                (SELECT ROUND(AVG(score), 1) FROM perfil_ratings WHERE rated_user_id = ?) as average_rating,
+                (SELECT COUNT(*) FROM perfil_ratings WHERE rated_user_id = ?) as total_ratings
+        ");
+        $stmtStatsC->execute([$u['id'], $u['id'], $u['id'], $u['id']]);
         $statsC = $stmtStatsC->fetch();
+        
+        $statsC['average_rating'] = isset($statsC['average_rating']) ? (float)$statsC['average_rating'] : 0.0;
+        $statsC['total_ratings']   = isset($statsC['total_ratings'])   ? (int)$statsC['total_ratings']   : 0;
+        
         $cumpleaneros[] = ['user' => $u, 'stats' => $statsC];
     }
 

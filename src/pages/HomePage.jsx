@@ -6,6 +6,7 @@ import PostModal from '../components/PostModal'
 import CreatePostModal from '../components/CreatePostModal'
 import { API_URL, BASE_URL } from '../config.js'
 import { getOfflinePosts } from '../utils/offlineSync'
+import VerifiedBadge from '../components/VerifiedBadge'
 
 /* ─── Sub-components ────────────────────────────────────── */
 function FiguraCard({ fig, onToggle, onClick }) {
@@ -37,8 +38,8 @@ function FiguraCard({ fig, onToggle, onClick }) {
 function PlayIcon() {
   return (
     <svg className="hp-play-icon" viewBox="0 0 50 50" fill="none">
-      <circle cx="25" cy="25" r="23" fill="rgba(0,0,0,0.65)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/>
-      <polygon points="20,14 38,25 20,36" fill="white"/>
+      <circle cx="25" cy="25" r="23" fill="rgba(0,0,0,0.65)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" />
+      <polygon points="20,14 38,25 20,36" fill="white" />
     </svg>
   )
 }
@@ -54,12 +55,12 @@ export default function HomePage() {
   const [selectedVideo, setSelectedVideo] = useState(null)
   const [cumpleIdx, setCumpleIdx] = useState(0)
   const navigate = useNavigate()
-  
+
   // Upload Modal State
   const [showUpload, setShowUpload] = useState(false)
   const authUserStr = localStorage.getItem('austral_auth_user')
   let currentUser = null
-  try { if (authUserStr) currentUser = JSON.parse(authUserStr) } catch(e) { currentUser = null }
+  try { if (authUserStr) currentUser = JSON.parse(authUserStr) } catch (e) { currentUser = null }
 
   const carouselRef = useRef(null)
   const eventsRef = useRef(null)
@@ -71,18 +72,18 @@ export default function HomePage() {
     setLoading(true)
     let homeData = { ultimas: [], votadas: [], eventos: [], videos: [], destacado: null, ultimos_cosplays: [] }
     const viewerParam = currentUser ? `?viewer_username=${currentUser.username}` : ''
-    
+
     try {
       const r = await fetch(`${API_URL}/public/home_data.php${viewerParam}`)
       if (!r.ok) throw new Error('Network error')
       const d = await r.json()
-      if(d.success) {
+      if (d.success) {
         homeData = d.data
         localStorage.setItem('austral_home_cache', JSON.stringify(d.data))
       } else {
         throw new Error('API returned false success')
       }
-    } catch(e) {
+    } catch (e) {
       console.error('Error fetching home_data, attempting to load cache:', e)
       const cached = localStorage.getItem('austral_home_cache')
       if (cached) {
@@ -90,7 +91,7 @@ export default function HomePage() {
           const parsedCache = JSON.parse(cached)
           // Make sure we have all keys even if cache is old
           homeData = { ...homeData, ...parsedCache }
-        } catch(err) {
+        } catch (err) {
           console.error('Cache parsing failed:', err)
         }
       }
@@ -115,15 +116,15 @@ export default function HomePage() {
 
         // Omitimos los que son "ediciones" (tienen isEditing=true o id_original) para no duplicar en el feed.
         const newOffline = offlineFormatted.filter(p => !p.id_original)
-        
+
         homeData.ultimas = [...newOffline, ...(homeData.ultimas || [])]
-        
+
         const offlineCosplays = newOffline.filter(p => p.tipo === 'cosplay').map(c => ({
           ...c, titulo: c.nombre
         }))
         homeData.ultimos_cosplays = [...offlineCosplays, ...(homeData.ultimos_cosplays || [])]
       }
-    } catch(e) {
+    } catch (e) {
       console.warn('Error loading offline posts:', e)
     }
 
@@ -139,10 +140,10 @@ export default function HomePage() {
     const currentMonth = todayDate.getMonth() + 1;
     const currentDay = todayDate.getDate();
     const valid = (data.cumpleaneros || []).filter(c => {
-       if (!c.user?.fecha_nacimiento) return false;
-       const p = c.user.fecha_nacimiento.split('-');
-       if (p.length !== 3) return false;
-       return parseInt(p[1], 10) === currentMonth && parseInt(p[2], 10) >= currentDay;
+      if (!c.user?.fecha_nacimiento) return false;
+      const p = c.user.fecha_nacimiento.split('-');
+      if (p.length !== 3) return false;
+      return parseInt(p[1], 10) === currentMonth && parseInt(p[2], 10) >= currentDay;
     });
 
     if (valid.length > 1) {
@@ -174,24 +175,24 @@ export default function HomePage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: currentUser.username, post_id: id })
     })
-    .then(r => r.json())
-    .then(d => {
-      if (d.success) {
-        setData(prev => {
-          const newUltimas = prev.ultimas.map(f => f.id === id ? { ...f, userLiked: d.action === 'liked', total_likes: d.total_likes } : f)
-          const newVotadas = prev.votadas.map(v => v.id === id ? { ...v, userLiked: d.action === 'liked', total_likes: d.total_likes } : v)
-          // Si el destacado también tiene cards interactivas, podríamos iterarlo, pero en HomePage no parece tenerlas que disparen handleLike
-          return { ...prev, ultimas: newUltimas, votadas: newVotadas }
-        })
-        
-        if (selectedPost && selectedPost.id === id) {
-          setSelectedPost(prev => ({ ...prev, userLiked: d.action === 'liked', total_likes: d.total_likes }))
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          setData(prev => {
+            const newUltimas = prev.ultimas.map(f => f.id === id ? { ...f, userLiked: d.action === 'liked', total_likes: d.total_likes } : f)
+            const newVotadas = prev.votadas.map(v => v.id === id ? { ...v, userLiked: d.action === 'liked', total_likes: d.total_likes } : v)
+            // Si el destacado también tiene cards interactivas, podríamos iterarlo, pero en HomePage no parece tenerlas que disparen handleLike
+            return { ...prev, ultimas: newUltimas, votadas: newVotadas }
+          })
+
+          if (selectedPost && selectedPost.id === id) {
+            setSelectedPost(prev => ({ ...prev, userLiked: d.action === 'liked', total_likes: d.total_likes }))
+          }
+        } else {
+          toast.error(d.error || 'Error al procesar el like.')
         }
-      } else {
-        toast.error(d.error || 'Error al procesar el like.')
-      }
-    })
-    .catch(e => console.error("Error toggling like:", e))
+      })
+      .catch(e => console.error("Error toggling like:", e))
   }
 
   const scrollCarousel = (direction) => {
@@ -226,7 +227,7 @@ export default function HomePage() {
     intervalIds.push(setInterval(() => {
       if (eventsRef.current && data.eventos.length > 0) {
         const wrap = eventsRef.current;
-        const itemHeight = 70 + 12; 
+        const itemHeight = 70 + 12;
         const setHeight = data.eventos.length * itemHeight;
 
         if (wrap.scrollTop >= setHeight) {
@@ -271,23 +272,18 @@ export default function HomePage() {
     <div className="home-page">
       {/* ── HERO ─────────────────────────────────────────── */}
       <section className="hp-hero" id="hero">
-        <div className="hp-hero-nebula" aria-hidden="true"/>
-        <div className="hp-hero-grain"  aria-hidden="true"/>
+        <div className="hp-hero-nebula" aria-hidden="true" />
+        <div className="hp-hero-grain" aria-hidden="true" />
 
-        <div className="hp-hero-inner section-wrapper">
-          <div className="hp-hero-mascot-wrap">
-            <div className="hp-mascot-glow" aria-hidden="true"/>
-            <img src="/robot_completo_sin_fondon.png" alt="Mascota Robot Austral Collector" className="hp-mascot"/>
-          </div>
-          <div className="hp-hero-content">
-            <h1 className="hp-hero-title">
-              <span className="hp-title-austral">AUSTRAL</span><br/>
-              <span className="hp-title-collector">COLLECTOR</span>
+        <div className="hp-hero-inner section-wrapper" style={{ justifyContent: 'center' }}>
+          <div className="hp-hero-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+            <h1 className="hp-hero-title" style={{ marginBottom: '8px' }}>
+              <img src="/logo_sin_fondo2.png" alt="Austral Collector" style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain' }} />
             </h1>
-            <p className="hp-hero-tagline">Juegos, juguetes y coleccionables de ayer y hoy</p>
-            <div className="hp-hero-actions" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '14px' }}>
-              <Link to="/galeria" id="hp-btn-galeria" className="btn-primary" style={{ fontSize: '0.95rem', padding: '12px 32px', borderRadius: '8px', letterSpacing: '0.1em', background: '#2d6e7e', color: '#ffffff', boxShadow: '0 8px 32px rgba(45, 110, 126, 0.5)' }}>Ver Galería</Link>
-              <Link to="/login?mode=register" id="hp-btn-unirse" className="btn-primary" style={{ fontSize: '0.95rem', padding: '12px 32px', borderRadius: '8px', letterSpacing: '0.1em', background: '#8b2020', color: '#000000', boxShadow: '0 8px 32px rgba(139, 32, 32, 0.5)' }}>Unirse</Link>
+            <p className="hp-hero-tagline" style={{ marginBottom: '16px', color: '#ffffff', fontSize: '1.15rem', fontWeight: 'bold', textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5)' }}>Juegos, juguetes, coleccionables de ayer y hoy.</p>
+            <div className="hp-hero-actions" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '8px', justifyContent: 'center' }}>
+              <Link to="/galeria" id="hp-btn-galeria" className="btn-primary" style={{ fontSize: '0.95rem', padding: '10px 28px', borderRadius: '8px', letterSpacing: '0.1em', background: '#2d6e7e', color: '#ffffff', boxShadow: '0 8px 32px rgba(45, 110, 126, 0.5)', textTransform: 'uppercase' }}>Ver Galería</Link>
+              <Link to="/login?mode=register" id="hp-btn-unirse" className="btn-primary" onClick={(e) => { if (currentUser) { e.preventDefault(); toast.info('Usted ya ha iniciado sesión'); } }} style={{ fontSize: '0.95rem', padding: '10px 28px', borderRadius: '8px', letterSpacing: '0.1em', background: '#8b2020', color: '#000000', boxShadow: '0 8px 32px rgba(139, 32, 32, 0.5)', textTransform: 'uppercase' }}>Unirse</Link>
             </div>
           </div>
         </div>
@@ -297,7 +293,7 @@ export default function HomePage() {
       {data.promos?.length > 0 && (
         <section className="hp-partners-section">
           <div className="section-wrapper">
-          <div className="hp-partners-track-wrap">
+            <div className="hp-partners-track-wrap">
               <div className="hp-partners-track">
                 {(() => {
                   const multiplyCount = Math.max(1, Math.ceil(12 / data.promos.length));
@@ -350,7 +346,7 @@ export default function HomePage() {
               <h2 className="hp-section-title">🔥 Últimas Figuras</h2>
 
             </div>
-            
+
             {!loading && data.ultimas.length === 0 ? (
               <p style={{ color: '#aaa', padding: '20px' }}>No hay publicaciones aún. ¡Sé el primero en subir algo!</p>
             ) : (
@@ -362,8 +358,8 @@ export default function HomePage() {
                       <div className="hp-figura-img-wrap">
                         <img src={fig.local_image || (fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/figura1.png')} alt={fig.nombre} className="hp-figura-img" loading="lazy" />
                         {fig.anio && <div className="hp-figura-year">{fig.anio}</div>}
-                        <div className="hp-figura-year" style={{top: '8px', right: '8px', left: 'auto', background: 'rgba(45,110,126,.9)'}}>{fig.tipo}</div>
-                        {fig.isOfflineSync && <div className="hp-figura-year" style={{top: '8px', right: 'auto', left: '8px', background: '#d35400', padding: '4px 8px'}} title="Pendiente de subida">⏳ Pendiente</div>}
+                        <div className="hp-figura-year" style={{ top: '8px', right: '8px', left: 'auto', background: 'rgba(45,110,126,.9)' }}>{fig.tipo}</div>
+                        {fig.isOfflineSync && <div className="hp-figura-year" style={{ top: '8px', right: 'auto', left: '8px', background: '#d35400', padding: '4px 8px' }} title="Pendiente de subida">⏳ Pendiente</div>}
                       </div>
                       <div className="hp-figura-body">
                         <h3 className="hp-figura-name">{fig.nombre}</h3>
@@ -379,7 +375,7 @@ export default function HomePage() {
                 <button className="hp-carrusel-btn right" onClick={() => scrollCarousel('right')}>❯</button>
               </div>
             )}
-            
+
           </section>
 
           {/* Miembro Destacado del Mes / Cumpleañeros */}
@@ -390,20 +386,20 @@ export default function HomePage() {
 
             // Filtrar cumpleañeros válidos (de este mes y que el día sea mayor o igual a hoy)
             const validCumpleaneros = (data.cumpleaneros || []).filter(c => {
-               if (!c.user?.fecha_nacimiento) return false;
-               const p = c.user.fecha_nacimiento.split('-');
-               if (p.length !== 3) return false;
-               const month = parseInt(p[1], 10);
-               const day = parseInt(p[2], 10);
-               return month === currentMonth && day >= currentDay;
+              if (!c.user?.fecha_nacimiento) return false;
+              const p = c.user.fecha_nacimiento.split('-');
+              if (p.length !== 3) return false;
+              const month = parseInt(p[1], 10);
+              const day = parseInt(p[2], 10);
+              return month === currentMonth && day >= currentDay;
             }).map(c => {
-               // Recalcular estado_cumple por si proviene de caché
-               const p = c.user.fecha_nacimiento.split('-');
-               const day = parseInt(p[2], 10);
-               let estado = 'este_mes';
-               if (day === currentDay) estado = 'hoy';
-               else if (day === currentDay + 1) estado = 'manana';
-               return { ...c, user: { ...c.user, estado_cumple: estado } };
+              // Recalcular estado_cumple por si proviene de caché
+              const p = c.user.fecha_nacimiento.split('-');
+              const day = parseInt(p[2], 10);
+              let estado = 'este_mes';
+              if (day === currentDay) estado = 'hoy';
+              else if (day === currentDay + 1) estado = 'manana';
+              return { ...c, user: { ...c.user, estado_cumple: estado } };
             });
 
             const hasCumpleaneros = validCumpleaneros.length > 0;
@@ -436,57 +432,113 @@ export default function HomePage() {
                         backgroundImage: targetUserObj.user.banner_url ? `url('${BASE_URL}/${targetUserObj.user.banner_url}')` : 'none',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
-                        flex: 1
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'flex-start',
+                        padding: '20px 10px',
+                        gap: '0px'
                     }}>
-                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(20,35,45,0.92) 0%, rgba(20,35,45,0.4) 100%)', zIndex: 1 }} />
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(20,35,45,0.95) 0%, rgba(20,35,45,0.6) 100%)', zIndex: 1 }} />
 
                       {hasCumpleaneros && (
                         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, textAlign: 'center', background: 'linear-gradient(90deg, #ff416c, #ff4b2b)', color: '#fff', padding: '6px', fontWeight: 'bold', fontSize: '0.9rem', zIndex: 10, letterSpacing: '1px' }}>
                           🎊 {targetUserObj.user.estado_cumple === 'hoy' ? '¡ESTÁ DE CUMPLEAÑOS HOY!' : (targetUserObj.user.estado_cumple === 'manana' ? '¡MAÑANA ES SU CUMPLEAÑOS!' : '¡PRONTO ES SU CUMPLEAÑOS!')} 🎊
                         </div>
                       )}
-                      
-                      <div className="hp-miembro-left" style={{ marginTop: hasCumpleaneros ? '30px' : '0', position: 'relative', zIndex: 2, background: 'transparent', borderRight: 'none' }}>
-                        <div className="hp-miembro-avatar-frame">
-                          <div className="hp-miembro-ring"/>
+
+                      <div className="hp-miembro-left" style={{ position: 'relative', zIndex: 2, background: 'transparent', borderRight: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, paddingRight: 0 }}>
+                        <Link to={`/perfil/${targetUserObj.user.username}`} className="hp-miembro-avatar-frame" style={{ display: 'block', cursor: 'pointer' }}>
+                          <div className="hp-miembro-ring" />
                           <img
                             src={targetUserObj.user.avatar_url ? `${BASE_URL}/${targetUserObj.user.avatar_url}` : '/mock_avatar.png'}
                             alt={targetUserObj.user.username}
                             className="hp-miembro-avatar"
                           />
+                        </Link>
+                        <div className="hp-miembro-stats-row" style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '12px', 
+                          justifyContent: 'center',
+                          marginTop: '10px',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          backdropFilter: 'blur(4px)',
+                          padding: '4px 12px',
+                          borderRadius: '20px',
+                          border: '1px solid rgba(255, 255, 255, 0.1)'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ fontSize: '0.9rem' }}>❤️</span>
+                            <span style={{ color: '#ff7070', fontSize: '0.9rem', fontWeight: '700' }}>{targetUserObj.stats.likes}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title="Valoración de la colección">
+                            <span style={{ fontSize: '0.9rem' }}>⭐</span>
+                            <span style={{ color: '#f1c40f', fontSize: '0.9rem', fontWeight: '700' }}>{targetUserObj.stats?.average_rating || 0}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title="Publicaciones">
+                            <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>📸</span>
+                            <span style={{ color: '#f0e4cc', fontSize: '0.9rem', fontWeight: '700' }}>{targetUserObj.stats.posts}</span>
+                          </div>
                         </div>
-                        <div className="hp-miembro-likes">❤️ {targetUserObj.stats.likes}</div>
-                        <span className="hp-miembro-credit" style={{ color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>Publicaciones: {targetUserObj.stats.posts}</span>
                       </div>
-                      
-                      <div className="hp-miembro-right" style={{ marginTop: hasCumpleaneros ? '30px' : '0', position: 'relative', zIndex: 2, justifyContent: 'center' }}>
-                        <h3 className="hp-miembro-name" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{targetUserObj.user.username}</h3>
-                        <div className="hp-miembro-badges-row">
+
+                      <div className="hp-miembro-right" style={{
+                        position: 'relative',
+                        zIndex: 2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        textAlign: 'left',
+                        marginLeft: '-25px'
+                      }}>
+                        <Link 
+                          to={`/perfil/${targetUserObj.user.username}`}
+                          style={{ textDecoration: 'none' }}
+                        >
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '4px', 
+                            justifyContent: 'flex-start',
+                            width: 'fit-content'
+                          }}>
+                            <h3 className="hp-miembro-name" style={{
+                              textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                              margin: 0,
+                              fontSize: '2.2rem',
+                              fontWeight: '800',
+                              color: '#fff'
+                            }}>{targetUserObj.user.username}</h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <VerifiedBadge type={targetUserObj.user.verification_type} badgeUrl={targetUserObj.user.verification_badge} size={30} />
+                              {targetUserObj.user.role === 'admin' && (
+                                <span title="Administrador" style={{ 
+                                  fontSize: '1.6rem', 
+                                  filter: 'drop-shadow(0 0 5px rgba(255,215,0,0.6))',
+                                  marginLeft: '2px'
+                                }}>👑</span>
+                              )}
+                            </div>
+                          </div>
+                        </Link>
+                        <div className="hp-miembro-badges-row" style={{ justifyContent: 'flex-start' }}>
                           {hasCumpleaneros ? (
-                            <span className="hp-miembro-badge-tag" style={{background:'#ffd700', color:'#000'}}>🎂 Cumpleañero/a</span>
-                          ) : (
-                            <span className="hp-miembro-badge-tag">✔ Miembro Destacado</span>
-                          )}
-                          {targetUserObj.user.role === 'admin' && <span className="hp-miembro-badge-tag" style={{background:'#ffd700', color:'#000'}}>👑 Administrador</span>}
-                        </div>
-                        
-                        <div className="hp-miembro-stats" style={{ marginTop: '12px' }}>
-                          {hasCumpleaneros ? (
-                            <span className="hp-miembro-stat" style={{ color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
-                              🎂 { (() => {
-                                  if (targetUserObj.user.fecha_nacimiento) {
-                                    let p = targetUserObj.user.fecha_nacimiento.split('-');
-                                    if(p.length === 3) {
-                                      const m = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-                                      return `${parseInt(p[2])} de ${m[parseInt(p[1])-1]}`;
-                                    }
+                            <span className="hp-miembro-badge-tag" style={{ background: '#ffd700', color: '#000' }}>
+                              🎂 Cumpleañero/a {(() => {
+                                if (targetUserObj.user.fecha_nacimiento) {
+                                  let p = targetUserObj.user.fecha_nacimiento.split('-');
+                                  if (p.length === 3) {
+                                    const m = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                                    return `- ${parseInt(p[2])} de ${m[parseInt(p[1]) - 1]}`;
                                   }
-                                  return 'Cumpleaños';
-                              })() }
+                                }
+                                return '';
+                              })()}
                             </span>
-                          ) : (
-                            <span className="hp-miembro-stat" style={{ color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>❤️ {targetUserObj.stats.likes} Likes de la comunidad</span>
-                          )}
+                          ) : null}
+                          {targetUserObj.user.role === 'admin' && <span className="hp-miembro-badge-tag" style={{ background: '#ffd700', color: '#000' }}>👑 Administrador</span>}
                         </div>
                       </div>
                     </div>
@@ -494,11 +546,11 @@ export default function HomePage() {
                     {/* Bottom Blue Bio Area */}
                     <div style={{ background: '#1c4a57', borderTop: '2px solid rgba(223, 192, 138, 0.6)', padding: '16px 20px', position: 'relative', zIndex: 2 }}>
                       <p className="hp-miembro-bio" style={{ margin: 0, color: '#f0e4cc', fontSize: '0.85rem', lineHeight: '1.5', paddingRight: (hasCumpleaneros && validCumpleaneros.length > 1) ? '40px' : '0' }}>
-                        {hasCumpleaneros 
-                          ? (data.config?.txt_cumple || "¡El Gremio de Coleccionistas celebra tu día! Te deseamos un excelente cumpleaños y que tu colección siga creciendo.") 
+                        {hasCumpleaneros
+                          ? (data.config?.txt_cumple || "¡El Gremio de Coleccionistas celebra tu día! Te deseamos un excelente cumpleaños y que tu colección siga creciendo.")
                           : (targetUserObj.user.biografia || data.config?.txt_destacado || "Por su constante participación, increíbles piezas y valiosos aportes a la comunidad de Austral Collector. ¡Gracias por ser parte del gremio!")}
                       </p>
-                      
+
                       {/* Dots for carousel, moved to bottom bar */}
                       {hasCumpleaneros && validCumpleaneros.length > 1 && (
                         <div style={{ position: 'absolute', bottom: '16px', right: '16px', display: 'flex', gap: '6px' }}>
@@ -510,7 +562,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="card" style={{padding:'30px', textAlign:'center', color:'#aaa'}}>No hay un miembro destacado asignado actualmente.</div>
+                  <div className="card" style={{ padding: '30px', textAlign: 'center', color: '#aaa' }}>No hay un miembro destacado asignado actualmente.</div>
                 )}
               </section>
             );
@@ -522,9 +574,9 @@ export default function HomePage() {
             {data.votadas.length > 0 ? (
               <div className="hp-votadas-grid">
                 {data.votadas.map(v => (
-                  <article key={v.id} className="hp-votada-card card" onClick={() => setSelectedPost(v)} style={{cursor: 'pointer'}}>
+                  <article key={v.id} className="hp-votada-card card" onClick={() => setSelectedPost(v)} style={{ cursor: 'pointer' }}>
                     <div className="hp-votada-img-wrap">
-                      <img src={v.imagen_url ? `${BASE_URL}/${v.imagen_url}` : '/mock_fig1.png'} alt={v.nombre} className="hp-votada-img" loading="lazy"/>
+                      <img src={v.imagen_url ? `${BASE_URL}/${v.imagen_url}` : '/mock_fig1.png'} alt={v.nombre} className="hp-votada-img" loading="lazy" />
                       <div className="hp-votada-overlay">
                         <span className="hp-votada-heart">❤</span>
                         <span className="hp-votada-name-overlay">{v.nombre}</span>
@@ -542,49 +594,48 @@ export default function HomePage() {
           </section>
 
           {/* CTA inferior — MOVIDO debajo de las más votadas */}
-          {!currentUser && (
-            <section className="hp-cta-simple" id="comunidad" style={{ 
-              borderTop: '1px solid rgba(223, 192, 138, 0.2)', 
-              paddingTop: '40px', 
-              marginTop: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center',
-              width: '100%'
+          <section className="hp-cta-simple" id="comunidad" style={{
+            borderTop: '1px solid rgba(223, 192, 138, 0.2)',
+            paddingTop: '40px',
+            marginTop: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            width: '100%'
+          }}>
+            <p className="hp-cta-text" style={{
+              fontSize: '1.1rem',
+              color: 'var(--color-cream)',
+              fontWeight: '500',
+              maxWidth: '700px',
+              marginBottom: '20px'
             }}>
-              <p className="hp-cta-text" style={{ 
-                fontSize: '1.1rem', 
-                color: 'var(--color-cream)', 
-                fontWeight: '500',
-                maxWidth: '700px',
-                marginBottom: '20px'
-              }}>
-                <strong>Austral Collector</strong> es una comunidad chilena de amantes del
-                coleccionismo que reúne a fanáticos de los juegos, juguetes y figuras de todas
-                las épocas. ¡Únete y comparte tu colección!
-              </p>
-              <Link 
-                to="/login?mode=register" 
-                id="hp-btn-cta-final" 
-                className="btn-primary" 
-                style={{ 
-                  textAlign: "center", 
-                  textDecoration: "none", 
-                  display: "inline-block",
-                  padding: "14px 40px",
-                  fontSize: "1.1rem",
-                  fontWeight: "800",
-                  letterSpacing: "0.05em",
-                  background: 'var(--color-red)',
-                  boxShadow: "0 8px 30px rgba(139, 32, 32, 0.5)",
-                  color: '#ffffff'
-                }}
-              >
-                UNIRSE A LA COMUNIDAD
-              </Link>
-            </section>
-          )}
+              <strong>Austral Collector</strong> es una comunidad chilena de amantes del
+              coleccionismo que reúne a fanáticos de los juegos, juguetes y figuras de todas
+              las épocas. ¡Únete y comparte tu colección!
+            </p>
+            <Link
+              to="/login?mode=register"
+              onClick={(e) => { if (currentUser) { e.preventDefault(); toast.info('Usted ya ha iniciado sesión'); } }}
+              id="hp-btn-cta-final"
+              className="btn-primary"
+              style={{
+                textAlign: "center",
+                textDecoration: "none",
+                display: "inline-block",
+                padding: "14px 40px",
+                fontSize: "1.1rem",
+                fontWeight: "800",
+                letterSpacing: "0.05em",
+                background: 'var(--color-red)',
+                boxShadow: "0 8px 30px rgba(139, 32, 32, 0.5)",
+                color: '#ffffff'
+              }}
+            >
+              UNIRSE A LA COMUNIDAD
+            </Link>
+          </section>
         </div>
 
         {/* RIGHT sidebar */}
@@ -604,18 +655,18 @@ export default function HomePage() {
           {/* Noticias & Eventos */}
           <div className="hp-sidebar-panel card" id="noticias">
             <h3 className="hp-sidebar-title">🔔 Noticias &amp; Próximos Eventos</h3>
-            <div className="gold-divider"/>
+            <div className="gold-divider" />
             <ul className="hp-evento-list" ref={eventsRef}>
               {displayEventos.length > 0 ? displayEventos.map((ev, idx) => (
                 <li key={`ev-${ev.id}-${idx}`} className="hp-evento-item">
-                  <img src={ev.imagen_url ? `${BASE_URL}/${ev.imagen_url}` : '/mock_event1.png'} alt={ev.titulo} className="hp-evento-thumb" loading="lazy"/>
+                  <img src={ev.imagen_url ? `${BASE_URL}/${ev.imagen_url}` : '/mock_event1.png'} alt={ev.titulo} className="hp-evento-thumb" loading="lazy" />
                   <div className="hp-evento-info">
                     <p className="hp-evento-title">{ev.titulo}</p>
                     <span className="hp-evento-date">{ev.fecha_display}</span>
                   </div>
                 </li>
               )) : (
-                <p style={{color:'#aaa', textAlign:'center', marginTop:'15px', fontSize:'0.9rem'}}>No hay eventos próximos.</p>
+                <p style={{ color: '#aaa', textAlign: 'center', marginTop: '15px', fontSize: '0.9rem' }}>No hay eventos próximos.</p>
               )}
             </ul>
           </div>
@@ -623,23 +674,23 @@ export default function HomePage() {
           {/* Videos */}
           <div className="hp-sidebar-panel card" id="videos">
             <h3 className="hp-sidebar-title">▶ Videos de interés</h3>
-            <div className="gold-divider"/>
+            <div className="gold-divider" />
             <div className="hp-videos-sidebar-grid">
               {data.videos.length > 0 ? data.videos.slice(0, 4).map(v => {
                 // Parse Youtube ID to get thumbnail
                 let ytid = v.link_yt;
                 const match = v.link_yt.match(/[?&]v=([^&]+)/);
                 if (match) ytid = match[1];
-                else { const sl = v.link_yt.split('/'); ytid = sl[sl.length-1]; }
-                
+                else { const sl = v.link_yt.split('/'); ytid = sl[sl.length - 1]; }
+
                 return (
                   <div key={v.id} className="hp-video-side-thumb clickable" id={`hp-vid-${v.id}`} onClick={() => setSelectedVideo(ytid)} style={{ cursor: 'pointer' }}>
-                    <img src={`https://img.youtube.com/vi/${ytid}/0.jpg`} alt={v.titulo} loading="lazy" onError={(e) => { e.target.src='/mock_community.png' }}/>
-                    <PlayIcon/>
+                    <img src={`https://img.youtube.com/vi/${ytid}/0.jpg`} alt={v.titulo} loading="lazy" onError={(e) => { e.target.src = '/mock_community.png' }} />
+                    <PlayIcon />
                   </div>
                 )
               }) : (
-                <p style={{color:'#aaa', textAlign:'center', gridColumn:'span 2', fontSize:'0.9rem'}}>No hay videos.</p>
+                <p style={{ color: '#aaa', textAlign: 'center', gridColumn: 'span 2', fontSize: '0.9rem' }}>No hay videos.</p>
               )}
             </div>
           </div>
@@ -647,7 +698,7 @@ export default function HomePage() {
           {/* 🎭 Últimos Cosplays */}
           <div className="hp-sidebar-panel card" id="cosplays">
             <h3 className="hp-sidebar-title">🎭 Últimos Cosplays</h3>
-            <div className="gold-divider"/>
+            <div className="gold-divider" />
             {data.ultimos_cosplays && data.ultimos_cosplays.length > 0 ? (
               <div className="hp-cosplay-sidebar-grid">
                 {data.ultimos_cosplays.slice(0, 4).map((cos, idx) => (
@@ -664,17 +715,17 @@ export default function HomePage() {
                       loading="lazy"
                     />
                     <div className="hp-cosplay-sb-overlay">
-                      {cos.isOfflineSync && <span style={{background:'#d35400', color:'white', fontSize:'0.7rem', padding:'2px 6px', borderRadius:'4px', position:'absolute', top:'6px', right:'6px'}}>⏳ Pendiente</span>}
+                      {cos.isOfflineSync && <span style={{ background: '#d35400', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', position: 'absolute', top: '6px', right: '6px' }}>⏳ Pendiente</span>}
                       <span className="hp-cosplay-sb-name">{cos.titulo}</span>
                     </div>
                   </article>
                 ))}
               </div>
             ) : (
-              <p style={{color:'#aaa', textAlign:'center', marginTop:'15px', fontSize:'0.85rem'}}>Aún no hay cosplays publicados.</p>
+              <p style={{ color: '#aaa', textAlign: 'center', marginTop: '15px', fontSize: '0.85rem' }}>Aún no hay cosplays publicados.</p>
             )}
-            <div style={{textAlign:'center', marginTop:'14px'}}>
-              <a href="/galeria?tipo=cosplay" style={{fontSize:'0.78rem', color:'var(--color-gold)', textDecoration:'none', letterSpacing:'.05em'}}>Ver todos los cosplays →</a>
+            <div style={{ textAlign: 'center', marginTop: '14px' }}>
+              <a href="/galeria?tipo=cosplay" style={{ fontSize: '0.78rem', color: 'var(--color-gold)', textDecoration: 'none', letterSpacing: '.05em' }}>Ver todos los cosplays →</a>
             </div>
           </div>
 
@@ -686,10 +737,10 @@ export default function HomePage() {
 
 
 
-      <PostModal 
-        post={selectedPost} 
-        isOpen={!!selectedPost} 
-        onClose={() => setSelectedPost(null)} 
+      <PostModal
+        post={selectedPost}
+        isOpen={!!selectedPost}
+        onClose={() => setSelectedPost(null)}
         onLike={handleLike}
         isHomeMode={true}
         onTagClick={(tag) => {
@@ -698,9 +749,9 @@ export default function HomePage() {
         }}
       />
 
-      <CreatePostModal 
-        isOpen={showUpload} 
-        onClose={() => setShowUpload(false)} 
+      <CreatePostModal
+        isOpen={showUpload}
+        onClose={() => setShowUpload(false)}
         onSuccess={loadData}
         currentUserId={currentUser?.id}
       />
@@ -710,12 +761,12 @@ export default function HomePage() {
         <div className="pm-full-overlay" onClick={() => setSelectedVideo(null)} style={{ zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.65)' }}>
           <button className="pm-close-full-btn" onClick={() => setSelectedVideo(null)} style={{ top: '20px', right: '20px' }}>✕ Cerrar Video</button>
           <div style={{ width: '90%', maxWidth: '1000px', aspectRatio: '16/9', background: '#000', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.7)' }} onClick={e => e.stopPropagation()}>
-            <iframe 
-              width="100%" 
-              height="100%" 
-              src={`https://www.youtube.com/embed/${selectedVideo}?autoplay=1`} 
-              frameBorder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${selectedVideo}?autoplay=1`}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
               allowFullScreen>
             </iframe>
           </div>

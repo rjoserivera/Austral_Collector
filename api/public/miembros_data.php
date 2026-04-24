@@ -19,7 +19,7 @@ try {
                 (SELECT COUNT(*) FROM perfil_ratings WHERE rated_user_id = u.id) as total_ratings
             FROM usuarios u
             WHERE u.is_active = 1
-            ORDER BY u.created_at DESC";
+            ORDER BY total_likes DESC, total_ratings DESC, u.created_at DESC";
             
     $stmt = $pdo->prepare($sql);
     $stmt->execute();

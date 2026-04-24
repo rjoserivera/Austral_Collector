@@ -71,7 +71,7 @@ function App() {
       </Routes>
 
       {location.pathname !== '/admin' && <VirtualAssistant />}
-      <Footer />
+      {location.pathname !== '/admin' && <Footer />}
 
       {/* Modal GLobal: Forzar cambio de contraseña */}
       {requirePassChange && (

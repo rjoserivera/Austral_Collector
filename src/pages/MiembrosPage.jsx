@@ -56,9 +56,13 @@ export default function MiembrosPage() {
 
             <div className="mi-card-body">
               <div className="mi-card-name-row">
-                <h3 className="mi-card-name" title={m.username}>{m.username}</h3>
-                <VerifiedBadge type={m.verification_type} badgeUrl={m.verification_badge} size={18} />
-                {m.role === 'admin' && <span className="mi-card-role-badge">Admin</span>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
+                  <h3 className="mi-card-name" title={m.username}>{m.username}</h3>
+                  <VerifiedBadge type={m.verification_type} badgeUrl={m.verification_badge} size={18} />
+                  {m.role === 'admin' && (
+                    <span title="Administrador" style={{ fontSize: '1.2rem', filter: 'drop-shadow(0 0 3px rgba(255,215,0,0.5))' }}>👑</span>
+                  )}
+                </div>
               </div>
               <p className="mi-card-headline" title={m.headline}>{m.headline || 'Coleccionista'}</p>
               <p className="mi-card-bio">{m.biografia || 'Sin biografía disponible. ¡Un coleccionista misterioso!'}</p>
