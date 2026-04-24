@@ -9,7 +9,7 @@
  * Applies the Austral Collector watermark to an image file.
  *
  * The watermark is scaled proportionally to 22% of the target image width
- * and placed in the bottom-right corner with a 12px margin.
+ * and placed in the bottom-left corner with a 12px margin.
  *
  * Supported formats: JPEG, PNG, WEBP.
  *
