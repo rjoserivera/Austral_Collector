@@ -12,8 +12,21 @@ try {
         'figuras'  => $pdo->query("SELECT COUNT(*) FROM posts WHERE tipo = 'figura'")->fetchColumn(),
         'cosplays' => $pdo->query("SELECT COUNT(*) FROM posts WHERE tipo = 'cosplay'")->fetchColumn(),
         'videos'   => $pdo->query("SELECT COUNT(*) FROM videos")->fetchColumn(),
-        'destacado'=> $pdo->query("SELECT COUNT(*) FROM configuracion WHERE clave = 'miembro_destacado'")->fetchColumn()
+        'destacado'=> $pdo->query("SELECT COUNT(*) FROM configuracion WHERE clave = 'miembro_destacado'")->fetchColumn(),
+        'total_posts' => $pdo->query("SELECT COUNT(*) FROM posts")->fetchColumn(),
+        'total_likes' => $pdo->query("SELECT COUNT(*) FROM likes")->fetchColumn(),
+        'eventos' => $pdo->query("SELECT COUNT(*) FROM eventos")->fetchColumn(),
     ];
+
+    // Cumpleaños de este mes
+    $birthdayCount = $pdo->query("SELECT COUNT(*) FROM usuarios WHERE MONTH(fecha_nacimiento) = MONTH(CURDATE()) AND is_active = 1")->fetchColumn();
+    $birthdayUsers = $pdo->query("SELECT id, username, nombre, apellido, avatar_url, DATE_FORMAT(fecha_nacimiento, '%d/%m') as fecha_cumple, DAY(fecha_nacimiento) as dia
+                                  FROM usuarios 
+                                  WHERE MONTH(fecha_nacimiento) = MONTH(CURDATE()) AND is_active = 1 
+                                  ORDER BY DAY(fecha_nacimiento) ASC")->fetchAll();
+
+    // Usuario más nuevo
+    $newestUser = $pdo->query("SELECT username, DATE_FORMAT(created_at, '%d/%m/%Y') as fecha FROM usuarios ORDER BY created_at DESC LIMIT 1")->fetch();
 
     $logs = $pdo->query("SELECT l.*, u.username as user, DATE_FORMAT(l.created_at, '%d/%m/%Y %H:%i') as time 
                          FROM logs l 
@@ -28,7 +41,12 @@ try {
         'success' => true,
         'stats' => $stats,
         'logs' => $logs,
-        'alert_destacado' => $alert_destacado
+        'alert_destacado' => $alert_destacado,
+        'birthdays' => [
+            'count' => (int)$birthdayCount,
+            'users' => $birthdayUsers
+        ],
+        'newest_user' => $newestUser ?: null
     ]);
 
 } catch (PDOException $e) {

@@ -247,6 +247,186 @@
   letter-spacing: 0.05em;
 }
 
+/* ── COMPACT STAT CARDS (Inicio Rediseñado) ─────────────── */
+.admin-stats-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.asc-card-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(200,169,110,0.20);
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.asc-card-compact:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.asc-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.asc-icon-sm { font-size: 1.1rem; }
+.asc-value-sm {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+.asc-label-sm {
+  font-size: 0.65rem;
+  color: rgba(240,228,204,0.60);
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── DASHBOARD ROW (2 columnas) ─────────────────────────── */
+.admin-dashboard-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+.admin-dashboard-card {
+  background: rgba(30,77,90,0.85);
+  border: 1.5px solid rgba(200,169,110,0.30);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.adc-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: rgba(0,0,0,0.15);
+  border-bottom: 1px solid rgba(200,169,110,0.15);
+  font-size: 1.1rem;
+}
+.adc-title {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #dfc08a;
+  margin: 0;
+  flex: 1;
+}
+.adc-count {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #fff;
+  background: rgba(200,169,110,0.25);
+  padding: 2px 10px;
+  border-radius: 12px;
+}
+.adc-body {
+  padding: 14px 18px;
+}
+.adc-empty {
+  font-size: 0.8rem;
+  color: rgba(240,228,204,0.50);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── BIRTHDAY LIST ──────────────────────────────────────── */
+.birthday-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.birthday-list::-webkit-scrollbar { width: 4px; }
+.birthday-list::-webkit-scrollbar-thumb { background: rgba(200,169,110,0.3); border-radius: 4px; }
+
+.birthday-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.18s;
+}
+.birthday-item:hover {
+  background: rgba(255,255,255,0.08);
+}
+.birthday-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(200,169,110,0.40);
+}
+.birthday-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.birthday-info strong {
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  color: #f0e4cc;
+}
+.birthday-name {
+  font-size: 0.68rem;
+  color: rgba(240,228,204,0.50);
+}
+.birthday-date {
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  color: rgba(240,228,204,0.65);
+  white-space: nowrap;
+}
+
+/* ── SUMMARY LIST ───────────────────────────────────────── */
+.summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.18s;
+}
+.summary-item:hover {
+  background: rgba(255,255,255,0.08);
+}
+.summary-icon {
+  font-size: 1rem;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.summary-label {
+  flex: 1;
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  color: rgba(240,228,204,0.70);
+}
+.summary-value {
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f0e4cc;
+  white-space: nowrap;
+}
+
 /* ── LOG PREVIEW (Inicio) ───────────────────────────────── */
 .admin-log-preview {
   display: flex;
@@ -778,6 +958,8 @@
   .admin-nav-item { width: auto; padding: 8px 10px; }
   .admin-sidebar-footer { display: none; }
   .admin-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .admin-stats-grid-compact { grid-template-columns: repeat(2, 1fr); }
+  .admin-dashboard-row { grid-template-columns: 1fr; }
   .admin-main { height: auto; }
   .admin-main-body { overflow: visible; }
 }

@@ -154,42 +154,125 @@ function AdminInicio() {
   if (error) return <ErrorMsg msg={error} />
   if (!data) return <Loading />
 
-  const { stats, logs } = data
+  const { stats, logs, birthdays, newest_user } = data
+
+  const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+  const currentMonth = monthNames[new Date().getMonth()]
 
   const statCards = [
-    { icon: '👥', label: 'Total Usuarios', value: stats.usuarios,  color: 'teal' },
-    { icon: '🪪', label: 'Total Perfiles', value: stats.perfiles,  color: 'teal' },
-    { icon: '🗿', label: 'Figuras',        value: stats.figuras,   color: 'rust' },
-    { icon: '🎭', label: 'Cosplays',       value: stats.cosplays,  color: 'rust' },
-    { icon: '🎬', label: 'Videos',         value: stats.videos,    color: 'gold' },
-    { icon: '⭐', label: 'Destacado Actual', value: stats.destacado, color: 'gold' },
+    { icon: '👥', label: 'Usuarios',     value: stats.usuarios,    color: 'teal' },
+    { icon: '🪪', label: 'Perfiles',     value: stats.perfiles,    color: 'teal' },
+    { icon: '🗿', label: 'Figuras',      value: stats.figuras,     color: 'rust' },
+    { icon: '🎭', label: 'Cosplays',     value: stats.cosplays,    color: 'rust' },
+    { icon: '🎬', label: 'Videos',       value: stats.videos,      color: 'gold' },
+    { icon: '📝', label: 'Publicaciones',value: stats.total_posts,  color: 'gold' },
+    { icon: '❤️', label: 'Total Likes',  value: stats.total_likes,  color: 'teal' },
+    { icon: '📢', label: 'Noticias',     value: stats.eventos,      color: 'rust' },
   ]
 
   return (
     <div className="admin-section">
       {data.alert_destacado && (
-        <div style={{ background: 'linear-gradient(135deg, #8b1111 0%, #aa2525 100%)', color: '#fff', padding: '16px 20px', borderRadius: '8px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', border: '1px solid #ff4b2b' }}>
-          <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+        <div style={{ background: 'linear-gradient(135deg, #8b1111 0%, #aa2525 100%)', color: '#fff', padding: '14px 18px', borderRadius: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', border: '1px solid #ff4b2b' }}>
+          <span style={{ fontSize: '1.3rem' }}>⚠️</span>
           <div>
-            <strong style={{ display: 'block', fontSize: '1.1rem', marginBottom: '4px' }}>¡Atención Administrador! No hay cumpleañeros este mes.</strong>
-            <span style={{ fontSize: '0.9rem', color: '#f0e4cc' }}>El sistema ha asignado temporalmente al usuario con más "me gustas" en sus publicaciones. Para elegir manualmente, ve a la pestaña de <strong>Contenido Destacado</strong> y asigna uno.</span>
+            <strong style={{ display: 'block', fontSize: '0.95rem', marginBottom: '2px' }}>¡No hay cumpleañeros este mes!</strong>
+            <span style={{ fontSize: '0.8rem', color: '#f0e4cc' }}>Se ha asignado temporalmente al usuario con más likes. Ve a <strong>Contenido Destacado</strong> para elegir manualmente.</span>
           </div>
         </div>
       )}
 
-      <div className="admin-stats-grid">
+      {/* ── Stat Cards Grid (compactas) ── */}
+      <div className="admin-stats-grid-compact">
         {statCards.map((s, i) => (
-          <div className={`asc-card asc-${s.color}`} key={i}>
-            <span className="asc-icon">{s.icon}</span>
-            <span className="asc-value">{s.value}</span>
-            <span className="asc-label">{s.label}</span>
+          <div className={`asc-card-compact asc-${s.color}`} key={i}>
+            <div className="asc-card-top">
+              <span className="asc-icon-sm">{s.icon}</span>
+              <span className="asc-value-sm">{s.value}</span>
+            </div>
+            <span className="asc-label-sm">{s.label}</span>
           </div>
         ))}
       </div>
 
-      <div style={{ marginTop: '32px' }}>
+      {/* ── Dos columnas: Cumpleaños + Resumen ── */}
+      <div className="admin-dashboard-row">
+        {/* Cumpleaños del mes */}
+        <div className="admin-dashboard-card">
+          <div className="adc-header">
+            <span>🎂</span>
+            <h3 className="adc-title">Cumpleaños de {currentMonth}</h3>
+            <span className="adc-count">{birthdays?.count || 0}</span>
+          </div>
+          <div className="adc-body">
+            {(!birthdays || birthdays.count === 0) ? (
+              <p className="adc-empty">No hay cumpleaños registrados este mes.</p>
+            ) : (
+              <div className="birthday-list">
+                {birthdays.users.map(u => (
+                  <div className="birthday-item" key={u.id}>
+                    <img 
+                      src={u.avatar_url ? `${BASE_URL}/${u.avatar_url}` : '/logo_sin_fondo.png'} 
+                      alt={u.username} 
+                      className="birthday-avatar"
+                      onError={e => { e.currentTarget.src = '/logo_sin_fondo.png' }}
+                    />
+                    <div className="birthday-info">
+                      <strong>{u.username}</strong>
+                      {(u.nombre || u.apellido) && <span className="birthday-name">{u.nombre} {u.apellido}</span>}
+                    </div>
+                    <span className="birthday-date">📅 {u.fecha_cumple}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Resumen del sitio */}
+        <div className="admin-dashboard-card">
+          <div className="adc-header">
+            <span>📊</span>
+            <h3 className="adc-title">Resumen del Sitio</h3>
+          </div>
+          <div className="adc-body">
+            <div className="summary-list">
+              <div className="summary-item">
+                <span className="summary-icon">⭐</span>
+                <span className="summary-label">Destacado Actual</span>
+                <span className="summary-value">{stats.destacado > 0 ? 'Configurado' : 'Sin asignar'}</span>
+              </div>
+              <div className="summary-item">
+                <span className="summary-icon">📝</span>
+                <span className="summary-label">Total Publicaciones</span>
+                <span className="summary-value">{stats.total_posts}</span>
+              </div>
+              <div className="summary-item">
+                <span className="summary-icon">❤️</span>
+                <span className="summary-label">Interacciones (Likes)</span>
+                <span className="summary-value">{stats.total_likes}</span>
+              </div>
+              <div className="summary-item">
+                <span className="summary-icon">🎂</span>
+                <span className="summary-label">Cumpleaños este mes</span>
+                <span className="summary-value">{birthdays?.count || 0}</span>
+              </div>
+              {newest_user && (
+                <div className="summary-item">
+                  <span className="summary-icon">🆕</span>
+                  <span className="summary-label">Último registro</span>
+                  <span className="summary-value">{newest_user.username} ({newest_user.fecha})</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Log de Actividad ── */}
+      <div style={{ marginTop: '8px' }}>
         <h2 className="admin-sec-title">⏳ Actividad Reciente</h2>
-        <div className="admin-log-preview">
+        <div className="admin-log-preview" style={{ marginTop: '12px' }}>
           {logs.length === 0 ? <p style={{ color: '#aaa' }}>No hay actividad reciente.</p> : null}
           {logs.slice(0, 6).map((log) => (
             <div className="alp-row" key={log.id}>
@@ -2508,7 +2591,7 @@ function AdminMascota({ adminId }) {
       <div className="admin-sec-header">
         <h2 className="admin-sec-title">🤖 Diálogos del Asistente Virtual</h2>
       </div>
-      <p style={{ color: '#aaa', marginBottom: '20px' }}>
+      <p style={{ color: 'var(--color-cream)', marginBottom: '20px', fontSize: '0.95rem' }}>
         Configura lo que dice la mascota de Austral Collector dependiendo de la página en la que se encuentre el usuario. Puedes usar saltos de línea para separar el texto o HTML básico.
       </p>
 
