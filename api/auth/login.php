@@ -27,6 +27,13 @@ if ($user && password_verify($password, $user['password'])) {
     $logStmt = $pdo->prepare("INSERT INTO logs (user_id, tipo, accion) VALUES (?, 'login', 'Inicio de sesión')");
     $logStmt->execute([$user['id']]);
 
+    $alert_destacado = false;
+    if ($user['role'] === 'admin') {
+        $hasManuallySetDestacado = $pdo->query("SELECT valor FROM configuracion WHERE clave = 'miembro_destacado'")->fetchColumn() ? true : false;
+        $hasBirthdays = $pdo->query("SELECT COUNT(*) FROM usuarios WHERE MONTH(fecha_nacimiento) = MONTH(CURDATE()) AND DAY(fecha_nacimiento) >= DAY(CURDATE()) AND is_active = 1")->fetchColumn() > 0;
+        $alert_destacado = !$hasManuallySetDestacado && !$hasBirthdays;
+    }
+
     require_once 'jwt_helper.php';
     $token = JWT::encode([
         'id' => $user['id'],
@@ -42,6 +49,7 @@ if ($user && password_verify($password, $user['password'])) {
         'user' => $user,
         'role' => $user['role'],
         'username' => $user['username'],
+        'alert_destacado' => $alert_destacado,
         'require_password_change' => false
     ]);
 } else {

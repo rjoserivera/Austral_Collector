@@ -184,9 +184,10 @@ export default function PerfilPublicoPage() {
           </div>
           <div className="perfil-user-details">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              <h1 className="perfil-name" style={{ margin: 0 }}>
+              <h1 className="perfil-name" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
                 {user.username}
                 <VerifiedBadge type={user.verification_type} badgeUrl={user.verification_badge} size={26} />
+                {user.role === 'admin' && <span title="Administrador" style={{ fontSize: '1.3rem', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>👑</span>}
               </h1>
               
               <div 
@@ -196,7 +197,9 @@ export default function PerfilPublicoPage() {
                 title={(!isOwner && loggedUserName) ? 'Pulsa para calificar' : ''}
               >
                 <span style={{ color: '#f1c40f', fontSize: '1.2rem', lineHeight: 1 }}>⭐</span>
-                <strong style={{ fontSize: '1.1rem', color: '#f0e4cc', lineHeight: 1 }}>{user.stats?.average_rating > 0 ? user.stats.average_rating : 'Nuevo'}</strong>
+                <strong style={{ fontSize: '1.1rem', color: '#f0e4cc', lineHeight: 1 }}>
+                  {parseFloat(user.stats?.average_rating || 0).toFixed(1)}
+                </strong>
                 <span style={{ fontSize: '0.85rem', color: 'rgba(240, 228, 204, 0.6)'}}>({user.stats?.total_ratings || 0})</span>
                 {!isOwner && loggedUserName && (
                    <span style={{ fontSize: '0.85rem', marginLeft: '4px', filter: 'grayscale(0.2)' }}>

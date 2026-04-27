@@ -13,6 +13,9 @@ export default function DashboardPage() {
   const [avatarFile, setAvatarFile] = useState(null)
   const [bannerFile, setBannerFile] = useState(null)
   const [figuras, setFiguras] = useState([])
+  const [activeTab, setActiveTab] = useState('figura')
+  const [currentPage, setCurrentPage] = useState(1)
+  const ITEMS_PER_PAGE = 12
   const [showUpload, setShowUpload] = useState(false)
   const [editingPost, setEditingPost] = useState(null)
   const [userId, setUserId] = useState(null)
@@ -113,7 +116,8 @@ export default function DashboardPage() {
   const [draggedIndex, setDraggedIndex] = useState(null)
 
   const handleDragStart = (e, index) => {
-    setDraggedIndex(index)
+    const actualIndex = (currentPage - 1) * ITEMS_PER_PAGE + index;
+    setDraggedIndex(actualIndex)
     e.dataTransfer.effectAllowed = 'move'
     // Firefox necesita esto
     e.dataTransfer.setData('text/html', e.target)
@@ -126,15 +130,26 @@ export default function DashboardPage() {
 
   const handleDragEnter = (e, index) => {
     e.preventDefault()
-    if (draggedIndex === null || draggedIndex === index) return
+    const actualIndex = (currentPage - 1) * ITEMS_PER_PAGE + index;
+    if (draggedIndex === null || draggedIndex === actualIndex) return
 
     setFiguras(prev => {
-      const newList = [...prev]
-      const draggedItem = newList.splice(draggedIndex, 1)[0]
-      newList.splice(index, 0, draggedItem)
-      return newList
+      const currentFilteredList = prev.filter(f => (f.tipo || 'figura') === activeTab);
+      const draggedItem = currentFilteredList[draggedIndex];
+      
+      const newFilteredList = [...currentFilteredList];
+      newFilteredList.splice(draggedIndex, 1);
+      newFilteredList.splice(actualIndex, 0, draggedItem);
+      
+      let filteredCounter = 0;
+      return prev.map(f => {
+         if ((f.tipo || 'figura') === activeTab) {
+             return newFilteredList[filteredCounter++];
+         }
+         return f;
+      });
     })
-    setDraggedIndex(index)
+    setDraggedIndex(actualIndex)
   }
 
   const handleDragEnd = (e) => {
@@ -158,6 +173,43 @@ export default function DashboardPage() {
     })
     .catch(e => console.error("Error guardando reorden: ", e))
   }
+
+  const handleManualReorder = (currentIndexOnPage, newPositionStr) => {
+    const currentFilteredList = figuras.filter(f => (f.tipo || 'figura') === activeTab);
+    const actualCurrentIndex = (currentPage - 1) * ITEMS_PER_PAGE + currentIndexOnPage;
+    
+    let newPos = parseInt(newPositionStr, 10);
+    if (isNaN(newPos) || newPos < 1) newPos = 1;
+    if (newPos > currentFilteredList.length) newPos = currentFilteredList.length;
+    
+    const actualNewIndex = newPos - 1;
+    if (actualCurrentIndex === actualNewIndex) return;
+
+    const newFilteredList = [...currentFilteredList];
+    const itemToMove = newFilteredList.splice(actualCurrentIndex, 1)[0];
+    newFilteredList.splice(actualNewIndex, 0, itemToMove);
+    
+    let filteredCounter = 0;
+    const newList = figuras.map(f => {
+       if ((f.tipo || 'figura') === activeTab) {
+           return newFilteredList[filteredCounter++];
+       }
+       return f;
+    });
+    
+    setFiguras(newList);
+    
+    const ordenData = newList.map((fig) => ({ id: fig.id, tipo: fig.tipo }));
+    fetch(`${API_URL}/auth/reordenar_posts.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orden: ordenData })
+    }).catch(e => console.error("Error guardando reorden manual: ", e));
+  }
+
+  const currentFilteredFiguras = figuras.filter(f => (f.tipo || 'figura') === activeTab);
+  const totalPages = Math.ceil(currentFilteredFiguras.length / ITEMS_PER_PAGE);
+  const currentItems = currentFilteredFiguras.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
     <div className="dashboard-page section-wrapper">
@@ -188,6 +240,7 @@ export default function DashboardPage() {
 
           <div className="db-field">
             <label className="db-label">Avatar (Foto Circular)</label>
+            <span style={{ fontSize: '0.75rem', color: '#aaa', display: 'block', marginBottom: '8px' }}>Te recomendamos que ocupes una imagen de estas dimensiones: 400x400 px (1:1).</span>
             <div className="db-media-preview">
               <img src={avatar} alt="Mi Avatar" className="db-avatar-img"/>
               <div className="db-media-actions">
@@ -201,6 +254,7 @@ export default function DashboardPage() {
 
           <div className="db-field">
             <label className="db-label">Fondo de Cabecera (Banner)</label>
+            <span style={{ fontSize: '0.75rem', color: '#aaa', display: 'block', marginBottom: '8px' }}>Te recomendamos que ocupes una imagen de estas dimensiones: 1200x400 px (horizontal 3:1).</span>
             <div className="db-media-preview">
               <div className="db-banner-img-wrap">
                 <img src={banner} alt="Fondo Cabecera" className="db-banner-img"/>
@@ -236,21 +290,36 @@ export default function DashboardPage() {
 
         {/* ── MAIN: INVENTARIO ──────────────────────────────── */}
         <main className="db-main">
-          <div className="db-inventory-header">
+          <div className="db-inventory-header" style={{ marginBottom: '16px' }}>
             <div>
               <h2 className="db-section-title">📦 Tus Publicaciones</h2>
-              <span className="db-inventory-count">{figuras.length} piezas en tu colección publicadas</span>
+              <span className="db-inventory-count">{figuras.length} piezas en total</span>
             </div>
             <button className="btn-primary db-add-btn" onClick={() => setShowUpload(true)}>
               <span className="db-add-icon">＋</span> Subir Nueva
             </button>
           </div>
 
+          <div className="db-tabs-container" style={{ marginBottom: '24px', borderBottom: '1px solid rgba(201,168,76,0.2)' }}>
+            <button 
+              className={`db-tab-btn ${activeTab === 'figura' ? 'active' : ''}`} 
+              onClick={() => { setActiveTab('figura'); setCurrentPage(1); }}
+            >
+              Figuras ({figuras.filter(f => (f.tipo || 'figura') === 'figura').length})
+            </button>
+            <button 
+              className={`db-tab-btn ${activeTab === 'cosplay' ? 'active' : ''}`} 
+              onClick={() => { setActiveTab('cosplay'); setCurrentPage(1); }}
+            >
+              Cosplays ({figuras.filter(f => f.tipo === 'cosplay').length})
+            </button>
+          </div>
+
           <div className="db-grid-4 cpm-reorderable-grid">
-            {figuras.map((fig, index) => (
+            {currentItems.map((fig, index) => (
               <article 
                 key={`${fig.id}-${fig.tipo}`} 
-                className={`db-card card ${draggedIndex === index ? 'dragging' : ''}`}
+                className={`db-card card ${draggedIndex === ((currentPage - 1) * ITEMS_PER_PAGE + index) ? 'dragging' : ''}`}
                 draggable
                 onDragStart={(e) => handleDragStart(e, index)}
                 onDragEnter={(e) => handleDragEnter(e, index)}
@@ -273,19 +342,56 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="db-card-overlay">
+                  <div style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(0,0,0,0.85)', padding: '6px', borderRadius: '6px', border: '1px solid var(--color-gold)', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'default' }} onClick={e => e.stopPropagation()} onDragStart={e => e.preventDefault()}>
+                    <span style={{ fontSize: '0.75rem', color: '#dfc08a', fontWeight: 'bold' }}>Nº</span>
+                    <input 
+                      key={`pos-${fig.id}-${(currentPage - 1) * ITEMS_PER_PAGE + index}`} 
+                      type="number" 
+                      min="1" 
+                      max={currentFilteredFiguras.length} 
+                      defaultValue={((currentPage - 1) * ITEMS_PER_PAGE + index) + 1}
+                      onBlur={(e) => handleManualReorder(index, e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
+                      style={{ width: '42px', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', textAlign: 'center', fontSize: '0.9rem', fontWeight: 'bold', padding: '2px' }}
+                      title="Escribe la posición y presiona Enter"
+                    />
+                  </div>
                   <button className="db-action-btn edit" title="Editar" onClick={() => setEditingPost(fig)}>✏️</button>
                   <button className="db-action-btn delete" title="Eliminar" onClick={() => handleDelete(fig)}>🗑️</button>
                 </div>
               </article>
             ))}
+          </div>
 
-            <div className="db-card card db-card-empty" onClick={() => setShowUpload(true)} style={{cursor:'pointer'}}>
-              <button className="db-empty-add-btn">
-                <span className="db-empty-plus">＋</span>
-                <span>Subir Nueva</span>
+          {totalPages > 1 && (
+            <div className="db-pagination">
+              <button 
+                disabled={currentPage === 1} 
+                onClick={() => { setCurrentPage(prev => prev - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className="db-pagination-btn"
+              >
+                Anterior
+              </button>
+              <div className="db-pagination-numbers">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                  <button
+                    key={pageNum}
+                    className={`db-pagination-num ${currentPage === pageNum ? 'active' : ''}`}
+                    onClick={() => { setCurrentPage(pageNum); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+              </div>
+              <button 
+                disabled={currentPage === totalPages} 
+                onClick={() => { setCurrentPage(prev => prev + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className="db-pagination-btn"
+              >
+                Siguiente
               </button>
             </div>
-          </div>
+          )}
         </main>
       </div>
 

@@ -659,6 +659,7 @@ function AdminUsuarios({ adminId }) {
               {formData.verification_type === 'external' && (
                 <div className="admin-form-group">
                   <label>🖼️ Badge del Colaborador (PNG/JPG, máx 2MB)</label>
+                  <span style={{ fontSize: '0.75rem', color: '#aaa', display: 'block', marginBottom: '8px' }}>Te recomendamos que ocupes una imagen de estas dimensiones: 128x128 px (1:1).</span>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     {badgePreview && (
                       <img
@@ -1108,6 +1109,7 @@ function AdminEventos({ adminId }) {
 
           <div className="admin-form-group" style={{ marginTop: '10px' }}>
             <label>Imagen / Foto representativa</label>
+            <span style={{ fontSize: '0.75rem', color: '#aaa', display: 'block', marginBottom: '8px' }}>Te recomendamos que ocupes una imagen de estas dimensiones: 800x600 px (horizontal 4:3).</span>
             <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                <input 
                  type="file" 
@@ -2418,6 +2420,7 @@ function AdminPromos({ adminId }) {
               </div>
               <div className="admin-form-group">
                 <label>Imagen / Logo {form.id ? '(Opcional)' : '*'}</label>
+                <span style={{ fontSize: '0.75rem', color: '#aaa', display: 'block', marginBottom: '6px' }}>Te recomendamos que ocupes una imagen de estas dimensiones: 800x400 px (horizontal 2:1).</span>
                 <input type="file" className="admin-input" accept="image/*"
                   required={!form.id}
                   onChange={handleImgChange}

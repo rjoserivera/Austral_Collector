@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from '../contexts/NotificationContext.jsx';
 import './LoginPage.css';
 
 import { API_URL } from '../config.js';
@@ -32,6 +33,9 @@ export default function LoginPage() {
     .then(r => r.json())
     .then(data => {
       if (data.success && data.user) {
+        if (data.alert_destacado) {
+          toast.add('Atención: No hay ningún destacado configurado ni cumpleañeros este mes. Ve al panel para asignar uno.', 'warning', 8000);
+        }
         localStorage.setItem('austral_auth_user', JSON.stringify(data.user));
         localStorage.setItem('austral_auth_role', data.user.role);
         // Save JWT token for authenticated API requests

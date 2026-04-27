@@ -724,9 +724,7 @@ export default function HomePage() {
             ) : (
               <p style={{ color: '#aaa', textAlign: 'center', marginTop: '15px', fontSize: '0.85rem' }}>Aún no hay cosplays publicados.</p>
             )}
-            <div style={{ textAlign: 'center', marginTop: '14px' }}>
-              <a href="/galeria?tipo=cosplay" style={{ fontSize: '0.78rem', color: 'var(--color-gold)', textDecoration: 'none', letterSpacing: '.05em' }}>Ver todos los cosplays →</a>
-            </div>
+
           </div>
 
 
