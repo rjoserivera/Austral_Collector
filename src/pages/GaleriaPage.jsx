@@ -12,6 +12,7 @@ export default function GaleriaPage() {
   const [selectedPost, setSelectedPost] = useState(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [currentPage, setCurrentPage]   = useState(1)
+  const [sortBy, setSortBy]             = useState('fechaReciente')
   const searchRef = useRef(null)
 
   const ITEMS_PER_PAGE = 40
@@ -169,7 +170,6 @@ export default function GaleriaPage() {
   })
 
   const applyCategorySuggestion = (cat) => {
-    // Si la categoría ya está seleccionada, al volver a darle se desmarca (vuelve a Todas)
     if (filterCat === cat) {
       setFilterCat('Todas')
     } else {
@@ -180,8 +180,22 @@ export default function GaleriaPage() {
     setCurrentPage(1)
   }
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
-  const currentItems = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+  const sortedAndFiltered = [...filtered].sort((a, b) => {
+    switch (sortBy) {
+      case 'likes':
+        return (b.total_likes || 0) - (a.total_likes || 0)
+      case 'nombre':
+        return a.nombre.localeCompare(b.nombre)
+      case 'fechaAntigua':
+        return new Date(a.created_at || 0) - new Date(b.created_at || 0)
+      case 'fechaReciente':
+      default:
+        return new Date(b.created_at || 0) - new Date(a.created_at || 0)
+    }
+  })
+
+  const totalPages = Math.ceil(sortedAndFiltered.length / ITEMS_PER_PAGE)
+  const currentItems = sortedAndFiltered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
 
   return (
     <div className="galeria-page">
@@ -256,6 +270,22 @@ export default function GaleriaPage() {
                 ))}
               </ul>
             )}
+          </div>
+
+          <div className="galeria-sort-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <label htmlFor="sort-select" style={{ color: 'rgba(240, 228, 204, 0.75)', fontSize: '0.9rem', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', letterSpacing: '1px' }}>Ordenar por:</label>
+            <select
+              id="sort-select"
+              value={sortBy}
+              onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
+              className="search-input"
+              style={{ padding: '8px 30px 8px 16px', borderRadius: '20px', cursor: 'pointer', appearance: 'none', background: 'rgba(10,5,4,.6) url("data:image/svg+xml;utf8,<svg fill=\'%23f0e4cc\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/><path d=\'M0 0h24v24H0z\' fill=\'none\'/></svg>") no-repeat right 8px center' }}
+            >
+              <option value="fechaReciente">📅 Más Reciente</option>
+              <option value="likes">👍 Más Me Gusta</option>
+              <option value="nombre">A-Z Nombre</option>
+              <option value="fechaAntigua">📅 Más Antiguo</option>
+            </select>
           </div>
 
           {/* Mostrar Categoría Activa (Badge Desmarcable) */}

@@ -99,31 +99,48 @@ export default function MiembrosPage() {
       </section>
 
       {/* FILTROS Y BÚSQUEDA */}
-      <div className="mi-filters-section section-wrapper">
-        <div className="mi-search-container">
-          <input
-            type="text"
-            placeholder="🔍 Buscar por nombre de usuario..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="mi-search-input"
-          />
-        </div>
+      <div className="section-wrapper" style={{ margin: '40px auto' }}>
+        <div className="galeria-controls" style={{ justifyContent: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: 0 }}>
+          
+          <div className="galeria-search-wrap">
+            <div className="galeria-search">
+              <span className="search-icon">🔍</span>
+              <input
+                id="miembros-search-input"
+                type="text"
+                placeholder="Buscar por nombre de usuario..."
+                value={searchTerm}
+                autoComplete="off"
+                className="search-input"
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button
+                  className="galeria-search-clear"
+                  onClick={() => setSearchTerm('')}
+                  aria-label="Limpiar"
+                >✕</button>
+              )}
+            </div>
+          </div>
 
-        <div className="mi-sort-container">
-          <label htmlFor="sort-select" style={{ marginRight: '8px', color: 'var(--color-cream)' }}>Ordenar por:</label>
-          <select
-            id="sort-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="mi-sort-select"
-          >
-            <option value="likes">👍 Más Me Gusta</option>
-            <option value="figuras">📦 Más Figuras</option>
-            <option value="nombre">A-Z Nombre</option>
-            <option value="fechaReciente">📅 Más Reciente</option>
-            <option value="fechaAntigua">📅 Más Antiguo</option>
-          </select>
+          <div className="galeria-sort-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <label htmlFor="sort-select" style={{ color: 'rgba(240, 228, 204, 0.75)', fontSize: '0.9rem', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', letterSpacing: '1px' }}>Ordenar por:</label>
+            <select
+              id="sort-select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="search-input"
+              style={{ padding: '8px 30px 8px 16px', borderRadius: '20px', cursor: 'pointer', appearance: 'none', background: 'rgba(10,5,4,.6) url("data:image/svg+xml;utf8,<svg fill=\'%23f0e4cc\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/><path d=\'M0 0h24v24H0z\' fill=\'none\'/></svg>") no-repeat right 8px center' }}
+            >
+              <option value="likes">👍 Más Me Gusta</option>
+              <option value="figuras">📦 Más Figuras</option>
+              <option value="nombre">A-Z Nombre</option>
+              <option value="fechaReciente">📅 Más Reciente</option>
+              <option value="fechaAntigua">📅 Más Antiguo</option>
+            </select>
+          </div>
+
         </div>
       </div>
 
@@ -179,25 +196,31 @@ export default function MiembrosPage() {
 
       {/* PAGINACIÓN */}
       {totalPages > 1 && (
-        <div className="mi-pagination section-wrapper">
-          <button
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="mi-pagination-btn"
+        <div className="galeria-pagination section-wrapper">
+          <button 
+            disabled={currentPage === 1} 
+            onClick={() => { setCurrentPage(prev => Math.max(1, prev - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className="pagination-btn"
           >
-            ← Anterior
+            Anterior
           </button>
-
-          <div className="mi-pagination-info">
-            Página <strong>{currentPage}</strong> de <strong>{totalPages}</strong>
+          <div className="pagination-numbers">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+              <button
+                key={pageNum}
+                className={`pagination-num ${currentPage === pageNum ? 'active' : ''}`}
+                onClick={() => { setCurrentPage(pageNum); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              >
+                {pageNum}
+              </button>
+            ))}
           </div>
-
-          <button
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="mi-pagination-btn"
+          <button 
+            disabled={currentPage === totalPages} 
+            onClick={() => { setCurrentPage(prev => Math.min(totalPages, prev + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className="pagination-btn"
           >
-            Siguiente →
+            Siguiente
           </button>
         </div>
       )}
