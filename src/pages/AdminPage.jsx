@@ -1998,22 +1998,22 @@ function AdminActividad() {
         }}>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '0.70rem', color: '#1e4d5a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Responsable</label>
+            <label style={{ fontSize: '0.75rem', color: '#1a3d4a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Responsable</label>
             <input 
               type="text" 
               placeholder="Buscar usuario..." 
               className="admin-input" 
-              style={{ width: '180px', background: 'rgba(255,250,240,0.5)', borderColor: 'rgba(180,160,120,0.4)', color: '#2e1f0f' }}
+              style={{ width: '180px' }}
               value={fUsuario}
               onChange={e => setFUsuario(e.target.value)}
             />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '0.70rem', color: '#1e4d5a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Categoría</label>
+            <label style={{ fontSize: '0.75rem', color: '#1a3d4a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Categoría</label>
             <select 
               className="admin-select"
-              style={{ width: '150px', height: '38px', background: 'rgba(255,250,240,0.5)', borderColor: 'rgba(180,160,120,0.4)', color: '#2e1f0f' }}
+              style={{ width: '150px', height: '38px' }}
               value={fTipo}
               onChange={e => setFTipo(e.target.value)}
             >
@@ -2028,22 +2028,22 @@ function AdminActividad() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '0.70rem', color: '#1e4d5a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Desde</label>
+            <label style={{ fontSize: '0.75rem', color: '#1a3d4a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Desde</label>
             <input 
               type="date" 
               className="admin-input" 
-              style={{ width: '150px', background: 'rgba(255,250,240,0.5)', borderColor: 'rgba(180,160,120,0.4)', color: '#2e1f0f' }}
+              style={{ width: '150px' }}
               value={fFechaDesde}
               onChange={e => setFFechaDesde(e.target.value)}
             />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '0.70rem', color: '#1e4d5a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Hasta</label>
+            <label style={{ fontSize: '0.75rem', color: '#1a3d4a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Hasta</label>
             <input 
               type="date" 
               className="admin-input" 
-              style={{ width: '150px', background: 'rgba(255,250,240,0.5)', borderColor: 'rgba(180,160,120,0.4)', color: '#2e1f0f' }}
+              style={{ width: '150px' }}
               value={fFechaHasta}
               onChange={e => setFFechaHasta(e.target.value)}
             />
@@ -2385,8 +2385,8 @@ function AdminPromos({ adminId }) {
         </div>
       </div>
 
-      <div style={{ padding: '12px 18px', background: 'rgba(45,110,126,0.1)', border: '1px solid rgba(45,110,126,0.3)', borderRadius: '10px', marginBottom: '24px', color: 'rgba(240,228,204,0.85)' }}>
-        <strong style={{ color: '#dfc08a' }}>Nota:</strong> Las promociones que agregues aquí se mostrarán automáticamente de forma simultánea en las 3 secciones de prueba del Home (Carrusel, Panel Lateral y Tarjetas Inferiores).
+      <div style={{ padding: '12px 18px', background: 'rgba(139,32,32,0.1)', border: '1px solid #8b2020', borderRadius: '10px', marginBottom: '24px', color: '#1a3d4a' }}>
+        <strong style={{ color: '#8b2020' }}>Nota:</strong> Las promociones que agregues aquí se mostrarán automáticamente de forma simultánea en las 3 secciones de prueba del Home (Carrusel, Panel Lateral y Tarjetas Inferiores).
       </div>
 
       {/* Modal de formulario */}
