@@ -436,3 +436,44 @@
   .galeria-author { font-size: 0.7rem; line-height: 1.2; }
   .galeria-counters { align-items: flex-start; width: 100%; flex-direction: row; justify-content: space-between; margin-top: 4px; }
 }
+
+/* ── PAGINATION ────────────────────────────────────────── */
+.galeria-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(200, 169, 110, 0.2);
+}
+
+.pagination-btn {
+  background: rgba(30, 77, 90, 0.88);
+  border: 1px solid rgba(200, 169, 110, 0.4);
+  color: #dfc08a;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: rgba(30, 77, 90, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.pagination-numbers {
+  display: flex;
+  box-shadow: 0 0 15px rgba(139, 32, 32, 0.4);
+}

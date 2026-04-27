@@ -11,7 +11,10 @@ export default function GaleriaPage() {
   const [figuras, setFiguras]           = useState([])
   const [selectedPost, setSelectedPost] = useState(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [currentPage, setCurrentPage]   = useState(1)
   const searchRef = useRef(null)
+
+  const ITEMS_PER_PAGE = 40
 
   useEffect(() => {
     const authUserStr = localStorage.getItem('austral_auth_user')
@@ -174,7 +177,11 @@ export default function GaleriaPage() {
     }
     setSearch('')
     setShowSuggestions(false)
+    setCurrentPage(1)
   }
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
+  const currentItems = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
 
   return (
     <div className="galeria-page">
@@ -217,13 +224,14 @@ export default function GaleriaPage() {
                   setSearch(e.target.value)
                   setShowSuggestions(true)
                   setFilterCat('Todas')
+                  setCurrentPage(1)
                 }}
                 onFocus={() => setShowSuggestions(true)}
               />
               {search && (
                 <button
                   className="galeria-search-clear"
-                  onClick={() => { setSearch(''); setFilterCat('Todas'); setShowSuggestions(false) }}
+                  onClick={() => { setSearch(''); setFilterCat('Todas'); setShowSuggestions(false); setCurrentPage(1); }}
                   aria-label="Limpiar"
                 >✕</button>
               )}
@@ -253,7 +261,7 @@ export default function GaleriaPage() {
               <span className="gaf-label">Filtrando por:</span>
               <button 
                 className="gaf-tag" 
-                onClick={() => setFilterCat('Todas')}
+                onClick={() => { setFilterCat('Todas'); setCurrentPage(1); }}
                 title="Quitar filtro"
               >
                 #{filterCat} <span className="gaf-close">✕</span>
@@ -264,9 +272,10 @@ export default function GaleriaPage() {
 
         {/* ── GRID ─────────────────────────────────────────── */}
         {filtered.length > 0 ? (
-          <div className="galeria-grid">
-            {filtered.map(fig => (
-              <article
+          <>
+            <div className="galeria-grid">
+              {currentItems.map(fig => (
+                <article
                 key={`${fig.id}-${fig.tipo}`}
                 className="galeria-card card"
                 onClick={() => setSelectedPost(fig)}
@@ -294,7 +303,38 @@ export default function GaleriaPage() {
                 </div>
               </article>
             ))}
-          </div>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="galeria-pagination">
+                <button 
+                  disabled={currentPage === 1} 
+                  onClick={() => { setCurrentPage(prev => prev - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                  className="pagination-btn"
+                >
+                  Anterior
+                </button>
+                <div className="pagination-numbers">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                    <button
+                      key={pageNum}
+                      className={`pagination-num ${currentPage === pageNum ? 'active' : ''}`}
+                      onClick={() => { setCurrentPage(pageNum); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+                </div>
+                <button 
+                  disabled={currentPage === totalPages} 
+                  onClick={() => { setCurrentPage(prev => prev + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                  className="pagination-btn"
+                >
+                  Siguiente
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="galeria-empty">
             <p>No se encontraron resultados para "{search || filterCat}".</p>
