@@ -54,5 +54,5 @@ testsprite_tests/
 PRD_TestSprite.md
 
 # User Uploads (Ignore content but keep directory if needed)
-uploads/**/*
-!uploads/.gitkeep
+#uploads/**/*
+#!uploads/.gitkeep
