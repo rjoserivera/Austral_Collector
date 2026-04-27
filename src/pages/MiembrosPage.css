@@ -39,16 +39,53 @@
   margin-bottom: 20px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  font-weight: 900;
 }
 
 .mi-title-teal {
-  color: #2d6e7e !important;
-  text-shadow: 0 2px 20px rgba(45,110,126,0.3);
+  color: #51767f !important;
+  /* Borde negro tipo stroke */
+  text-shadow: 
+    -3px -3px 0 #000,
+    3px -3px 0 #000,
+    -3px 3px 0 #000,
+    3px 3px 0 #000,
+    -3px 0 0 #000,
+    3px 0 0 #000,
+    0 -3px 0 #000,
+    0 3px 0 #000,
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
 }
 
 .mi-title-red {
-  color: #8b2020 !important;
-  text-shadow: 0 2px 20px rgba(139,32,32,0.3);
+  color: #c8a87b !important;
+  /* Borde negro tipo stroke */
+  text-shadow: 
+    -3px -3px 0 #000,
+    3px -3px 0 #000,
+    -3px 3px 0 #000,
+    3px 3px 0 #000,
+    -3px 0 0 #000,
+    3px 0 0 #000,
+    0 -3px 0 #000,
+    0 3px 0 #000,
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
 }
 
 .mi-hero-desc {
