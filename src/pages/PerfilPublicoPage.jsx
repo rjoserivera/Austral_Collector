@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom'
 import './PerfilPublicoPage.css'
 import { API_URL, BASE_URL } from '../config.js'
 import CreatePostModal from '../components/CreatePostModal'
+import PostModal from '../components/PostModal'
 import { getOfflinePosts } from '../utils/offlineSync'
 import VerifiedBadge from '../components/VerifiedBadge'
 
@@ -14,6 +15,7 @@ export default function PerfilPublicoPage() {
   const [showUpload, setShowUpload] = useState(false)
   const [activeTab, setActiveTab] = useState('figura')
   const [showRatingModal, setShowRatingModal] = useState(false)
+  const [selectedPost, setSelectedPost] = useState(null)
   
   const authUserStr = localStorage.getItem('austral_auth_user')
   let loggedUserName = null;
@@ -157,6 +159,8 @@ export default function PerfilPublicoPage() {
   }
 
   const isOwner = loggedUserName && loggedUserName === user.username;
+  const figurasCount = user.collection ? user.collection.filter(f => (f.tipo || 'figura') === 'figura').length : 0;
+  const cosplayCount = user.collection ? user.collection.filter(f => f.tipo === 'cosplay').length : 0;
 
   return (
     <div className="perfil-page">
@@ -240,20 +244,20 @@ export default function PerfilPublicoPage() {
                 className={`perfil-tab-btn ${activeTab === 'figura' ? 'active' : ''}`} 
                 onClick={() => setActiveTab('figura')}
               >
-                Figuras
+                Figuras ({figurasCount})
               </button>
               <button 
                 className={`perfil-tab-btn ${activeTab === 'cosplay' ? 'active' : ''}`} 
                 onClick={() => setActiveTab('cosplay')}
               >
-                Cosplay
+                Cosplay ({cosplayCount})
               </button>
             </div>
           </div>
           
           <div className="perfil-grid-4">
             {user.collection && user.collection.filter(fig => (fig.tipo || 'figura') === activeTab).map(fig => (
-              <article key={fig.id} className="hp-figura-card card">
+              <article key={fig.id} className="hp-figura-card card" onClick={() => setSelectedPost(fig)}>
                 <div className="hp-figura-img-wrap" style={{ position: 'relative' }}>
                   <img src={fig.local_image || (fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png')} alt={fig.nombre} className="hp-figura-img" loading="lazy"/>
                   {fig.anio && <div className="hp-figura-year">{fig.anio}</div>}
@@ -265,7 +269,7 @@ export default function PerfilPublicoPage() {
                   <span className="hp-figura-sub">De: {user.username}</span>
                   <p className="hp-figura-desc">{fig.descripcion || 'Sin descripción.'}</p>
                   <div>
-                    <button className="hp-heart-btn" onClick={() => handleLike(fig.id, fig.tipo)}>
+                    <button className="hp-heart-btn" onClick={(e) => { e.stopPropagation(); handleLike(fig.id, fig.tipo); }}>
                        {fig.userLiked ? '❤' : '♡'} {fig.total_likes || 0}
                     </button>
                   </div>
@@ -316,6 +320,16 @@ export default function PerfilPublicoPage() {
           </div>
         </div>
       )}
+
+      {selectedPost && (
+        <PostModal
+          post={selectedPost}
+          isOpen={!!selectedPost}
+          onClose={() => setSelectedPost(null)}
+          onLike={(id) => handleLike(id, selectedPost.tipo)}
+        />
+      )}
     </div>
   )
 }
+
