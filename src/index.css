@@ -216,3 +216,34 @@ a:hover { color: var(--color-steel-dark); }
   overflow-y: auto;
   padding-right: 4px;
 }
+
+/* --- Global Hero Title Styles (Replicated from Miembros) --- */
+.global-hero-title {
+  font-family: var(--font-title);
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  line-height: 1.1;
+  margin-bottom: 20px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+.global-title-teal {
+  color: #51767f !important;
+  text-shadow: 
+    -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000,
+    -3px 0 0 #000, 3px 0 0 #000, 0 -3px 0 #000, 0 3px 0 #000,
+    -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000,
+    -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+}
+
+.global-title-red {
+  color: #c8a87b !important;
+  text-shadow: 
+    -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000,
+    -3px 0 0 #000, 3px 0 0 #000, 0 -3px 0 #000, 0 3px 0 #000,
+    -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000,
+    -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+}
