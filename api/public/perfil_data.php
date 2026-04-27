@@ -89,6 +89,19 @@ if ($viewerId > 0) {
     $stats['viewer_rating'] = $vRating->fetchColumn() ?: null;
 }
 
+// Formatear cumpleaños
+$cumpleanios = null;
+if ($user['fecha_nacimiento']) {
+    $date = new DateTime($user['fecha_nacimiento']);
+    $meses = [
+        1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril', 5 => 'mayo', 6 => 'junio',
+        7 => 'julio', 8 => 'agosto', 9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre'
+    ];
+    $dia = $date->format('j'); // día sin cero inicial
+    $mes = $meses[(int)$date->format('n')];
+    $cumpleanios = $dia . ' de ' . $mes;
+}
+
 echo json_encode([
     'success' => true,
     'data' => [
@@ -102,6 +115,7 @@ echo json_encode([
         'banner_url'         => $user['banner_url'],
         'role'               => $user['role'],
         'fecha_nacimiento'   => $user['fecha_nacimiento'],
+        'cumpleanios'        => $cumpleanios,
         'verification_type'  => $user['verification_type']  ?? 'none',
         'verification_badge' => $user['verification_badge'] ?? null,
         'stats'              => $stats,
