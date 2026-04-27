@@ -191,7 +191,10 @@ export default function GaleriaPage() {
         <div className="galeria-hero-bg" aria-hidden="true"/>
         <div className="section-wrapper galeria-hero-inner">
           <div className="galeria-hero-text">
-            <h1 className="galeria-title">Galería de Figuras</h1>
+            <h1 className="global-hero-title" style={{ textAlign: 'left', margin: 0 }}>
+              <span className="global-title-teal">GALERÍA DE</span><br/>
+              <span className="global-title-red">FIGURAS</span>
+            </h1>
             <p className="galeria-subtitle">
               Explora miles de archivos históricos, subidos por coleccionistas de élite.
             </p>

@@ -69,9 +69,9 @@ export default function PortafolioPage() {
             <img src="/austral_brazos_cruzados.png" alt="Mascota Robot Austral Collector" className="pp-mascot"/>
           </div>
           <div className="pp-hero-content">
-            <h1 className="pp-hero-title">
-              <span className="pp-title-austral">AUSTRAL</span><br/>
-              <span className="pp-title-collector">COLLECTOR</span>
+            <h1 className="global-hero-title" style={{ textAlign: 'left' }}>
+              <span className="global-title-teal">AUSTRAL</span><br/>
+              <span className="global-title-red">COLLECTOR</span>
             </h1>
             <p className="pp-hero-subtitle">Portafolio Austral Collector</p>
             <div className="gold-divider" style={{ width: '220px', margin: '14px 0 22px' }}/>
