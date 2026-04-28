@@ -234,11 +234,7 @@ export default function PortafolioPage() {
         </div>
       )}
 
-      {/* ── FOOTER ───────────────────────────────────────── */}
-      <footer className="pp-footer">
-        <div className="gold-divider"/>
-        <p className="pp-footer-copy">© 2024 Austral Collector — Comunidad de coleccionistas.</p>
-      </footer>
+
     </div>
   )
 }
