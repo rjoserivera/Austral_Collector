@@ -348,7 +348,7 @@ export default function HomePage() {
             </div>
 
             {!loading && data.ultimas.length === 0 ? (
-              <p style={{ color: '#aaa', padding: '20px' }}>No hay publicaciones aún. ¡Sé el primero en subir algo!</p>
+              <p style={{ color: 'var(--color-muted)', padding: '20px' }}>No hay publicaciones aún. ¡Sé el primero en subir algo!</p>
             ) : (
               <div className="hp-carrusel-wrap">
                 <button className="hp-carrusel-btn left" onClick={() => scrollCarousel('left')}>❮</button>
@@ -589,7 +589,7 @@ export default function HomePage() {
                 ))}
               </div>
             ) : (
-              <p style={{ color: '#aaa' }}>En espera de votaciones...</p>
+              <p style={{ color: 'var(--color-muted)' }}>En espera de votaciones...</p>
             )}
           </section>
 
