@@ -220,7 +220,7 @@ export default function DashboardPage() {
           <p className="db-subtitle">Administra tu perfil público y tu inventario de figuras.</p>
         </div>
         {userRole === 'admin' && (
-          <Link to="/admin" className="btn-primary" style={{ background: '#1e4d5a', padding: '12px 24px' }}>
+          <Link to="/admin" className="btn-primary" style={{ background: '#1e4d5a', color: '#fff', padding: '12px 24px' }}>
             ⚙️ Ir al Panel de Control
           </Link>
         )}

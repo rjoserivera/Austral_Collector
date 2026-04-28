@@ -110,6 +110,7 @@ a:hover { color: var(--color-steel-dark); }
 }
 .btn-primary:hover {
   background: #d44235;
+  color: #fff;
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(192, 57, 43, 0.55);
 }
