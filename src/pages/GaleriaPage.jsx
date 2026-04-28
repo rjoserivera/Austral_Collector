@@ -273,7 +273,7 @@ export default function GaleriaPage() {
           </div>
 
           <div className="galeria-sort-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <label htmlFor="sort-select" style={{ color: 'rgba(240, 228, 204, 0.75)', fontSize: '0.9rem', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', letterSpacing: '1px' }}>Ordenar por:</label>
+            <label htmlFor="sort-select" style={{ color: 'rgba(240, 228, 204, 0.75)', fontSize: '0.9rem', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', letterSpacing: '1px', whiteSpace: 'nowrap' }}>Ordenar por:</label>
             <select
               id="sort-select"
               value={sortBy}
