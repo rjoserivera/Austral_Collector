@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { toast, confirmDialog } from '../contexts/NotificationContext.jsx'
 import { Link, Navigate } from 'react-router-dom'
 import './AdminPage.css'
@@ -28,7 +28,7 @@ const NAV = [
   { id: 'inicio',     icon: '📊', label: 'Inicio' },
   { id: 'usuarios',   icon: '👥', label: 'Gestión de Usuarios' },
   { id: 'moderacion', icon: '⚖️', label: 'Moderación de Contenido' },
-  { id: 'videos',     icon: '🎬', label: 'Gestión de Videos' },
+  { id: 'videos',     icon: '🎬', label: 'Promocion Videos' },
   { id: 'destacados', icon: '🏆', label: 'Contenido Destacado' },
   { id: 'eventos',    icon: '📢', label: 'Noticias y Eventos' },
   { id: 'identidad',  icon: '⭐', label: 'Identidad y Nosotros' },
@@ -293,6 +293,11 @@ function AdminUsuarios({ adminId }) {
   const [usuarios, setUsuarios] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [filterRole, setFilterRole] = useState('all')
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [sortBy, setSortBy] = useState('fechaDesc')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 30
   const [keyResult, setKeyResult] = useState(null)
   const [messageModal, setMessageModal] = useState(null)
   const [messageForm, setMessageForm] = useState({ asunto: '', mensaje: '' })
@@ -321,6 +326,10 @@ function AdminUsuarios({ adminId }) {
   }
 
   useEffect(() => { loadData() }, [])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, filterRole, filterStatus, sortBy])
 
   const openForm = (mode, user = null) => {
     setFormMode(mode)
@@ -493,12 +502,45 @@ function AdminUsuarios({ adminId }) {
     .finally(() => setIsSendingMsg(false))
   }
 
-  const filteredUsers = usuarios.filter(u => {
-    const q = searchTerm.toLowerCase()
-    return u.username.toLowerCase().includes(q) || 
-           (u.nombre && u.nombre.toLowerCase().includes(q)) || 
-           (u.apellido && u.apellido.toLowerCase().includes(q))
-  })
+  const processedUsers = useMemo(() => {
+    let result = [...usuarios]
+
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase()
+      result = result.filter(u => 
+        u.username.toLowerCase().includes(q) || 
+        (u.nombre && u.nombre.toLowerCase().includes(q)) || 
+        (u.apellido && u.apellido.toLowerCase().includes(q))
+      )
+    }
+
+    if (filterRole !== 'all') {
+      result = result.filter(u => u.role === filterRole)
+    }
+
+    if (filterStatus !== 'all') {
+      result = result.filter(u => String(u.is_active) === filterStatus)
+    }
+
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case 'fechaAsc':
+          return new Date(a.created_at || 0) - new Date(b.created_at || 0)
+        case 'nombreAsc':
+          return a.username.localeCompare(b.username)
+        case 'nombreDesc':
+          return b.username.localeCompare(a.username)
+        case 'fechaDesc':
+        default:
+          return new Date(b.created_at || 0) - new Date(a.created_at || 0)
+      }
+    })
+
+    return result
+  }, [usuarios, searchTerm, filterRole, filterStatus, sortBy])
+
+  const totalPages = Math.ceil(processedUsers.length / itemsPerPage)
+  const currentItems = processedUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   if (loading && usuarios.length === 0) return <Loading />
 
@@ -545,18 +587,34 @@ function AdminUsuarios({ adminId }) {
       <div className="admin-sec-header" style={{ marginBottom: formMode ? '0' : '0' }}>
         <h2 className="admin-sec-title">👥 Listado de Usuarios</h2>
         {!formMode && (
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
             <input 
               type="text" 
               className="admin-input" 
-              placeholder="Buscar por usuario o nombre..." 
+              placeholder="Buscar usuario o nombre..." 
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              style={{ padding: '6px 12px', width: '220px' }}
+              style={{ padding: '6px 12px', width: '200px' }}
             />
+            <select className="admin-input" value={filterRole} onChange={e => setFilterRole(e.target.value)} style={{ padding: '6px 12px', width: 'auto' }}>
+              <option value="all">Roles (Todos)</option>
+              <option value="admin">Administrador</option>
+              <option value="user">Usuario</option>
+            </select>
+            <select className="admin-input" value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ padding: '6px 12px', width: 'auto' }}>
+              <option value="all">Estado (Todos)</option>
+              <option value="1">Activos</option>
+              <option value="0">Baneados</option>
+            </select>
+            <select className="admin-input" value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ padding: '6px 12px', width: 'auto' }}>
+              <option value="fechaDesc">Más Recientes</option>
+              <option value="fechaAsc">Más Antiguos</option>
+              <option value="nombreAsc">A-Z Nombre</option>
+              <option value="nombreDesc">Z-A Nombre</option>
+            </select>
             <button className="btn-primary btn-sm" style={{ background: '#2d6e7e', borderColor: 'var(--color-gold)', color: '#fff' }}
               onClick={() => setMessageModal({ mass: true })}>
-              📢 Anuncio General
+              📢 Anuncio
             </button>
             <button className="btn-primary btn-sm" onClick={() => openForm('create')}>
               ➕ Crear Usuario
@@ -714,7 +772,7 @@ function AdminUsuarios({ adminId }) {
             <th style={{ textAlign: 'center' }}>Acciones</th>
           </tr></thead>
           <tbody>
-            {filteredUsers.map(u => (
+            {currentItems.map(u => (
               <tr key={u.id}>
                 <td className="td-id">#{u.id}</td>
                 <td>
@@ -791,12 +849,43 @@ function AdminUsuarios({ adminId }) {
                 </td>
               </tr>
             ))}
-            {filteredUsers.length === 0 && (
+            {currentItems.length === 0 && (
               <tr><td colSpan="7" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>No hay usuarios que coincidan con la búsqueda.</td></tr>
             )}
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="galeria-pagination">
+          <button 
+            className="pagination-btn"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          >
+            Anterior
+          </button>
+          <div className="pagination-numbers">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+              <button
+                key={pageNum}
+                className={`pagination-num ${currentPage === pageNum ? 'active' : ''}`}
+                onClick={() => setCurrentPage(pageNum)}
+              >
+                {pageNum}
+              </button>
+            ))}
+          </div>
+          <button 
+            className="pagination-btn"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+          >
+            Siguiente
+          </button>
+        </div>
+      )}
+
     </div>
   )
 }
@@ -810,15 +899,48 @@ function AdminVideos({ adminId }) {
   const [videoForm, setVideoForm] = useState({ titulo: '', link: '' })
   const [saving, setSaving] = useState(false)
 
+  const [videoConfig, setVideoConfig] = useState({
+    video_destacado_1: '',
+    video_destacado_2: '',
+    video_destacado_3: '',
+    video_destacado_4: ''
+  })
+  const [savingConfig, setSavingConfig] = useState(false)
+
   const loadData = () => {
     setLoading(true)
-    authFetch(`${API_URL}/videos.php`)
-      .then(r => r.json())
-      .then(d => setVideos(d.videos || []))
-      .finally(() => setLoading(false))
+    Promise.all([
+      authFetch(`${API_URL}/videos.php`).then(r => r.json()),
+      authFetch(`${API_URL}/destacados.php`).then(r => r.json())
+    ]).then(([videosData, destData]) => {
+      setVideos(videosData.videos || [])
+      if (destData && destData.config) {
+        setVideoConfig({
+          video_destacado_1: destData.config.video_destacado_1 || '',
+          video_destacado_2: destData.config.video_destacado_2 || '',
+          video_destacado_3: destData.config.video_destacado_3 || '',
+          video_destacado_4: destData.config.video_destacado_4 || ''
+        })
+      }
+    }).finally(() => setLoading(false))
   }
 
   useEffect(() => { loadData() }, [])
+
+  const handleSaveConfig = (clave, valor) => {
+    setSavingConfig(true)
+    authFetch(`${API_URL}/destacados.php`, {
+      method: 'POST',
+      body: JSON.stringify({ clave, valor, adminId })
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) toast.success('✅ Guardado correctamente.')
+        else toast.error('❌ Error al guardar.')
+      })
+      .catch(e => toast.error('❌ ' + e.message))
+      .finally(() => setSavingConfig(false))
+  }
 
   const handleVideoSubmit = (e) => {
     e.preventDefault()
@@ -904,8 +1026,74 @@ function AdminVideos({ adminId }) {
         </div>
       )}
 
+      <div className="dest-card" style={{ marginBottom: '32px' }}>
+        <h3 className="dest-card-title">🎬 Promocion Videos</h3>
+        <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '16px' }}>
+          Selecciona hasta 4 videos que se mostrarán en formato de carrusel en la portada principal.
+        </p>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+          {[
+            { label: 'Video Slot 1', key: 'video_destacado_1' },
+            { label: 'Video Slot 2', key: 'video_destacado_2' },
+            { label: 'Video Slot 3', key: 'video_destacado_3' },
+            { label: 'Video Slot 4', key: 'video_destacado_4' }
+          ].map((slot, idx) => {
+            const selectedId = videoConfig[slot.key];
+            const selectedVideo = videos.find(v => String(v.id) === String(selectedId));
+            let ytId = null;
+            if (selectedVideo && selectedVideo.link_yt) {
+              const url = selectedVideo.link_yt;
+              if (url.includes('youtu.be/')) ytId = url.split('youtu.be/')[1];
+              else if (url.includes('watch?v=')) ytId = url.split('watch?v=')[1];
+              else if (url.includes('embed/')) ytId = url.split('embed/')[1];
+              if (ytId) {
+                ytId = ytId.split('&')[0].split('?')[0];
+              }
+            }
+
+            return (
+            <div key={idx} style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <h4 style={{ color: '#ddd', marginBottom: '8px', fontSize: '0.9rem' }}>{slot.label}</h4>
+              
+              {ytId ? (
+                <img 
+                  src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} 
+                  alt="Thumbnail" 
+                  style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '6px', marginBottom: '10px', border: '1px solid rgba(255,255,255,0.1)' }} 
+                />
+              ) : (
+                <div style={{ width: '100%', height: '140px', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555', fontSize: '0.8rem' }}>
+                  Sin video
+                </div>
+              )}
+
+              <select 
+                className="admin-select" 
+                value={videoConfig[slot.key]} 
+                onChange={e => setVideoConfig({...videoConfig, [slot.key]: e.target.value})} 
+                style={{ width: '100%', marginBottom: '12px' }}
+              >
+                <option value="">– Sin video –</option>
+                {videos.map(v => (
+                  <option key={v.id} value={v.id}>{v.titulo}</option>
+                ))}
+              </select>
+              <button
+                className="btn-outline btn-sm"
+                disabled={savingConfig}
+                onClick={() => handleSaveConfig(slot.key, videoConfig[slot.key])}
+                style={{ width: '100%' }}
+              >
+                {savingConfig ? 'Guardando...' : `Guardar Slot ${idx + 1}`}
+              </button>
+            </div>
+          )})}
+        </div>
+      </div>
+
       <div className="admin-sec-header">
-        <h2 className="admin-sec-title">🎬 Gestión de Videos</h2>
+        <h2 className="admin-sec-title">🎬 Promocion Videos</h2>
         <button className="btn-primary btn-sm" onClick={() => setVideoModal(true)}>➕ Agregar Link</button>
       </div>
       <div className="admin-table-wrap">
@@ -1001,6 +1189,7 @@ function AdminEventos({ adminId }) {
   const [fecha_display, setFechaDisplay] = useState('')
   const [imagen, setImagen] = useState(null)
   const [preview, setPreview] = useState(null)
+  const [showModal, setShowModal] = useState(false)
 
   const loadData = () => {
     setLoading(true)
@@ -1014,6 +1203,7 @@ function AdminEventos({ adminId }) {
 
   const resetForm = () => {
     setId(null); setTitulo(''); setFechaDisplay(''); setImagen(null); setPreview(null);
+    setShowModal(false);
   }
 
   const handleSubmit = (e) => {
@@ -1065,21 +1255,30 @@ function AdminEventos({ adminId }) {
     setTitulo(ev.titulo);
     setFechaDisplay(ev.fecha_display || '');
     setPreview(ev.imagen_url ? `${BASE_URL}/${ev.imagen_url}` : null);
-    // Scroll to form
-    const formEl = document.querySelector('.admin-form-card');
-    if(formEl) formEl.scrollIntoView({ behavior: 'smooth' });
+    setShowModal(true);
   }
 
   return (
     <div className="admin-section">
-      <div className="admin-sec-header">
-        <h2 className="admin-sec-title">📢 Gestión de Noticias y Eventos</h2>
-      </div>
-
-      <div className="admin-form-card">
-        <h3 className="admin-form-title">{id ? '✏️ Editar Noticia' : '🆕 Nueva Noticia / Evento'}</h3>
-        <form onSubmit={handleSubmit} id="event-form">
-          <div className="admin-form-row">
+      {/* MODAL DE EVENTOS */}
+      {showModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <form 
+            onSubmit={handleSubmit}
+            style={{ 
+              width: '550px', 
+              background: '#0d2830', 
+              border: '1px solid var(--color-gold)', 
+              borderRadius: '12px', 
+              padding: '2.5rem',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+              position: 'relative'
+            }}
+          >
+            <h3 style={{ borderBottom: '1px solid rgba(255,215,0,0.3)', paddingBottom: '12px', marginBottom: '24px', color: '#ffd700', fontSize: '1.4rem' }}>
+              {id ? '✏️ Editar Noticia / Evento' : '🆕 Nueva Noticia / Evento'}
+            </h3>
+            
             <div className="admin-form-group">
               <label>Título / Nombre de la Noticia *</label>
               <input 
@@ -1091,10 +1290,8 @@ function AdminEventos({ adminId }) {
                 placeholder="Ej: ComicCon 2026 / Lanzamiento..." 
               />
             </div>
-          </div>
-
-          <div className="admin-form-row">
-            <div className="admin-form-group">
+            
+            <div className="admin-form-group" style={{ marginTop: '20px' }}>
               <label>Fecha / Texto Informativo *</label>
               <input 
                 type="text" 
@@ -1105,51 +1302,55 @@ function AdminEventos({ adminId }) {
                 required
               />
             </div>
-          </div>
 
-          <div className="admin-form-group" style={{ marginTop: '10px' }}>
-            <label>Imagen / Foto representativa</label>
-            <span style={{ fontSize: '0.75rem', color: '#aaa', display: 'block', marginBottom: '8px' }}>Te recomendamos que ocupes una imagen de estas dimensiones: 800x600 px (horizontal 4:3).</span>
-            <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-               <input 
-                 type="file" 
-                 accept="image/*"
-                 onChange={e => {
-                   const file = e.target.files[0];
-                   setImagen(file);
-                   if(file) setPreview(URL.createObjectURL(file));
-                 }} 
-               />
-               {preview && (
-                 <div style={{ position: 'relative' }}>
-                   <img 
-                     src={preview} 
-                     alt="Preview" 
-                     style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '2px solid var(--color-gold)' }} 
-                   />
-                   <button 
-                     type="button" 
-                     onClick={() => { setImagen(null); setPreview(null); }}
-                     style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#d9534f', color: '#fff', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', fontSize: '12px' }}
-                   >
-                     &times;
-                   </button>
-                 </div>
-               )}
+            <div className="admin-form-group" style={{ marginTop: '20px' }}>
+              <label>Imagen / Foto representativa</label>
+              <span style={{ fontSize: '0.8rem', color: '#aaa', display: 'block', marginBottom: '12px' }}>Recomendado: 800x600 px (horizontal 4:3).</span>
+              <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                 <input 
+                   type="file" 
+                   accept="image/*"
+                   style={{ color: '#ddd' }}
+                   onChange={e => {
+                     const file = e.target.files[0];
+                     setImagen(file);
+                     if(file) setPreview(URL.createObjectURL(file));
+                   }} 
+                 />
+                 {preview && (
+                   <div style={{ position: 'relative' }}>
+                     <img 
+                       src={preview} 
+                       alt="Preview" 
+                       style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '2px solid var(--color-gold)' }} 
+                     />
+                     <button 
+                       type="button" 
+                       onClick={() => { setImagen(null); setPreview(null); }}
+                       style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#d9534f', color: '#fff', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', fontSize: '12px' }}
+                     >
+                       &times;
+                     </button>
+                   </div>
+                 )}
+              </div>
             </div>
-          </div>
 
-          <div className="admin-form-actions">
-            {id && (
-              <button type="button" className="btn-outline" style={{ borderColor: '#aaa', color: '#aaa' }} onClick={resetForm}>
-                Cancelar Edición
+            <div style={{ display: 'flex', gap: '12px', marginTop: '30px' }}>
+              <button type="submit" className="btn-primary" disabled={saving} style={{ flex: 1 }}>
+                {saving ? 'Guardando...' : id ? '💾 Actualizar Noticia' : '🚀 Publicar Noticia'}
               </button>
-            )}
-            <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? 'Guardando...' : id ? '💾 Actualizar Noticia' : '🚀 Publicar Noticia'}
-            </button>
-          </div>
-        </form>
+              <button type="button" className="btn-outline" onClick={resetForm} disabled={saving}>
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="admin-sec-header">
+        <h2 className="admin-sec-title">📢 Gestión de Noticias y Eventos</h2>
+        <button className="btn-primary btn-sm" onClick={() => setShowModal(true)}>➕ Agregar Noticia o Evento</button>
       </div>
 
       <h3 className="admin-sub-title" style={{ marginTop: '30px', color: '#1a3d4a' }}>Noticias Publicadas Actuales</h3>
@@ -1209,6 +1410,7 @@ function AdminIdentidad({ adminId }) {
   const [identidades, setIdentidades] = useState([])
   const [loading, setLoading] = useState(true)
   const [savingId, setSavingId] = useState(null)
+  const [editIdIndex, setEditIdIndex] = useState(null)
 
   // Galería
   const [galeriaItems, setGaleriaItems] = useState([])
@@ -1217,12 +1419,14 @@ function AdminIdentidad({ adminId }) {
   const [galPreview, setGalPreview] = useState(null)
   const [galDesc, setGalDesc] = useState('')
   const [uploadingGal, setUploadingGal] = useState(false)
+  const [editGalItem, setEditGalItem] = useState(null)
 
   // Videos
   const [videos, setVideos] = useState([])
   const [savingVidId, setSavingVidId] = useState(null)
   const [addingVid, setAddingVid] = useState(false)
   const [draggedVidIndex, setDraggedVidIndex] = useState(null)
+  const [editVidItem, setEditVidItem] = useState(null)
 
   // Comunidad
   const [comunidadFile, setComunidadFile] = useState(null)
@@ -1279,12 +1483,13 @@ function AdminIdentidad({ adminId }) {
   const handleSaveSingle = (index) => {
     const item = identidades[index]
     setSavingId(item.id)
-    authFetch(`${API_URL}/identidad_admin.php`, {
+    return authFetch(`${API_URL}/identidad_admin.php`, {
       method: 'PUT',
       body: JSON.stringify({ user_id: userId, identidades: [item] })
     }).then(r => r.json()).then(d => {
       if(d.success) toast.success(`✅ ${item.title} actualizado!`)
       else toast.error('Error: ' + d.error)
+      return d.success
     }).finally(() => setSavingId(null))
   }
 
@@ -1325,11 +1530,15 @@ function AdminIdentidad({ adminId }) {
     })
   }
   const handleGalDescUpdate = async (item) => {
-    authFetch(`${API_URL}/galeria_portafolio.php`, {
+    return authFetch(`${API_URL}/galeria_portafolio.php`, {
       method: 'PUT',
       body: JSON.stringify({ id: item.id, descripcion: item.descripcion, orden: item.orden })
     }).then(r => r.json()).then(d => {
-      if(!d.success) toast.error('Error al guardar descripción.')
+      if(!d.success) {
+        toast.error('Error al guardar descripción.')
+        throw new Error('Error al guardar')
+      }
+      return d
     })
   }
 
@@ -1513,40 +1722,117 @@ function AdminIdentidad({ adminId }) {
         </div>
       )}
 
+      {/* ── MODAL EDITAR IDENTIDAD ─────────────────────── */}
+      {editIdIndex !== null && identidades[editIdIndex] && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:1001, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <div style={{ width:'500px', background:'#0d2830', border:'1px solid var(--color-gold)', borderRadius:'12px', padding:'2.5rem', position:'relative', boxShadow:'0 20px 40px rgba(0,0,0,0.6)' }}>
+            <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.4rem', borderBottom:'1px solid rgba(255,215,0,0.3)', paddingBottom:'12px' }}>
+              ✏️ Editar {identidades[editIdIndex].id.toUpperCase()}
+            </h3>
+
+            <div className="admin-form-group">
+              <label>Título</label>
+              <input type="text" className="admin-input" value={identidades[editIdIndex].title}
+                onChange={e => handleChange(editIdIndex, 'title', e.target.value)} />
+            </div>
+            
+            <div className="admin-form-group" style={{ marginTop:'20px' }}>
+              <label>Ícono (Emoji)</label>
+              <input type="text" className="admin-input" value={identidades[editIdIndex].icon}
+                onChange={e => handleChange(editIdIndex, 'icon', e.target.value)} />
+            </div>
+            
+            <div className="admin-form-group" style={{ marginTop:'20px' }}>
+              <label>Descripción</label>
+              <textarea className="admin-input" rows="6" value={identidades[editIdIndex].desc}
+                onChange={e => handleChange(editIdIndex, 'desc', e.target.value)}
+                style={{ resize:'vertical' }} />
+            </div>
+
+            <div style={{ display:'flex', gap:'12px', marginTop:'30px' }}>
+              <button 
+                className="btn-primary" 
+                style={{ flex:1 }}
+                onClick={() => {
+                  handleSaveSingle(editIdIndex).then(success => {
+                    if (success) setEditIdIndex(null);
+                  });
+                }} 
+                disabled={savingId === identidades[editIdIndex].id}
+              >
+                {savingId === identidades[editIdIndex].id ? 'Guardando...' : '💾 Guardar Cambios'}
+              </button>
+              <button className="btn-outline" onClick={() => setEditIdIndex(null)} disabled={savingId === identidades[editIdIndex].id}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL EDITAR DESCRIPCION GALERIA ─────────────────────── */}
+      {editGalItem && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:1001, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <div style={{ width:'460px', background:'#0d2830', border:'1px solid var(--color-gold)', borderRadius:'12px', padding:'2.5rem', position:'relative', boxShadow:'0 20px 40px rgba(0,0,0,0.6)' }}>
+            <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.4rem', borderBottom:'1px solid rgba(255,215,0,0.3)', paddingBottom:'12px' }}>
+              ✏️ Editar Descripción
+            </h3>
+            <img
+              src={`${window.location.origin.includes('5173') ? 'http://localhost' : ''}/Austral_Collector/${editGalItem.imagen_url}`}
+              alt="Preview"
+              style={{ width:'100%', height:'180px', objectFit:'cover', borderRadius:'8px', border:'1px solid rgba(255,215,0,0.3)', marginBottom:'16px' }}
+              onError={e => { e.target.style.background='#1a3d4a'; e.target.src=''; }}
+            />
+            <div className="admin-form-group">
+              <label>Descripción de la foto</label>
+              <textarea 
+                className="admin-input" 
+                rows="4" 
+                value={editGalItem.descripcion || ''}
+                onChange={e => setEditGalItem({...editGalItem, descripcion: e.target.value})}
+                style={{ resize:'vertical' }} 
+              />
+            </div>
+            <div style={{ display:'flex', gap:'12px', marginTop:'24px' }}>
+              <button 
+                className="btn-primary" 
+                style={{ flex:1 }}
+                onClick={() => {
+                  handleGalDescUpdate(editGalItem).then(() => {
+                    setGaleriaItems(prev => prev.map(g => g.id === editGalItem.id ? editGalItem : g));
+                    setEditGalItem(null);
+                    toast.success('✅ Descripción actualizada.');
+                  }).catch(() => {});
+                }} 
+              >
+                💾 Guardar Cambios
+              </button>
+              <button className="btn-outline" onClick={() => setEditGalItem(null)}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── A: NUESTRA IDENTIDAD ──────────────────── */}
       <div className="admin-sec-header">
         <h2 className="admin-sec-title">⭐ Nuestra Identidad</h2>
         <button className="btn-outline btn-sm" onClick={loadAll} style={{ borderColor:'rgba(0,0,0,0.2)', color:'#1a3d4a' }}>🔄 Recargar</button>
       </div>
-      <div className="admin-identidad-grid" style={{ marginBottom:'48px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '48px' }}>
         {identidades.map((item, index) => (
-          <div key={item.id} className="admin-identidad-card">
-            <div className="aic-header">
-              <span className="aic-icon-view">{item.icon}</span>
-              <h3 className="aic-id-label">{item.id}</h3>
+          <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(139,90,43,0.2)', padding: '12px 20px', borderRadius: '8px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+            <div style={{ fontSize: '2rem' }}>{item.icon}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h3 style={{ fontSize: '1.05rem', color: '#1a3d4a', margin: '0 0 4px 0', fontWeight: 'bold' }}>{item.title || item.id}</h3>
+              <p style={{ fontSize: '0.85rem', color: '#666', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {item.desc || 'Sin descripción...'}
+              </p>
             </div>
-            <div className="admin-form-group">
-              <label>Título</label>
-              <input type="text" className="admin-input" value={item.title}
-                onChange={e => handleChange(index, 'title', e.target.value)} />
-            </div>
-            <div className="admin-form-group" style={{ marginTop:'10px' }}>
-              <label>Ícono (Emoji)</label>
-              <input type="text" className="admin-input" value={item.icon}
-                onChange={e => handleChange(index, 'icon', e.target.value)} />
-            </div>
-            <div className="admin-form-group" style={{ marginTop:'10px', flex:1 }}>
-              <label>Descripción</label>
-              <textarea className="admin-input" rows="4" value={item.desc}
-                onChange={e => handleChange(index, 'desc', e.target.value)}
-                style={{ resize:'none' }} />
-            </div>
-            <div className="aic-footer" style={{ marginTop:'16px' }}>
-              <button className="btn-primary" style={{ width:'100%' }}
-                onClick={() => handleSaveSingle(index)} disabled={savingId === item.id}>
-                {savingId === item.id ? 'Guardando...' : '💾 Guardar'}
-              </button>
-            </div>
+            <button className="btn-outline btn-sm" style={{ borderColor: 'var(--color-gold)', color: '#1a3d4a', fontWeight: 'bold', whiteSpace: 'nowrap', padding: '6px 16px' }} onClick={() => setEditIdIndex(index)}>
+              ✏️ Editar
+            </button>
           </div>
         ))}
       </div>
@@ -1572,7 +1858,7 @@ function AdminIdentidad({ adminId }) {
             </button>
           </div>
         ) : (
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(220px, 1fr))', gap:'16px' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px, 1fr))', gap:'16px' }}>
             {galeriaItems.map((item, idx) => (
               <div 
                 key={item.id} 
@@ -1582,57 +1868,135 @@ function AdminIdentidad({ adminId }) {
                 onDragEnd={handleDragEnd}
                 onDragOver={(e) => e.preventDefault()}
                 style={{ 
-                  background:'rgba(255,255,255,0.6)', 
+                  background:'#1a3d4a', 
                   borderRadius:'10px', 
                   overflow:'hidden', 
-                  border:'1px solid rgba(139,90,43,0.25)', 
+                  border:'1px solid rgba(139,90,43,0.3)', 
                   position:'relative', 
-                  boxShadow:'0 2px 8px rgba(0,0,0,0.1)',
+                  boxShadow:'0 4px 12px rgba(0,0,0,0.15)',
                   cursor: 'grab',
                   opacity: draggedIndex === idx ? 0.3 : 1,
                   transform: draggedIndex === idx ? 'scale(0.95)' : 'none',
                   transition: 'all 0.2s ease',
-                  userSelect: 'none'
+                  userSelect: 'none',
+                  aspectRatio: '1 / 1'
                 }}
               >
                 <img
                   src={`${window.location.origin.includes('5173') ? 'http://localhost' : ''}/Austral_Collector/${item.imagen_url}`}
                   alt={item.descripcion || 'Galería'}
-                  style={{ width:'100%', height:'160px', objectFit:'cover', display:'block', pointerEvents:'none' }}
+                  style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', pointerEvents:'none' }}
                   onError={e => { e.target.style.background='#1a3d4a'; e.target.src=''; }}
                 />
-                <div style={{ padding:'12px' }} onMouseDown={e => e.stopPropagation()}>
-                  <textarea
-                    className="admin-input"
-                    rows="2"
-                    value={item.descripcion || ''}
-                    onChange={e => {
-                      const upd = galeriaItems.map(g => g.id === item.id ? {...g, descripcion: e.target.value} : g)
-                      setGaleriaItems(upd)
-                    }}
-                    onBlur={() => handleGalDescUpdate(item)}
-                    placeholder="Descripción de la foto..."
-                    style={{ resize:'none', fontSize:'0.78rem', marginBottom:'8px' }}
-                  />
-                  <button
+                
+                {/* Overlay actions (Top Right) */}
+                <div style={{ position: 'absolute', top: '8px', right: '8px', display: 'flex', gap: '6px' }} onMouseDown={e => e.stopPropagation()}>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setEditGalItem(item); }}
+                    style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '6px', color: '#fff', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: '0.2s', fontSize: '1.1rem' }}
+                    title="Editar Descripción"
+                  >
+                    ✏️
+                  </button>
+                  <button 
                     onClick={(e) => { e.stopPropagation(); handleGalDelete(item.id); }}
-                    style={{ width:'100%', background:'rgba(217,83,79,0.15)', border:'1px solid #d9534f', color:'#d9534f', borderRadius:'6px', padding:'6px', cursor:'pointer', fontSize:'0.82rem' }}>
-                    🗑️ Eliminar
+                    style={{ background: 'rgba(217,83,79,0.9)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '6px', color: '#fff', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: '0.2s', fontSize: '1.1rem' }}
+                    title="Eliminar Foto"
+                  >
+                    🗑️
                   </button>
                 </div>
+
+                {/* Bottom Description Overlay */}
+                {item.descripcion && (
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.75)', padding: '10px 12px', color: '#fff', fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', backdropFilter: 'blur(2px)' }}>
+                    {item.descripcion}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* ── C: VIDEOS DE YOUTUBE ──────────────────── */}
+      {/* ── MODAL EDITAR VIDEO ─────────────────── */}
+      {editVidItem && (() => {
+        const ytId = getYtId(editVidItem.link_yt);
+        return (
+          <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:1001, display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <div style={{ width:'520px', background:'#0d2830', border:'1px solid var(--color-gold)', borderRadius:'12px', padding:'2.5rem', position:'relative', boxShadow:'0 20px 40px rgba(0,0,0,0.6)' }}>
+              <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.4rem', borderBottom:'1px solid rgba(255,215,0,0.3)', paddingBottom:'12px' }}>
+                ✏️ Editar Video
+              </h3>
+              {ytId ? (
+                <img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt="Preview"
+                  style={{ width:'100%', height:'180px', objectFit:'cover', borderRadius:'8px', border:'1px solid rgba(255,215,0,0.3)', marginBottom:'16px' }} />
+              ) : (
+                <div style={{ width:'100%', height:'120px', background:'rgba(255,255,255,0.05)', borderRadius:'8px', border:'1px solid rgba(255,215,0,0.2)', display:'flex', alignItems:'center', justifyContent:'center', color:'#aaa', fontSize:'2rem', marginBottom:'16px' }}>🎬</div>
+              )}
+              <div className="admin-form-group">
+                <label>Título del Video</label>
+                <input type="text" className="admin-input"
+                  value={editVidItem.titulo}
+                  onChange={e => setEditVidItem({...editVidItem, titulo: e.target.value})}
+                  placeholder="Ej: Tour Colección 2024..."
+                />
+              </div>
+              <div className="admin-form-group" style={{ marginTop:'16px' }}>
+                <label>URL de YouTube</label>
+                <input type="url" className="admin-input"
+                  value={editVidItem.link_yt}
+                  onChange={e => setEditVidItem({...editVidItem, link_yt: e.target.value})}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                />
+              </div>
+              <div className="admin-form-group" style={{ marginTop:'16px' }}>
+                <label>Descripción del Video</label>
+                <textarea className="admin-input" rows="3"
+                  value={editVidItem.descripcion || ''}
+                  onChange={e => setEditVidItem({...editVidItem, descripcion: e.target.value})}
+                  placeholder="Explica qué se muestra en este video..."
+                  style={{ resize:'none' }} />
+              </div>
+              <div style={{ display:'flex', gap:'12px', marginTop:'24px' }}>
+                <button
+                  className="btn-primary"
+                  style={{ flex:1 }}
+                  disabled={savingVidId === editVidItem.id}
+                  onClick={() => {
+                    handleVideoChange(editVidItem.id, 'titulo', editVidItem.titulo);
+                    handleVideoChange(editVidItem.id, 'link_yt', editVidItem.link_yt);
+                    handleVideoChange(editVidItem.id, 'descripcion', editVidItem.descripcion);
+                    saveVideoData(editVidItem).then && saveVideoData(editVidItem);
+                    // saveVideoData actualiza el servidor, sync local
+                    setSavingVidId(editVidItem.id);
+                    authFetch(`${API_URL}/videos_portafolio.php`, {
+                      method: 'PUT',
+                      body: JSON.stringify(editVidItem)
+                    }).then(r => r.json()).then(d => {
+                      if(d.success) { toast.success('✅ Video actualizado!'); setEditVidItem(null); loadAll(); }
+                      else toast.error('❌ Error al guardar.')
+                    }).catch(e => toast.error('❌ ' + e.message)).finally(() => setSavingVidId(null));
+                  }}
+                >
+                  {savingVidId === editVidItem.id ? 'Guardando...' : '💾 Guardar Cambios'}
+                </button>
+                <button className="btn-outline" onClick={() => setEditVidItem(null)}>
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── C: VIDEOS DE YOUTUBE ──────────── */}
       <div style={{ borderTop:'2px solid rgba(200,169,110,0.35)', paddingTop:'32px', marginBottom:'40px' }}>
         <div className="admin-sec-header" style={{ marginBottom:'20px' }}>
           <div>
             <h2 className="admin-sec-title">▶ Videos del Portafolio</h2>
             <p style={{ color:'#4a3520', fontSize:'0.85rem', marginTop:'4px' }}>
-              Gestiona los videos de la página de Nosotros. Puedes añadir títulos y descripciones.
+              Gestiona los videos de la página de Nosotros.
             </p>
           </div>
           <button className="btn-primary btn-sm" onClick={addNewVideo} disabled={addingVid}>
@@ -1640,83 +2004,65 @@ function AdminIdentidad({ adminId }) {
           </button>
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(320px, 1fr))', gap:'20px' }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(260px, 1fr))', gap:'16px' }}>
           {videos.map((v, idx) => {
             const ytId = getYtId(v.link_yt)
             return (
-              <div 
-                key={v.id} 
+              <div
+                key={v.id}
                 draggable
                 onDragStart={(e) => handleVidDragStart(e, idx)}
                 onDragEnter={() => handleVidDragEnter(idx)}
                 onDragEnd={handleVidDragEnd}
                 onDragOver={(e) => e.preventDefault()}
-                style={{ 
-                  background:'rgba(255,255,255,0.7)', 
-                  borderRadius:'12px', 
-                  overflow:'hidden', 
-                  border:'1px solid rgba(139,90,43,0.35)', 
-                  boxShadow: draggedVidIndex === idx ? '0 10px 25px rgba(0,0,0,0.2)' : '0 2px 10px rgba(0,0,0,0.1)',
-                  cursor: 'grab',
+                style={{
+                  background:'#1a3d4a',
+                  borderRadius:'10px',
+                  overflow:'hidden',
+                  border:'1px solid rgba(139,90,43,0.3)',
+                  position:'relative',
+                  boxShadow:'0 4px 12px rgba(0,0,0,0.15)',
+                  cursor:'grab',
                   opacity: draggedVidIndex === idx ? 0.4 : 1,
-                  transform: draggedVidIndex === idx ? 'scale(1.02)' : 'scale(1)',
-                  transition: 'all 0.2s',
-                  position: 'relative'
+                  transform: draggedVidIndex === idx ? 'scale(0.95)' : 'scale(1)',
+                  transition:'all 0.2s',
+                  userSelect:'none'
                 }}
               >
-                {/* Drag Handle Indicator */}
-                <div style={{ 
-                  position:'absolute', 
-                  top:'10px', 
-                  left:'10px', 
-                  background:'rgba(255,255,255,0.85)', 
-                  borderRadius:'4px', 
-                  padding:'4px 8px', 
-                  zIndex:10, 
-                  fontSize:'0.9rem',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  pointerEvents: 'none'
-                }}>
-                  ⠿
-                </div>
                 {ytId ? (
                   <img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt={v.titulo}
-                    style={{ width:'100%', height:'180px', objectFit:'cover', display:'block', pointerEvents: 'none' }} />
+                    style={{ width:'100%', height:'160px', objectFit:'cover', display:'block', pointerEvents:'none' }} />
                 ) : (
-                  <div style={{ width:'100%', height:'180px', background:'rgba(0,0,0,0.12)', display:'flex', alignItems:'center', justifyContent:'center', color:'#4a3520', fontSize:'2.5rem' }}>🎬</div>
+                  <div style={{ width:'100%', height:'160px', background:'rgba(0,0,0,0.2)', display:'flex', alignItems:'center', justifyContent:'center', color:'#aaa', fontSize:'3rem', pointerEvents:'none' }}>🎬</div>
                 )}
-                <div style={{ padding:'16px' }} onMouseDown={e => e.stopPropagation()}>
-                  <div className="admin-form-group">
-                    <label style={{ color: '#2e1f0f', fontWeight: '800', marginBottom: '8px', display: 'block' }}>URL de YouTube</label>
-                    <input type="url" className="admin-input"
-                      value={v.link_yt}
-                      onChange={e => handleVideoChange(v.id, 'link_yt', e.target.value)}
-                      placeholder="https://www.youtube.com/watch?v=..."
-                      style={{ marginBottom:'10px', fontSize:'0.82rem' }} />
-                  </div>
 
-                  <div className="admin-form-group">
-                    <label style={{ color: '#2e1f0f', fontWeight: '800', marginBottom: '8px', display: 'block' }}>Descripción del Video</label>
-                    <textarea className="admin-input" rows="3"
-                      value={v.descripcion || ''}
-                      onChange={e => handleVideoChange(v.id, 'descripcion', e.target.value)}
-                      placeholder="Explica qué se muestra en este video..."
-                      style={{ resize:'none', marginBottom:'14px', fontSize:'0.82rem' }} />
-                  </div>
+                {/* Overlay actions */}
+                <div style={{ position:'absolute', top:'8px', right:'8px', display:'flex', gap:'6px' }} onMouseDown={e => e.stopPropagation()}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setEditVidItem({...v}); }}
+                    style={{ background:'rgba(0,0,0,0.7)', border:'1px solid rgba(255,255,255,0.3)', borderRadius:'6px', color:'#fff', width:'34px', height:'34px', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', fontSize:'1.1rem' }}
+                    title="Editar Video"
+                  >✏️</button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); deleteVideo(v.id); }}
+                    style={{ background:'rgba(217,83,79,0.9)', border:'1px solid rgba(255,255,255,0.3)', borderRadius:'6px', color:'#fff', width:'34px', height:'34px', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', fontSize:'1.1rem' }}
+                    title="Eliminar Video"
+                  >🗑️</button>
+                </div>
 
-                  <div style={{ display:'flex', gap:'8px' }}>
-                    <button
-                      onClick={() => saveVideoData(v)}
-                      disabled={savingVidId === v.id}
-                      style={{ flex:1, background:'var(--color-gold)', border:'none', color:'#1a3d4a', borderRadius:'6px', padding:'8px', cursor:'pointer', fontSize:'0.82rem', fontWeight:700 }}>
-                      {savingVidId === v.id ? '...' : '💾 Guardar'}
-                    </button>
-                    <button
-                      onClick={() => deleteVideo(v.id)}
-                      style={{ background:'rgba(217,83,79,0.1)', border:'1px solid #d9534f', color:'#d9534f', borderRadius:'6px', padding:'8px', cursor:'pointer', fontSize:'0.82rem' }}>
-                      🗑️
-                    </button>
+                {/* Drag handle */}
+                <div style={{ position:'absolute', top:'8px', left:'8px', background:'rgba(0,0,0,0.6)', borderRadius:'4px', padding:'2px 8px', color:'#fff', fontSize:'1rem', pointerEvents:'none' }}>⠿</div>
+
+                {/* Bottom info */}
+                <div style={{ padding:'12px 14px' }}>
+                  <div style={{ color:'#f0e4cc', fontWeight:'bold', fontSize:'0.95rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                    {v.titulo || 'Sin título'}
                   </div>
+                  {v.descripcion && (
+                    <div style={{ color:'#aaa', fontSize:'0.82rem', marginTop:'4px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                      {v.descripcion}
+                    </div>
+                  )}
                 </div>
               </div>
             )
@@ -1776,10 +2122,6 @@ function AdminDestacados({ adminId }) {
   const [miembroId, setMiembroId] = useState('')
   const [searchUser, setSearchUser] = useState('')
   const [noticiasTexto, setNoticiasTexto] = useState('')
-  const [videoId1, setVideoId1] = useState('')
-  const [videoId2, setVideoId2] = useState('')
-  const [videoId3, setVideoId3] = useState('')
-  const [videoId4, setVideoId4] = useState('')
   const [txtDestacado, setTxtDestacado] = useState('')
   const [txtCumple, setTxtCumple] = useState('')
 
@@ -1792,10 +2134,6 @@ function AdminDestacados({ adminId }) {
         // Initialise selects once data arrives
         setMiembroId(d.config?.miembro_destacado || '')
         setNoticiasTexto(d.config?.noticias_texto || '')
-        setVideoId1(d.config?.video_destacado_1 || '')
-        setVideoId2(d.config?.video_destacado_2 || '')
-        setVideoId3(d.config?.video_destacado_3 || '')
-        setVideoId4(d.config?.video_destacado_4 || '')
         setTxtDestacado(d.config?.txt_destacado || '')
         setTxtCumple(d.config?.txt_cumple || '')
       })
@@ -1914,42 +2252,6 @@ function AdminDestacados({ adminId }) {
             </div>
           </div>
         </div>
-
-        {/* --- VIDEOS PRINCIPALES --- */}
-        <div className="dest-card">
-          <h3 className="dest-card-title">🎬 Videos Principales</h3>
-          <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '16px' }}>
-            Selecciona hasta 4 videos que se mostrarán en formato de carrusel en la portada principal.
-          </p>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-            {[
-              { label: 'Video Slot 1', state: videoId1, setter: setVideoId1, key: 'video_destacado_1' },
-              { label: 'Video Slot 2', state: videoId2, setter: setVideoId2, key: 'video_destacado_2' },
-              { label: 'Video Slot 3', state: videoId3, setter: setVideoId3, key: 'video_destacado_3' },
-              { label: 'Video Slot 4', state: videoId4, setter: setVideoId4, key: 'video_destacado_4' }
-            ].map((slot, idx) => (
-              <div key={idx} style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <h4 style={{ color: '#ddd', marginBottom: '8px', fontSize: '0.9rem' }}>{slot.label}</h4>
-                <select className="admin-select" value={slot.state} onChange={e => slot.setter(e.target.value)} style={{ width: '100%', marginBottom: '12px' }}>
-                  <option value="">– Sin video –</option>
-                  {(listas?.videos || []).map(v => (
-                    <option key={v.id} value={v.id}>{v.nombre}</option>
-                  ))}
-                </select>
-                <button
-                  className="btn-outline btn-sm"
-                  disabled={saving}
-                  onClick={() => handleSave(slot.key, slot.state)}
-                  style={{ width: '100%' }}
-                >
-                  Guardar Slot {idx + 1}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
       </div>
     </div>
   )
@@ -2104,6 +2406,8 @@ function AdminModeracion({ adminId }) {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterTipo, setFilterTipo] = useState('all') // all | figura | cosplay
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 30
   const [selectedPost, setSelectedPost] = useState(null)
   
   // Modal de eliminación con advertencia
@@ -2120,6 +2424,10 @@ function AdminModeracion({ adminId }) {
   }
 
   useEffect(() => { loadData() }, [])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, filterTipo])
 
   const handleDelete = async (e) => {
     e.preventDefault()
@@ -2156,6 +2464,9 @@ function AdminModeracion({ adminId }) {
     const matchesTipo = filterTipo === 'all' || p.tipo === filterTipo
     return matchesSearch && matchesTipo
   })
+
+  const totalPages = Math.ceil(filteredPosts.length / itemsPerPage)
+  const currentItems = filteredPosts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   if (loading && posts.length === 0) return <Loading />
 
@@ -2228,7 +2539,7 @@ function AdminModeracion({ adminId }) {
             <th style={{ textAlign: 'center' }}>Acciones</th>
           </tr></thead>
           <tbody>
-            {filteredPosts.map(p => (
+            {currentItems.map(p => (
               <tr key={`${p.tipo}-${p.id}`}>
                 <td>
                   <img 
@@ -2261,12 +2572,42 @@ function AdminModeracion({ adminId }) {
                 </td>
               </tr>
             ))}
-            {filteredPosts.length === 0 && (
+            {currentItems.length === 0 && (
               <tr><td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#666' }}>No hay publicaciones para moderar.</td></tr>
             )}
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="galeria-pagination">
+          <button 
+            className="pagination-btn"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          >
+            Anterior
+          </button>
+          <div className="pagination-numbers">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+              <button
+                key={pageNum}
+                className={`pagination-num ${currentPage === pageNum ? 'active' : ''}`}
+                onClick={() => setCurrentPage(pageNum)}
+              >
+                {pageNum}
+              </button>
+            ))}
+          </div>
+          <button 
+            className="pagination-btn"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+          >
+            Siguiente
+          </button>
+        </div>
+      )}
 
       <PostModal 
         post={selectedPost}

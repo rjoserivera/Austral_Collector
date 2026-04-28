@@ -963,3 +963,74 @@
   .admin-main { height: auto; }
   .admin-main-body { overflow: visible; }
 }
+
+/* ── PAGINACIÓN (Estilo Galería/Miembros) ────────────────────────── */
+.galeria-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
+.pagination-btn {
+  background: rgba(30, 77, 90, 0.88);
+  border: 1px solid rgba(200, 169, 110, 0.4);
+  color: #dfc08a;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: rgba(30, 77, 90, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.pagination-numbers {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pagination-num {
+  background: rgba(30, 77, 90, 0.1);
+  border: 1px solid rgba(30, 77, 90, 0.3);
+  color: #1e4d5a;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-num:hover {
+  background: rgba(30, 77, 90, 0.2);
+  color: #1e4d5a;
+}
+
+.pagination-num.active {
+  background: #8b2020;
+  border-color: #8b2020;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(139, 32, 32, 0.4);
+}
