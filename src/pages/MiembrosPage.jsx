@@ -76,7 +76,7 @@ export default function MiembrosPage() {
   }, [searchTerm, sortBy])
 
   if (loading) {
-    return <div className="miembros-page section-wrapper" style={{textAlign: 'center', paddingTop: '100px', color: '#aaa'}}>Cargando directorio de coleccionistas...</div>
+    return <div className="miembros-page section-wrapper" style={{textAlign: 'center', paddingTop: '100px', color: 'var(--color-muted)'}}>Cargando directorio de coleccionistas...</div>
   }
 
   return (
@@ -188,7 +188,7 @@ export default function MiembrosPage() {
         ))}
 
         {filteredMiembros.length === 0 && (
-          <p style={{ gridColumn: '1 / -1', textAlign: 'center', color: '#aaa', marginTop: '40px' }}>
+          <p style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--color-muted)', marginTop: '40px' }}>
             {searchTerm ? 'No se encontraron coleccionistas con ese nombre.' : 'No hay coleccionistas registrados aún.'}
           </p>
         )}
