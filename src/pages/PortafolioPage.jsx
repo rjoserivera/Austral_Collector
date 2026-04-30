@@ -69,13 +69,10 @@ export default function PortafolioPage() {
             <img src="/austral_brazos_cruzados.png" alt="Mascota Robot Austral Collector" className="pp-mascot"/>
           </div>
           <div className="pp-hero-content">
-            <h1 className="global-hero-title" style={{ textAlign: 'left' }}>
+            <h1 className="global-hero-title" style={{ textAlign: 'center', margin: 0 }}>
               <span className="global-title-teal">AUSTRAL</span><br/>
               <span className="global-title-red">COLLECTOR</span>
             </h1>
-            <p className="pp-hero-subtitle">Portafolio Austral Collector</p>
-            <div className="gold-divider" style={{ width: '220px', margin: '14px 0 22px' }}/>
-            <button onClick={(e) => { if (currentUser) { e.preventDefault(); toast.info('Usted ya ha iniciado sesión'); } else { window.location.href='/login?mode=register'; } }} id="pp-btn-unirse" className="btn-primary pp-hero-btn" style={{ padding: "12px 32px", fontSize: "0.95rem", fontWeight: "800", letterSpacing: "0.1em", background: "var(--color-red)", boxShadow: "0 8px 32px rgba(139, 32, 32, 0.5)", color: "#ffffff" }}>Unirse</button>
           </div>
         </div>
       </section>

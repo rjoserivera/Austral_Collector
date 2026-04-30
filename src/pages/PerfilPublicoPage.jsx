@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { toast, confirmDialog } from '../contexts/NotificationContext.jsx'
 import { useParams, Link } from 'react-router-dom'
 import './PerfilPublicoPage.css'
@@ -16,6 +16,8 @@ export default function PerfilPublicoPage() {
   const [activeTab, setActiveTab] = useState('figura')
   const [showRatingModal, setShowRatingModal] = useState(false)
   const [selectedPost, setSelectedPost] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const POSTS_PER_PAGE = 20
   
   const authUserStr = localStorage.getItem('austral_auth_user')
   let loggedUserName = null;
@@ -152,6 +154,18 @@ export default function PerfilPublicoPage() {
     .catch(e => console.error("Error deleting rating:", e))
   }
 
+  // Filtrar por tab activo y paginar (Deben estar antes del return condicional)
+  const filteredCollection = useMemo(() => {
+    if (!user || !user.collection) return [];
+    return user.collection.filter(fig => (fig.tipo || 'figura') === activeTab);
+  }, [user, activeTab]);
+
+  const totalPages = Math.ceil(filteredCollection.length / POSTS_PER_PAGE);
+  const paginatedCollection = filteredCollection.slice((currentPage - 1) * POSTS_PER_PAGE, currentPage * POSTS_PER_PAGE);
+
+  // Reset page when switching tabs
+  useEffect(() => { setCurrentPage(1); }, [activeTab]);
+
   if (!user) {
     return <div className="perfil-page" style={{padding: '100px', textAlign: 'center', color: '#aaa'}}>
       Cargando perfil o el usuario no existe...
@@ -161,6 +175,8 @@ export default function PerfilPublicoPage() {
   const isOwner = loggedUserName && loggedUserName === user.username;
   const figurasCount = user.collection ? user.collection.filter(f => (f.tipo || 'figura') === 'figura').length : 0;
   const cosplayCount = user.collection ? user.collection.filter(f => f.tipo === 'cosplay').length : 0;
+
+
 
   return (
     <div className="perfil-page">
@@ -259,7 +275,7 @@ export default function PerfilPublicoPage() {
           </div>
           
           <div className="perfil-grid-4">
-            {user.collection && user.collection.filter(fig => (fig.tipo || 'figura') === activeTab).map(fig => (
+            {paginatedCollection.map(fig => (
               <article key={fig.id} className="hp-figura-card card" onClick={() => setSelectedPost(fig)}>
                 <div className="hp-figura-img-wrap" style={{ position: 'relative' }}>
                   <img src={fig.local_image || (fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png')} alt={fig.nombre} className="hp-figura-img" loading="lazy"/>
@@ -280,6 +296,37 @@ export default function PerfilPublicoPage() {
               </article>
             ))}
           </div>
+
+          {/* PAGINACIÓN */}
+          {totalPages > 1 && (
+            <div className="galeria-pagination" style={{ marginTop: '32px' }}>
+              <button 
+                disabled={currentPage === 1} 
+                onClick={() => { setCurrentPage(prev => Math.max(1, prev - 1)); window.scrollTo({ top: 400, behavior: 'smooth' }); }}
+                className="pagination-btn"
+              >
+                Anterior
+              </button>
+              <div className="pagination-numbers">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                  <button
+                    key={pageNum}
+                    className={`pagination-num ${currentPage === pageNum ? 'active' : ''}`}
+                    onClick={() => { setCurrentPage(pageNum); window.scrollTo({ top: 400, behavior: 'smooth' }); }}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+              </div>
+              <button 
+                disabled={currentPage === totalPages} 
+                onClick={() => { setCurrentPage(prev => Math.min(totalPages, prev + 1)); window.scrollTo({ top: 400, behavior: 'smooth' }); }}
+                className="pagination-btn"
+              >
+                Siguiente
+              </button>
+            </div>
+          )}
         </section>
       </div>
 

@@ -5,55 +5,35 @@
 /* ── Hero ─────────────────────────────────────────────────── */
 .pp-hero {
   position: relative;
-  min-height: 400px;
+  min-height: 250px;
   display: flex;
   align-items: center;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse 65% 80% at 85% 45%,  rgba(45,110,126,0.85) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 40% at 50% 92%,  rgba(30,77,90,0.70)   0%, transparent 65%),
-    radial-gradient(ellipse 50% 60% at 8% 50%,   rgba(90,45,15,0.55)   0%, transparent 65%),
-    #c8b89a;
+  background: transparent;
 }
 
-.pp-hero-nebula {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 35%, rgba(40,22,8,0.55) 100%),
-    radial-gradient(ellipse 30% 35% at 2% 2%,    rgba(75,35,10,0.50)   0%, transparent 55%);
-  pointer-events: none;
-}
+.pp-hero-nebula { display: none; }
 
-.pp-hero-grain {
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E");
-  pointer-events: none;
-}
+.pp-hero-grain { display: none; }
 
-.pp-hero-vignette {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 100% 100% at 50% 0%, transparent 30%, rgba(10,2,2,.6) 100%);
-  pointer-events: none;
-}
+.pp-hero-vignette { display: none; }
 
 .pp-hero-inner {
   position: relative;
   z-index: 2;
   display: flex;
   align-items: center;
-  gap: 40px;
-  padding-top: 50px;
-  padding-bottom: 50px;
+  justify-content: center;
+  gap: 20px;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
 /* Mascot */
 .pp-hero-mascot-wrap {
   position: relative;
   flex-shrink: 0;
-  width: 220px;
+  width: 140px;
   animation: ppMascotFloat 4s ease-in-out infinite;
 }
 
@@ -84,7 +64,7 @@
 }
 
 /* Content */
-.pp-hero-content { flex: 1; }
+.pp-hero-content { text-align: center; }
 
 .pp-hero-title {
   font-family: var(--font-title);

@@ -1,13 +1,9 @@
-// ============================================
-// ENTORNO DE DESARROLLO LOCAL
-// ============================================
-// Ruta para desarrollo en esta PC (localhost)
-export const API_URL  = 'http://localhost/Austral_Collector/api';
-export const BASE_URL = 'http://localhost/Austral_Collector';
+// Detectar host dinámicamente para soporte en red local (Celular, Tablet, etc.)
+const currentHost = window.location.hostname;
 
-// Si necesitas acceso desde otros dispositivos en la red local, usa tu IP:
-// export const API_URL  = 'http://192.168.18.100/Austral_Collector/api';
-// export const BASE_URL = 'http://192.168.18.100/Austral_Collector';
+export const API_URL  = `http://${currentHost}/Austral_Collector/api`;
+export const BASE_URL = `http://${currentHost}/Austral_Collector`;
+
 
 // ============================================
 // ENTORNO DE PRODUCCIÓN (LANZAMIENTO WEB)

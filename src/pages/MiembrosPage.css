@@ -1,35 +1,44 @@
 .miembros-page {
   min-height: 100vh;
-  padding: 30px 20px 60px; /* Reducido de 80px a 30px para subir el contenido */
+  padding-bottom: 60px;
 }
 
 .mi-hero {
   position: relative;
-  min-height: 320px;
+  min-height: 180px;
   display: flex;
   align-items: center;
-  padding: 30px 0; /* Reducido de 60px a 30px */
+  padding: 10px 0;
   overflow: hidden;
-  background: 
-    radial-gradient(ellipse 50% 50% at 90% 50%, rgba(45,110,126,0.15), transparent),
-    radial-gradient(ellipse 50% 50% at 10% 50%, rgba(139,32,32,0.1), transparent);
+  background: transparent;
+}
+
+.mi-hero-bg {
+  display: none;
 }
 
 .mi-hero-inner {
   display: flex;
   align-items: center;
-  gap: 40px;
+  justify-content: center;
+  gap: 20px;
   max-width: 1100px;
   margin: 0 auto;
 }
 
-.mi-mascot-row {
+.mi-hero-mascot-wrap {
   flex-shrink: 0;
-  width: 220px;
+  width: 140px;
+  animation: mascotFloat 4s ease-in-out infinite;
+}
+
+.mi-mascot {
+  width: 100%;
+  filter: drop-shadow(0 0 20px rgba(45,110,126,.3));
 }
 
 .mi-hero-content {
-  flex: 1;
+  text-align: center;
 }
 
 .mi-hero-title {
@@ -89,7 +98,7 @@
 }
 
 .mi-hero-desc {
-  color: var(--color-muted);
+  color: #ffffff;
   font-size: 1.15rem;
   line-height: 1.6;
   max-width: 600px;

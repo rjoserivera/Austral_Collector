@@ -193,6 +193,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .admin-sec-title {
@@ -1033,4 +1035,320 @@
   border-color: #8b2020;
   color: #fff;
   box-shadow: 0 0 15px rgba(139, 32, 32, 0.4);
+}
+
+/* ── IDENTIDAD Y NOSOTROS ───────────────────────────────── */
+.identidad-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 48px;
+}
+
+.identidad-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1.5px solid rgba(45, 110, 126, 0.1);
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+
+.identidad-card:hover {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: var(--color-gold);
+  transform: translateX(4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.identidad-icon {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.1));
+}
+
+.identidad-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.identidad-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a3d4a;
+  margin: 0 0 4px 0;
+}
+
+.identidad-desc {
+  font-size: 0.88rem;
+  color: #5a4530;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Portafolio Admin Styles */
+.admin-portafolio-sec {
+  border-top: 2px solid rgba(200, 169, 110, 0.3);
+  padding-top: 36px;
+  margin-bottom: 48px;
+}
+
+.admin-banner-preview-card {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1.5px solid rgba(45, 110, 126, 0.15);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.admin-banner-img-wrap {
+  width: 100%;
+  height: 180px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  border: 1px dashed rgba(45, 110, 126, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.admin-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+
+.admin-banner-empty {
+  color: #5a4530;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.identidad-icon-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.identidad-edit-trigger {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  width: 28px;
+  height: 28px;
+  background: var(--color-gold);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  z-index: 2;
+  padding: 0;
+}
+
+.identidad-edit-trigger:hover {
+  transform: scale(1.15) rotate(15deg);
+  background: #fff;
+  color: #1a3d4a;
+}
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.admin-modal-content {
+  width: 500px;
+  background: #0d2830;
+  border: 1px solid var(--color-gold);
+  border-radius: 16px;
+  padding: 2.5rem;
+  position: relative;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ── Mobile Layout (Responsive) ────────────────────────── */
+
+/* Botón Hamburguesa oculto en PC */
+.admin-mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: #f0e4cc;
+  font-size: 1.8rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Pantalla oscura detrás de la barra lateral móvil */
+.admin-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+}
+
+@media (max-width: 768px) {
+  
+  .admin-page {
+    /* Permitir scroll general si es necesario, aunque main lo maneja */
+  }
+
+  /* ── Sidebar (Off-canvas) ── */
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+  }
+
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .admin-sidebar-overlay {
+    display: block;
+  }
+
+  /* ── Header y Menú Hamburguesa ── */
+  .admin-mobile-menu-btn {
+    display: block;
+  }
+
+  .admin-main-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .amh-title {
+    font-size: 1.3rem;
+  }
+
+  /* ── Grillas de Estadísticas ── */
+  .admin-stats-grid-compact {
+    grid-template-columns: 1fr; /* Una sola columna en móvil */
+    gap: 10px;
+  }
+
+  .admin-dashboard-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  /* ── Tablas Responsivas (con Wrapper) ── */
+  .table-responsive-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    margin-bottom: 15px;
+  }
+  
+  .admin-table {
+    width: 100%;
+    min-width: 600px; /* Fuerza el ancho para habilitar el scroll sin romper celdas */
+  }
+  
+  /* Ajustes en celdas de la tabla para asegurar legibilidad */
+  .admin-table th, 
+  .admin-table td {
+    padding: 12px 10px;
+    white-space: normal; /* Permite que textos largos bajen de línea si hay espacio */
+  }
+
+  /* ── Títulos y Filas de Log ── */
+  .admin-sec-title {
+    flex-wrap: wrap;
+    line-height: 1.2;
+  }
+  
+  .alp-row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  
+  .alp-time, .alp-user, .alp-accion {
+    white-space: normal;
+  }
+
+  /* ── Formularios y Filtros ── */
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .admin-toolbar input[type="text"],
+  .admin-toolbar select {
+    width: 100%;
+  }
+
+  .admin-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-admin {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* ── Ventanas Modales ── */
+  .admin-modal-content {
+    width: 95%;
+    padding: 1.5rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  /* Log de actividad y demás grillas genéricas */
+  .log-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Elementos de Identidad / Upload */
+  .identidad-card {
+    flex-direction: column;
+  }
+  
+  .admin-section {
+    padding: 15px;
+  }
 }

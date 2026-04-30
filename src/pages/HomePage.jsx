@@ -426,29 +426,18 @@ export default function HomePage() {
                 </h2>
                 {targetUserObj && targetUserObj.user ? (
                   <div className="card" style={{ position: 'relative', overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column' }}>
+                    {hasCumpleaneros && (
+                      <div style={{ textAlign: 'center', background: 'linear-gradient(90deg, #ff416c, #ff4b2b)', color: '#fff', padding: '6px', fontWeight: 'bold', fontSize: '0.9rem', letterSpacing: '1px', zIndex: 10 }}>
+                        🎊 {targetUserObj.user.estado_cumple === 'hoy' ? '¡ESTÁ DE CUMPLEAÑOS HOY!' : (targetUserObj.user.estado_cumple === 'manana' ? '¡MAÑANA ES SU CUMPLEAÑOS!' : '¡PRONTO ES SU CUMPLEAÑOS!')} 🎊
+                      </div>
+                    )}
                     {/* Top UI Area with Banner Background */}
-                    <div className="hp-miembro-wrap" style={{ 
-                        position: 'relative',
-                        backgroundImage: targetUserObj.user.banner_url ? `url('${BASE_URL}/${targetUserObj.user.banner_url}')` : 'none',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        padding: '20px 10px',
-                        gap: '0px'
+                    <div className="hp-miembro-wrap" style={{
+                      backgroundImage: targetUserObj.user.banner_url ? `url('${BASE_URL}/${targetUserObj.user.banner_url}')` : 'none',
                     }}>
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(20,35,45,0.95) 0%, rgba(20,35,45,0.6) 100%)', zIndex: 1 }} />
 
-                      {hasCumpleaneros && (
-                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, textAlign: 'center', background: 'linear-gradient(90deg, #ff416c, #ff4b2b)', color: '#fff', padding: '6px', fontWeight: 'bold', fontSize: '0.9rem', zIndex: 10, letterSpacing: '1px' }}>
-                          🎊 {targetUserObj.user.estado_cumple === 'hoy' ? '¡ESTÁ DE CUMPLEAÑOS HOY!' : (targetUserObj.user.estado_cumple === 'manana' ? '¡MAÑANA ES SU CUMPLEAÑOS!' : '¡PRONTO ES SU CUMPLEAÑOS!')} 🎊
-                        </div>
-                      )}
-
-                      <div className="hp-miembro-left" style={{ position: 'relative', zIndex: 2, background: 'transparent', borderRight: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, paddingRight: 0 }}>
+                      <div className="hp-miembro-left" style={{ zIndex: 2 }}>
                         <Link to={`/perfil/${targetUserObj.user.username}`} className="hp-miembro-avatar-frame" style={{ display: 'block', cursor: 'pointer' }}>
                           <div className="hp-miembro-ring" />
                           <img
@@ -457,65 +446,26 @@ export default function HomePage() {
                             className="hp-miembro-avatar"
                           />
                         </Link>
-                        <div className="hp-miembro-stats-row" style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '12px', 
-                          justifyContent: 'center',
-                          marginTop: '10px',
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          backdropFilter: 'blur(4px)',
-                          padding: '4px 12px',
-                          borderRadius: '20px',
-                          border: '1px solid rgba(255, 255, 255, 0.1)'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span style={{ fontSize: '0.9rem' }}>❤️</span>
-                            <span style={{ color: '#ff7070', fontSize: '0.9rem', fontWeight: '700' }}>{targetUserObj.stats.likes}</span>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title="Valoración de la colección">
-                            <span style={{ fontSize: '0.9rem' }}>⭐</span>
-                            <span style={{ color: '#f1c40f', fontSize: '0.9rem', fontWeight: '700' }}>{targetUserObj.stats?.average_rating || 0}</span>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title="Publicaciones">
-                            <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>📸</span>
-                            <span style={{ color: '#f0e4cc', fontSize: '0.9rem', fontWeight: '700' }}>{targetUserObj.stats.posts}</span>
-                          </div>
-                        </div>
                       </div>
 
-                      <div className="hp-miembro-right" style={{
-                        position: 'relative',
-                        zIndex: 2,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        textAlign: 'left',
-                        marginLeft: '-25px'
-                      }}>
-                        <Link 
+                      <div className="hp-miembro-right" style={{ position: 'relative', zIndex: 2 }}>
+                        <Link
                           to={`/perfil/${targetUserObj.user.username}`}
                           style={{ textDecoration: 'none' }}
                         >
-                          <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '4px', 
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
                             justifyContent: 'flex-start',
                             width: 'fit-content'
                           }}>
-                            <h3 className="hp-miembro-name" style={{
-                              textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-                              margin: 0,
-                              fontSize: '2.2rem',
-                              fontWeight: '800',
-                              color: '#fff'
-                            }}>{targetUserObj.user.username}</h3>
+                            <h3 className="hp-miembro-name">{targetUserObj.user.username}</h3>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <VerifiedBadge type={targetUserObj.user.verification_type} badgeUrl={targetUserObj.user.verification_badge} size={30} />
+                              <VerifiedBadge type={targetUserObj.user.verification_type} badgeUrl={targetUserObj.user.verification_badge} size={24} />
                               {targetUserObj.user.role === 'admin' && (
-                                <span title="Administrador" style={{ 
-                                  fontSize: '1.6rem', 
+                                <span title="Administrador" style={{
+                                  fontSize: '1.2rem',
                                   filter: 'drop-shadow(0 0 5px rgba(255,215,0,0.6))',
                                   marginLeft: '2px'
                                 }}>👑</span>
@@ -523,6 +473,20 @@ export default function HomePage() {
                             </div>
                           </div>
                         </Link>
+                        <div className="hp-miembro-stats-row">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ fontSize: '0.75rem' }}>❤️</span>
+                            <span style={{ color: '#ff7070', fontSize: '0.75rem', fontWeight: '700' }}>{targetUserObj.stats.likes}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title="Valoración de la colección">
+                            <span style={{ fontSize: '0.75rem' }}>⭐</span>
+                            <span style={{ color: '#f1c40f', fontSize: '0.75rem', fontWeight: '700' }}>{targetUserObj.stats?.average_rating || 0}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title="Publicaciones">
+                            <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>📸</span>
+                            <span style={{ color: '#f0e4cc', fontSize: '0.75rem', fontWeight: '700' }}>{targetUserObj.stats.posts}</span>
+                          </div>
+                        </div>
                         <div className="hp-miembro-badges-row" style={{ justifyContent: 'flex-start' }}>
                           {hasCumpleaneros ? (
                             <span className="hp-miembro-badge-tag" style={{ background: '#ffd700', color: '#000' }}>

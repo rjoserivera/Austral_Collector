@@ -39,6 +39,7 @@ const NAV = [
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('inicio')
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const userRole = localStorage.getItem('austral_auth_role')
   const userNameRaw = localStorage.getItem('austral_auth_user');
   let adminId = null;
@@ -62,7 +63,10 @@ export default function AdminPage() {
   return (
     <div className="admin-page">
       {/* ── Sidebar ─────────────────────────────────────── */}
-      <aside className="admin-sidebar">
+      {isMobileMenuOpen && (
+        <div className="admin-sidebar-overlay" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
+      <aside className={`admin-sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
         <div className="admin-sidebar-logo">
           <span className="asl-icon">⚙️</span>
           <div>
@@ -76,7 +80,7 @@ export default function AdminPage() {
             <button
               key={item.id}
               className={`admin-nav-item ${activeTab === item.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
             >
               <span className="ani-icon">{item.icon}</span>
               <span className="ani-label">{item.label}</span>
@@ -101,9 +105,14 @@ export default function AdminPage() {
       {/* ── Main Area ─────────────────────────────────────── */}
       <main className="admin-main">
         <header className="admin-main-header">
-          <div>
-            <h1 className="amh-title">{current?.icon} {current?.label}</h1>
-            <span className="amh-sub">Panel de Control · Austral Collector</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <button className="admin-mobile-menu-btn" onClick={() => setIsMobileMenuOpen(true)}>
+              ☰
+            </button>
+            <div>
+              <h1 className="amh-title">{current?.icon} {current?.label}</h1>
+              <span className="amh-sub">Panel de Control · Austral Collector</span>
+            </div>
           </div>
           <div className="admin-status">
             <span className="status-dot" /> Sistemas Operativos
@@ -760,100 +769,102 @@ function AdminUsuarios({ adminId }) {
       )}
 
       <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead><tr>
-            <th>ID</th>
-            <th>Usuario</th>
-            <th>Email</th>
-            <th style={{ textAlign: 'center' }}>Mensaje</th>
-            <th>Rol</th>
-            <th>Estado</th>
-            <th>Registro</th>
-            <th style={{ textAlign: 'center' }}>Acciones</th>
-          </tr></thead>
-          <tbody>
-            {currentItems.map(u => (
-              <tr key={u.id}>
-                <td className="td-id">#{u.id}</td>
-                <td>
-                  <Link to={`/perfil/${u.username}`} className="admin-user-link" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <strong style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      {u.username}
-                      {u.verification_type === 'austral' && (
-                        <img src="/logo_head.png" alt="Verificado" title="Verificado por Austral Collector" style={{ width: 16, height: 16, objectFit: 'contain', filter: 'drop-shadow(0 0 3px gold)' }} />
-                      )}
-                      {u.verification_type === 'external' && u.verification_badge && (
-                        <img src={`http://localhost/Austral_Collector/${u.verification_badge}`} alt="Externo" title="Colaborador Externo" style={{ width: 16, height: 16, objectFit: 'contain', borderRadius: '50%' }} />
-                      )}
-                    </strong>
-                    {(u.nombre || u.apellido) && <div className="td-muted" style={{ fontSize: '0.7rem' }}>{u.nombre} {u.apellido}</div>}
-                  </Link>
-                </td>
-                <td className="td-muted">{u.email}</td>
-                <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                  <button 
-                    className="act-btn" 
-                    title="Enviar mensaje personalizado"
-                    style={{ 
-                      background: 'var(--color-gold)', 
-                      border: '1px solid #000', 
-                      color: '#000',
-                      width: '32px',
-                      height: '32px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => setMessageModal({ user_id: u.id, username: u.username, email: u.email, mass: false })}
-                  >
-                    ✉️
-                  </button>
-                </td>
-                <td>
-                  <select 
-                    className={`badge-select ${u.role === 'admin' ? 'bs-admin' : 'bs-user'}`}
-                    value={u.role}
-                    onChange={(e) => updateFieldInline(u.id, 'role', e.target.value)}
-                  >
-                    <option value="user">USER</option>
-                    <option value="admin">ADMIN</option>
-                  </select>
-                </td>
-                <td>
-                  <select
-                    className={`badge-select ${Number(u.is_active) ? 'bs-active' : 'bs-inactive'}`}
-                    value={u.is_active}
-                    onChange={(e) => updateFieldInline(u.id, 'is_active', e.target.value)}
-                  >
-                    <option value="1">ACTIVO</option>
-                    <option value="0">BANEADO</option>
-                  </select>
-                </td>
-                <td className="td-muted">{u.created_at.split(' ')[0]}</td>
-                <td>
-                  <div className="action-row centered">
-                    <button className="act-btn act-gold" title="Editar Usuario" onClick={() => openForm('edit', u)}>
-                      ✏️
-                    </button>
+        <div className="table-responsive-wrapper">
+          <table className="admin-table">
+            <thead><tr>
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th style={{ textAlign: 'center' }}>Mensaje</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Registro</th>
+              <th style={{ textAlign: 'center' }}>Acciones</th>
+            </tr></thead>
+            <tbody>
+              {currentItems.map(u => (
+                <tr key={u.id}>
+                  <td className="td-id">#{u.id}</td>
+                  <td>
+                    <Link to={`/perfil/${u.username}`} className="admin-user-link" style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <strong style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {u.username}
+                        {u.verification_type === 'austral' && (
+                          <img src="/logo_head.png" alt="Verificado" title="Verificado por Austral Collector" style={{ width: 16, height: 16, objectFit: 'contain', filter: 'drop-shadow(0 0 3px gold)' }} />
+                        )}
+                        {u.verification_type === 'external' && u.verification_badge && (
+                          <img src={`http://localhost/Austral_Collector/${u.verification_badge}`} alt="Externo" title="Colaborador Externo" style={{ width: 16, height: 16, objectFit: 'contain', borderRadius: '50%' }} />
+                        )}
+                      </strong>
+                      {(u.nombre || u.apellido) && <div className="td-muted" style={{ fontSize: '0.7rem' }}>{u.nombre} {u.apellido}</div>}
+                    </Link>
+                  </td>
+                  <td className="td-muted">{u.email}</td>
+                  <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                     <button 
                       className="act-btn" 
-                      title="Enviar clave temporal por email"
-                      style={{ background: 'rgba(45,110,126,0.3)', border: '1px solid rgba(45,110,126,0.6)' }}
-                      onClick={() => sendTempKey(u)}
+                      title="Enviar mensaje personalizado"
+                      style={{ 
+                        background: 'var(--color-gold)', 
+                        border: '1px solid #000', 
+                        color: '#000',
+                        width: '32px',
+                        height: '32px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => setMessageModal({ user_id: u.id, username: u.username, email: u.email, mass: false })}
                     >
-                      📧
+                      ✉️
                     </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {currentItems.length === 0 && (
-              <tr><td colSpan="7" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>No hay usuarios que coincidan con la búsqueda.</td></tr>
-            )}
-          </tbody>
-        </table>
+                  </td>
+                  <td>
+                    <select 
+                      className={`badge-select ${u.role === 'admin' ? 'bs-admin' : 'bs-user'}`}
+                      value={u.role}
+                      onChange={(e) => updateFieldInline(u.id, 'role', e.target.value)}
+                    >
+                      <option value="user">USER</option>
+                      <option value="admin">ADMIN</option>
+                    </select>
+                  </td>
+                  <td>
+                    <select
+                      className={`badge-select ${Number(u.is_active) ? 'bs-active' : 'bs-inactive'}`}
+                      value={u.is_active}
+                      onChange={(e) => updateFieldInline(u.id, 'is_active', e.target.value)}
+                    >
+                      <option value="1">ACTIVO</option>
+                      <option value="0">BANEADO</option>
+                    </select>
+                  </td>
+                  <td className="td-muted">{u.created_at.split(' ')[0]}</td>
+                  <td>
+                    <div className="action-row centered">
+                      <button className="act-btn act-gold" title="Editar Usuario" onClick={() => openForm('edit', u)}>
+                        ✏️
+                      </button>
+                      <button 
+                        className="act-btn" 
+                        title="Enviar clave temporal por email"
+                        style={{ background: 'rgba(45,110,126,0.3)', border: '1px solid rgba(45,110,126,0.6)' }}
+                        onClick={() => sendTempKey(u)}
+                      >
+                        📧
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {currentItems.length === 0 && (
+                <tr><td colSpan="7" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>No hay usuarios que coincidan con la búsqueda.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {totalPages > 1 && (
@@ -1097,81 +1108,83 @@ function AdminVideos({ adminId }) {
         <button className="btn-primary btn-sm" onClick={() => setVideoModal(true)}>➕ Agregar Link</button>
       </div>
       <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead><tr>
-            <th>Título</th><th>Link YouTube</th><th>Destacado</th><th>Acciones</th>
-          </tr></thead>
-          <tbody>
-            {videos.map(v => (
-              <tr key={v.id}>
-                <td><strong>{v.titulo}</strong></td>
-                <td>
-                  <a href={v.link_yt} target="_blank" rel="noreferrer" 
-                    style={{ 
-                      color: '#0d2830', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '8px', 
-                      textDecoration: 'underline',
-                      fontWeight: '800',
-                      fontSize: '0.9rem'
-                    }}
-                  >
-                    <span style={{ fontSize: '1.2rem', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.1))' }}>📺</span> Ver video
-                  </a>
-                </td>
-                <td>
-                  <button 
-                    className={`act-btn ${parseInt(v.destacado)===1 ? 'act-gold' : ''}`} 
-                    onClick={() => toggleDest(v.id)}
-                    style={{
-                      width: '38px',
-                      height: '38px',
-                      fontSize: '1.3rem',
-                      background: parseInt(v.destacado)===1 ? '#ffd700' : '#f0e4cc',
-                      border: '2px solid #0d2830',
-                      borderRadius: '8px',
-                      color: '#000',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                    }}
-                  >
-                    {parseInt(v.destacado)===1 ? '⭐' : '☆'}
-                  </button>
-                </td>
-                <td>
-                  <div className="action-row">
+        <div className="table-responsive-wrapper">
+          <table className="admin-table">
+            <thead><tr>
+              <th>Título</th><th>Link YouTube</th><th>Destacado</th><th>Acciones</th>
+            </tr></thead>
+            <tbody>
+              {videos.map(v => (
+                <tr key={v.id}>
+                  <td><strong>{v.titulo}</strong></td>
+                  <td>
+                    <a href={v.link_yt} target="_blank" rel="noreferrer" 
+                      style={{ 
+                        color: '#0d2830', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px', 
+                        textDecoration: 'underline',
+                        fontWeight: '800',
+                        fontSize: '0.9rem'
+                      }}
+                    >
+                      <span style={{ fontSize: '1.2rem', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.1))' }}>📺</span> Ver video
+                    </a>
+                  </td>
+                  <td>
                     <button 
-                      className="act-btn act-red" 
-                      onClick={() => handleDelete(v.id)} 
-                      title="Eliminar"
+                      className={`act-btn ${parseInt(v.destacado)===1 ? 'act-gold' : ''}`} 
+                      onClick={() => toggleDest(v.id)}
                       style={{
                         width: '38px',
                         height: '38px',
-                        fontSize: '1.2rem',
+                        fontSize: '1.3rem',
+                        background: parseInt(v.destacado)===1 ? '#ffd700' : '#f0e4cc',
+                        border: '2px solid #0d2830',
+                        borderRadius: '8px',
+                        color: '#000',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        background: '#ff4444',
-                        border: '2px solid #000',
-                        color: '#fff',
-                        borderRadius: '8px',
                         cursor: 'pointer',
                         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                       }}
                     >
-                      🗑️
+                      {parseInt(v.destacado)===1 ? '⭐' : '☆'}
                     </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {videos.length === 0 && <tr><td colSpan="4" style={{textAlign:'center', padding:'20px'}}>No hay videos.</td></tr>}
-          </tbody>
-        </table>
+                  </td>
+                  <td>
+                    <div className="action-row">
+                      <button 
+                        className="act-btn act-red" 
+                        onClick={() => handleDelete(v.id)} 
+                        title="Eliminar"
+                        style={{
+                          width: '38px',
+                          height: '38px',
+                          fontSize: '1.2rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: '#ff4444',
+                          border: '2px solid #000',
+                          color: '#fff',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        }}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {videos.length === 0 && <tr><td colSpan="4" style={{textAlign:'center', padding:'20px'}}>No hay videos.</td></tr>}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
@@ -1357,48 +1370,50 @@ function AdminEventos({ adminId }) {
       
       {loading ? <Loading /> : (
         <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Miniatura</th>
-                <th>Evento / Noticia</th>
-                <th>Día / Descripción</th>
-                <th style={{ textAlign: 'center' }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {eventos.map(ev => (
-                <tr key={ev.id}>
-                  <td>
-                    <img 
-                      src={ev.imagen_url ? `${BASE_URL}/${ev.imagen_url}` : '/mock_event1.png'} 
-                      alt="Mini" 
-                      style={{ width: '60px', height: '45px', objectFit: 'cover', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.1)' }} 
-                    />
-                  </td>
-                  <td>
-                    <div style={{ fontWeight: '700', color: '#1a3d4a' }}>{ev.titulo}</div>
-                  </td>
-                  <td>
-                    <span className="td-muted">{ev.fecha_display || 'Sin texto'}</span>
-                  </td>
-                  <td>
-                    <div className="action-row centered">
-                      <button className="act-btn act-gold" title="Editar" onClick={() => handleEdit(ev)}>✏️</button>
-                      <button className="act-btn act-red" title="Eliminar" onClick={() => handleDelete(ev.id)}>🗑️</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {eventos.length === 0 && (
+          <div className="table-responsive-wrapper">
+            <table className="admin-table">
+              <thead>
                 <tr>
-                  <td colSpan="4" style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-                    No hay noticias o eventos publicados. Utiliza el formulario de arriba para añadir uno.
-                  </td>
+                  <th>Miniatura</th>
+                  <th>Evento / Noticia</th>
+                  <th>Día / Descripción</th>
+                  <th style={{ textAlign: 'center' }}>Acciones</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {eventos.map(ev => (
+                  <tr key={ev.id}>
+                    <td>
+                      <img 
+                        src={ev.imagen_url ? `${BASE_URL}/${ev.imagen_url}` : '/mock_event1.png'} 
+                        alt="Mini" 
+                        style={{ width: '60px', height: '45px', objectFit: 'cover', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.1)' }} 
+                      />
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: '700', color: '#1a3d4a' }}>{ev.titulo}</div>
+                    </td>
+                    <td>
+                      <span className="td-muted">{ev.fecha_display || 'Sin texto'}</span>
+                    </td>
+                    <td>
+                      <div className="action-row centered">
+                        <button className="act-btn act-gold" title="Editar" onClick={() => handleEdit(ev)}>✏️</button>
+                        <button className="act-btn act-red" title="Eliminar" onClick={() => handleDelete(ev.id)}>🗑️</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {eventos.length === 0 && (
+                  <tr>
+                    <td colSpan="4" style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+                      No hay noticias o eventos publicados. Utiliza el formulario de arriba para añadir uno.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -1433,6 +1448,8 @@ function AdminIdentidad({ adminId }) {
   const [comunidadPreview, setComunidadPreview] = useState('')
   const [comunidadUrl, setComunidadUrl] = useState('')
   const [savingCom, setSavingCom] = useState(false)
+  const [showBannerModal, setShowBannerModal] = useState(false)
+
 
   // Arrastre
   const [draggedIndex, setDraggedIndex] = useState(null)
@@ -1682,6 +1699,24 @@ function AdminIdentidad({ adminId }) {
     }
   }
 
+  const clearComunidad = async () => {
+    if (!await confirmDialog('¿Estás seguro de eliminar el banner actual?')) return
+    setSavingCom(true)
+    authFetch(`${API_URL}/destacados.php`, {
+      method: 'POST',
+      body: JSON.stringify({ clave: 'portafolio_comunidad', valor: '', adminId })
+    }).then(r => r.json()).then(d => {
+      if(d.success) {
+        setComunidadUrl('')
+        setComunidadPreview('')
+        toast.success('✅ Banner eliminado.')
+      } else {
+        toast.error('❌ Error al eliminar.')
+      }
+    }).catch(e => toast.error('❌ ' + e.message)).finally(() => setSavingCom(false))
+  }
+
+
   if (loading) return <Loading />
 
   return (
@@ -1724,8 +1759,9 @@ function AdminIdentidad({ adminId }) {
 
       {/* ── MODAL EDITAR IDENTIDAD ─────────────────────── */}
       {editIdIndex !== null && identidades[editIdIndex] && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:1001, display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <div style={{ width:'500px', background:'#0d2830', border:'1px solid var(--color-gold)', borderRadius:'12px', padding:'2.5rem', position:'relative', boxShadow:'0 20px 40px rgba(0,0,0,0.6)' }}>
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-content">
+
             <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.4rem', borderBottom:'1px solid rgba(255,215,0,0.3)', paddingBottom:'12px' }}>
               ✏️ Editar {identidades[editIdIndex].id.toUpperCase()}
             </h3>
@@ -1770,10 +1806,53 @@ function AdminIdentidad({ adminId }) {
         </div>
       )}
 
+      {/* ── MODAL EDITAR BANNER COMUNIDAD ─────────────────────── */}
+      {showBannerModal && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-content">
+            <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.4rem', borderBottom:'1px solid rgba(255,215,0,0.3)', paddingBottom:'12px' }}>
+              🤝 Editar Banner de Comunidad
+            </h3>
+            
+            <div className="admin-form-group" style={{ marginBottom:'20px' }}>
+              <label>📤 Subir nueva imagen (Máx 5MB)</label>
+              <input type="file" accept="image/*" onChange={handleComunidadFile}
+                style={{ display:'block', marginTop:'8px', color:'#f0e4cc', fontSize: '0.9rem' }} />
+            </div>
+            
+            <div className="admin-form-group" style={{ marginBottom:'25px' }}>
+              <label>🔗 O pegar URL directa</label>
+              <input type="url" className="admin-input"
+                value={comunidadUrl}
+                onChange={e => { setComunidadUrl(e.target.value); if(!comunidadFile) setComunidadPreview(e.target.value) }}
+                placeholder="https://ejemplo.com/imagen.jpg" style={{ marginTop:'6px' }} />
+            </div>
+            
+            <div style={{ display:'flex', gap:'12px' }}>
+              <button 
+                className="btn-primary" 
+                style={{ flex:1 }}
+                onClick={() => {
+                  saveComunidad();
+                  setShowBannerModal(false);
+                }} 
+                disabled={savingCom}
+              >
+                {savingCom ? 'Guardando...' : '💾 Actualizar Banner'}
+              </button>
+              <button className="btn-outline" onClick={() => setShowBannerModal(false)} disabled={savingCom}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── MODAL EDITAR DESCRIPCION GALERIA ─────────────────────── */}
       {editGalItem && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:1001, display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <div style={{ width:'460px', background:'#0d2830', border:'1px solid var(--color-gold)', borderRadius:'12px', padding:'2.5rem', position:'relative', boxShadow:'0 20px 40px rgba(0,0,0,0.6)' }}>
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-content" style={{ width: '460px' }}>
+
             <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.4rem', borderBottom:'1px solid rgba(255,215,0,0.3)', paddingBottom:'12px' }}>
               ✏️ Editar Descripción
             </h3>
@@ -1818,24 +1897,32 @@ function AdminIdentidad({ adminId }) {
       {/* ── A: NUESTRA IDENTIDAD ──────────────────── */}
       <div className="admin-sec-header">
         <h2 className="admin-sec-title">⭐ Nuestra Identidad</h2>
-        <button className="btn-outline btn-sm" onClick={loadAll} style={{ borderColor:'rgba(0,0,0,0.2)', color:'#1a3d4a' }}>🔄 Recargar</button>
+        <button className="btn-outline btn-sm" onClick={loadAll}>🔄 Recargar Datos</button>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '48px' }}>
+
+      <div className="identidad-grid">
         {identidades.map((item, index) => (
-          <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(139,90,43,0.2)', padding: '12px 20px', borderRadius: '8px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
-            <div style={{ fontSize: '2rem' }}>{item.icon}</div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <h3 style={{ fontSize: '1.05rem', color: '#1a3d4a', margin: '0 0 4px 0', fontWeight: 'bold' }}>{item.title || item.id}</h3>
-              <p style={{ fontSize: '0.85rem', color: '#666', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {item.desc || 'Sin descripción...'}
+          <div key={item.id} className="identidad-card">
+            <div className="identidad-icon">{item.icon}</div>
+            <div className="identidad-info">
+              <h3 className="identidad-title">{item.title || item.id}</h3>
+              <p className="identidad-desc">
+                {item.desc || 'Sin descripción configurada...'}
               </p>
             </div>
-            <button className="btn-outline btn-sm" style={{ borderColor: 'var(--color-gold)', color: '#1a3d4a', fontWeight: 'bold', whiteSpace: 'nowrap', padding: '6px 16px' }} onClick={() => setEditIdIndex(index)}>
+            <button 
+              className="btn-outline btn-sm" 
+              style={{ borderColor: 'var(--color-gold)', color: '#1a3d4a', fontWeight: 'bold', whiteSpace: 'nowrap', padding: '6px 16px' }}
+              onClick={() => setEditIdIndex(index)}
+            >
               ✏️ Editar
             </button>
           </div>
         ))}
       </div>
+
+
+
 
       {/* ── B: GALERÍA DE FOTOS ───────────────────── */}
       <div style={{ borderTop:'2px solid rgba(200,169,110,0.35)', paddingTop:'32px', marginBottom:'40px' }}>
@@ -2071,43 +2158,59 @@ function AdminIdentidad({ adminId }) {
       </div>
 
       {/* ── D: IMAGEN COMUNIDAD ───────────────────── */}
-      <div style={{ borderTop:'2px solid rgba(200,169,110,0.35)', paddingTop:'32px' }}>
-        <h2 className="admin-sec-title" style={{ marginBottom:'8px' }}>🤝 Banner "Únete a la Comunidad"</h2>
-        <p style={{ color:'#4a3520', fontSize:'0.85rem', marginBottom:'20px' }}>
-          Imagen que aparece al lado del texto de la sección Comunidad al final del Portafolio.
-        </p>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'28px', alignItems:'start' }}>
+      <div className="admin-portafolio-sec">
+        <div className="admin-sec-header" style={{ marginBottom:'16px' }}>
           <div>
-            <div className="admin-form-group" style={{ marginBottom:'16px' }}>
-              <label>Subir imagen (hasta 5MB)</label>
-              <input type="file" accept="image/*" onChange={handleComunidadFile}
-                style={{ display:'block', marginTop:'8px', color:'#1a3d4a' }} />
-            </div>
-            <div className="admin-form-group" style={{ marginBottom:'16px' }}>
-              <label>O pegar URL directamente</label>
-              <input type="url" className="admin-input"
-                value={comunidadUrl}
-                onChange={e => { setComunidadUrl(e.target.value); if(!comunidadFile) setComunidadPreview(e.target.value) }}
-                placeholder="https://..." style={{ marginTop:'6px' }} />
-            </div>
-            <button className="btn-primary" onClick={saveComunidad} disabled={savingCom} style={{ width:'100%' }}>
-              {savingCom ? 'Guardando...' : '💾 Guardar Imagen de Comunidad'}
-            </button>
+            <h2 className="admin-sec-title">🤝 Banner "Únete a la Comunidad"</h2>
+            <p style={{ color:'#4a3520', fontSize:'0.85rem', marginTop: '4px' }}>
+              Gestiona la imagen que aparece en la sección Comunidad.
+            </p>
           </div>
-          <div>
+        </div>
+
+        <div style={{ maxWidth: '480px' }}>
+          <div className="admin-banner-img-wrap" style={{ height: '180px', position: 'relative', borderStyle: 'solid', background: '#0d2830' }}>
+
             {comunidadPreview ? (
-              <img src={comunidadPreview.startsWith('uploads/') ? `http://localhost/Austral_Collector/${comunidadPreview}` : comunidadPreview}
-                alt="Preview"
-                style={{ width:'100%', height:'200px', objectFit:'cover', borderRadius:'10px', border:'1px solid rgba(255,215,0,0.3)' }}
-                onError={e => e.target.style.display='none'} />
+              <>
+                <img 
+                  src={comunidadPreview.startsWith('uploads/') ? `${BASE_URL}/${comunidadPreview}` : comunidadPreview}
+                  alt="Preview"
+                  className="admin-banner-img"
+                  onError={e => { e.target.style.display = 'none'; }} 
+                />
+                <div style={{ position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '10px' }}>
+                  <button 
+                    className="act-btn act-gold" 
+                    title="Editar Banner" 
+                    style={{ width: '40px', height: '40px', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}
+                    onClick={() => setShowBannerModal(true)}
+                  >
+                    ✏️
+                  </button>
+                  <button 
+                    className="act-btn act-red" 
+                    title="Eliminar Banner" 
+                    style={{ width: '40px', height: '40px', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}
+                    onClick={clearComunidad}
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </>
             ) : (
-              <div style={{ width:'100%', height:'200px', background:'rgba(0,0,0,0.07)', borderRadius:'10px', border:'1px dashed rgba(139,90,43,0.35)', display:'flex', alignItems:'center', justifyContent:'center', color:'#3a2a0f', fontSize:'0.85rem', fontWeight:500 }}>
-                Vista previa aquí
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                <span style={{ fontSize: '3rem' }}>🖼️</span>
+                <button className="btn-primary" onClick={() => setShowBannerModal(true)}>
+                  ➕ Configurar Banner
+                </button>
               </div>
             )}
           </div>
         </div>
       </div>
+
+
     </div>
   )
 }
@@ -2265,6 +2368,10 @@ function AdminActividad() {
   const [fTipo, setFTipo] = useState('')
   const [fFechaDesde, setFFechaDesde] = useState('')
   const [fFechaHasta, setFFechaHasta] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 20
+
+
 
   const loadData = () => {
     setLoading(true)
@@ -2276,13 +2383,24 @@ function AdminActividad() {
 
     authFetch(`${API_URL}/get_activity_log.php?${params.toString()}`)
       .then(r => r.json())
-      .then(d => setLogs(d.logs || []))
+      .then(d => {
+        setLogs(d.logs || [])
+        setCurrentPage(1)
+      })
       .finally(() => setLoading(false))
   }
+
 
   useEffect(() => {
     loadData()
   }, [])
+
+  const totalPages = Math.ceil(logs.length / itemsPerPage)
+  const currentLogs = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage
+    return logs.slice(start, start + itemsPerPage)
+  }, [logs, currentPage])
+
 
   return (
     <div className="admin-section">
@@ -2365,37 +2483,71 @@ function AdminActividad() {
 
       
       {loading ? <Loading /> : (
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead><tr><th>Fecha y Hora</th><th>Acción</th><th>Usuario Responsable</th><th>Tipo</th></tr></thead>
-            <tbody>
-              {logs.map(log => (
-                <tr key={log.id}>
-                  <td style={{ color: 'var(--color-cream)', fontSize: '0.90rem' }}>{log.time}</td>
-                  <td>{log.accion}</td>
-                  <td>
-                    {log.user_id ? (
-                      <Link to={`/perfil/${log.user_id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                        <strong>{log.user}</strong>
-                      </Link>
-                    ) : (
-                      <strong>{log.user}</strong>
-                    )}
-                  </td>
-                  <td>
-                    <span className={`badge ${getLogConfig(log.tipo).class}`}>
-                      {getLogConfig(log.tipo).label}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {logs.length === 0 && (
-                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>No hay registros para estos filtros.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <div className="admin-table-wrap">
+            <div className="table-responsive-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>FECHA Y HORA</th>
+                    <th>ACCIÓN</th>
+                    <th>USUARIO</th>
+                    <th>TIPO</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentLogs.map(l => (
+                    <tr key={l.id}>
+                      <td className="td-muted" style={{ whiteSpace: 'nowrap' }}>{l.time}</td>
+                      <td><strong style={{ color: '#1e4d5a' }}>{l.accion}</strong></td>
+                      <td>{l.user}</td>
+                      <td>
+                        <span className={`badge ${getLogConfig(l.tipo).class}`}>
+                          {getLogConfig(l.tipo).label}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {currentLogs.length === 0 && (
+                    <tr><td colSpan="4" style={{ textAlign: 'center', padding: '30px', color: '#888' }}>No se encontraron registros.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {totalPages > 1 && (
+            <div className="galeria-pagination" style={{ marginTop: '24px' }}>
+              <button 
+                disabled={currentPage === 1} 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                className="pagination-btn"
+              >
+                Anterior
+              </button>
+              <div className="pagination-numbers">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                  <button
+                    key={pageNum}
+                    className={`pagination-num ${currentPage === pageNum ? 'active' : ''}`}
+                    onClick={() => setCurrentPage(pageNum)}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+              </div>
+              <button 
+                disabled={currentPage === totalPages} 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                className="pagination-btn"
+              >
+                Siguiente
+              </button>
+            </div>
+          )}
+        </>
       )}
+
     </div>
   )
 }
@@ -2468,6 +2620,23 @@ function AdminModeracion({ adminId }) {
   const totalPages = Math.ceil(filteredPosts.length / itemsPerPage)
   const currentItems = filteredPosts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
+  const handleOpenPost = (p) => {
+    // Si los hashtags vienen como string JSON, parsearlos
+    let hashtags = p.hashtags
+    if (typeof hashtags === 'string') {
+      try { hashtags = JSON.parse(hashtags) } catch(e) { hashtags = [] }
+    }
+    
+    // Si imagenes_extra viene como string JSON, parsearlo
+    let extra = p.imagenes_extra
+    if (typeof extra === 'string') {
+      try { extra = JSON.parse(extra) } catch(e) { extra = [] }
+    }
+
+    setSelectedPost({ ...p, hashtags, imagenes_extra: extra })
+  }
+
+
   if (loading && posts.length === 0) return <Loading />
 
   return (
@@ -2511,7 +2680,7 @@ function AdminModeracion({ adminId }) {
 
       <div className="admin-sec-header">
         <h2 className="admin-sec-title">🛡️ Moderación de Publicaciones</h2>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
           <select className="admin-select" style={{ width: 'auto' }} value={filterTipo} onChange={e => setFilterTipo(e.target.value)}>
             <option value="all">Todos los tipos</option>
             <option value="figura">Sólo Figuras</option>
@@ -2529,54 +2698,59 @@ function AdminModeracion({ adminId }) {
       </div>
 
       <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead><tr>
-            <th>Vista</th>
-            <th>Nombre / Título</th>
-            <th>Tipo</th>
-            <th>Autor</th>
-            <th>Fecha</th>
-            <th style={{ textAlign: 'center' }}>Acciones</th>
-          </tr></thead>
-          <tbody>
-            {currentItems.map(p => (
-              <tr key={`${p.tipo}-${p.id}`}>
-                <td>
-                  <img 
-                    src={`${BASE_URL}/${p.imagen_url}`} 
-                    alt="Mini" 
-                    style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }}
-                  />
-                </td>
-                <td>
-                  <strong>{p.nombre}</strong>
-                </td>
-                <td>
-                  <span className={`badge ${getLogConfig(p.tipo).class}`}>
-                    {getLogConfig(p.tipo).label}
-                  </span>
-                </td>
-                <td>
-                  <span className="td-muted">{p.autor}</span>
-                </td>
-                <td className="td-muted">{p.created_at.split(' ')[0]}</td>
-                <td>
-                  <div className="action-row centered">
-                    <button className="act-btn" style={{ background: 'var(--color-teal)', border: '1px solid rgba(255,255,255,0.2)' }} title="Ver Publicación" onClick={() => setSelectedPost(p)}>
-                      👁️
-                    </button>
-                    <button className="act-btn act-red" title="Eliminar Publicación" onClick={() => setPostToRemove(p)}>
-                      🗑️
-                    </button>
-                  </div>
-                </td>
+        <div className="table-responsive-wrapper">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Vista</th>
+                <th>Nombre / Título</th>
+                <th>Tipo</th>
+                <th>Autor</th>
+                <th>Fecha</th>
+                <th style={{ textAlign: 'center' }}>Acciones</th>
               </tr>
-            ))}
-            {currentItems.length === 0 && (
-              <tr><td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#666' }}>No hay publicaciones para moderar.</td></tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {currentItems.map(p => (
+                <tr key={`${p.tipo}-${p.id}`} onClick={() => handleOpenPost(p)} style={{ cursor: 'pointer' }}>
+                  <td>
+                    <img
+                      src={`${BASE_URL}/${p.imagen_url}`}
+                      alt="Mini"
+                      style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }}
+                    />
+                  </td>
+                  <td>
+                    <strong>{p.nombre}</strong>
+                  </td>
+                  <td>
+                    <span className={`badge ${getLogConfig(p.tipo).class}`}>
+                      {getLogConfig(p.tipo).label}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="td-muted">{p.autor}</span>
+                  </td>
+                  <td className="td-muted">{p.created_at.split(' ')[0]}</td>
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <div className="action-row centered">
+                      <button className="act-btn" style={{ background: 'var(--color-teal)', border: '1px solid rgba(255,255,255,0.2)' }} title="Ver Publicación" onClick={() => handleOpenPost(p)}>
+                        👁️
+                      </button>
+                      <button className="act-btn act-red" title="Eliminar Publicación" onClick={() => setPostToRemove(p)}>
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+
+              {currentItems.length === 0 && (
+                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#666' }}>No hay publicaciones para moderar.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {totalPages > 1 && (
@@ -2726,9 +2900,6 @@ function AdminPromos({ adminId }) {
         </div>
       </div>
 
-      <div style={{ padding: '12px 18px', background: 'rgba(139,32,32,0.1)', border: '1px solid #8b2020', borderRadius: '10px', marginBottom: '24px', color: '#1a3d4a' }}>
-        <strong style={{ color: '#8b2020' }}>Nota:</strong> Las promociones que agregues aquí se mostrarán automáticamente de forma simultánea en las 3 secciones de prueba del Home (Carrusel, Panel Lateral y Tarjetas Inferiores).
-      </div>
 
       {/* Modal de formulario */}
       {showForm && (

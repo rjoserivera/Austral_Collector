@@ -10,7 +10,7 @@ export default function MiembrosPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('likes') // 'likes', 'nombre', 'fechaReciente', 'fechaAntigua', 'figuras'
   const [currentPage, setCurrentPage] = useState(1)
-  const ITEMS_PER_PAGE = 20
+  const ITEMS_PER_PAGE = 21
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -82,10 +82,10 @@ export default function MiembrosPage() {
   return (
     <div className="miembros-page">
       <section className="mi-hero">
+        <div className="mi-hero-bg" aria-hidden="true"/>
         <div className="mi-hero-inner section-wrapper">
-          <div className="hp-hero-mascot-wrap mi-mascot-row">
-            <div className="hp-mascot-glow" aria-hidden="true"/>
-            <img src="/robot_sin_fondon.png" alt="Mascota Robot Austral Collector" className="hp-mascot"/>
+          <div className="mi-hero-mascot-wrap">
+            <img src="/robot_sin_fondon.png" alt="Mascota Robot Austral Collector" className="mi-mascot"/>
           </div>
           
           <div className="mi-hero-content">
@@ -144,11 +144,7 @@ export default function MiembrosPage() {
         </div>
       </div>
 
-      <div className="mi-results-info section-wrapper">
-        <p style={{ color: 'var(--color-cream)', marginBottom: '0' }}>
-          Mostrando <strong>{paginatedMiembros.length}</strong> de <strong>{filteredMiembros.length}</strong> coleccionistas
-        </p>
-      </div>
+
 
       <div className="mi-grid">
         {paginatedMiembros.map(m => (

@@ -204,17 +204,17 @@ export default function GaleriaPage() {
       <section className="galeria-hero">
         <div className="galeria-hero-bg" aria-hidden="true"/>
         <div className="section-wrapper galeria-hero-inner">
+          <div className="galeria-mascot-wrap">
+            <img src="/robot_sin_fondon.png" alt="Mascota" className="galeria-mascot"/>
+          </div>
           <div className="galeria-hero-text">
-            <h1 className="global-hero-title" style={{ textAlign: 'left', margin: 0 }}>
-              <span className="global-title-teal">GALERÍA DE</span><br/>
-              <span className="global-title-red">FIGURAS</span>
+            <h1 className="global-hero-title" style={{ textAlign: 'center', margin: 0 }}>
+              <span className="global-title-teal">GALERÍA</span><br/>
+              <span className="global-title-red">DE FIGURAS</span>
             </h1>
             <p className="galeria-subtitle">
               Explora miles de archivos históricos, subidos por coleccionistas de élite.
             </p>
-          </div>
-          <div className="galeria-mascot-wrap">
-            <img src="/robot_sin_fondon.png" alt="Mascota" className="galeria-mascot"/>
           </div>
         </div>
       </section>

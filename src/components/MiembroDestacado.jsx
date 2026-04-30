@@ -27,27 +27,30 @@ export default function MiembroDestacado() {
       </div>
       <div className="gold-divider" />
 
-      {/* Avatar */}
-      <div className="miembro-avatar-section">
-        <div className="miembro-avatar-frame">
-          <div className="miembro-avatar-ring" />
-          <img
-            src={MEMBER.avatar}
-            alt={`Foto de ${MEMBER.name}`}
-            className="miembro-avatar"
-          />
-          {MEMBER.verified && (
-            <div className="miembro-verified" title="Verificado">✔</div>
-          )}
+      {/* Profile Group (Avatar + Name) */}
+      <div className="miembro-profile-group">
+        <div className="miembro-avatar-section">
+          <div className="miembro-avatar-frame">
+            <div className="miembro-avatar-ring" />
+            <img
+              src={MEMBER.avatar}
+              alt={`Foto de ${MEMBER.name}`}
+              className="miembro-avatar"
+            />
+            {MEMBER.verified && (
+              <div className="miembro-verified" title="Verificado">✔</div>
+            )}
+          </div>
+        </div>
+
+        <div className="miembro-info">
+          <h4 className="miembro-name">{MEMBER.name}</h4>
+          <span className="miembro-username">{MEMBER.username}</span>
         </div>
       </div>
 
-      {/* Info */}
-      <div className="miembro-info">
-        <h4 className="miembro-name">{MEMBER.name}</h4>
-        <span className="miembro-username">{MEMBER.username}</span>
-        <p className="miembro-bio">{MEMBER.bio}</p>
-      </div>
+      <p className="miembro-bio">{MEMBER.bio}</p>
+
 
       {/* Stats */}
       <div className="miembro-stats">

@@ -3,17 +3,25 @@
   text-align: center;
 }
 
+/* Profile Group */
+.miembro-profile-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 16px 0 12px;
+  text-align: left;
+}
+
 /* Avatar */
 .miembro-avatar-section {
-  display: flex;
-  justify-content: center;
-  margin: 20px 0 16px;
+  flex-shrink: 0;
 }
+
 
 .miembro-avatar-frame {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 75px;
+  height: 75px;
 }
 
 .miembro-avatar-ring {
@@ -39,8 +47,8 @@
 .miembro-avatar {
   position: relative;
   z-index: 1;
-  width: 100px;
-  height: 100px;
+  width: 75px;
+  height: 75px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid var(--color-bg);
@@ -70,7 +78,6 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-bottom: 16px;
 }
 
 .miembro-name {
@@ -87,10 +94,12 @@
 }
 
 .miembro-bio {
-  font-size: 0.75rem;
-  color: rgba(240,228,204,0.80);   /* crema claro — legible */
+  font-size: 0.8rem;
+  color: rgba(240,228,204,0.85);
   line-height: 1.5;
   margin-top: 6px;
+  margin-bottom: 16px;
+  text-align: left;
 }
 
 /* Stats */

@@ -41,7 +41,7 @@ export default function ContactoPage() {
         <header className="contacto-hero-row">
           <img src="/robot_sin_fondon.png" alt="Austral Collector Robot" className="contacto-hero-robot"/>
           <div className="contacto-hero-text">
-            <h1 className="global-hero-title" style={{ textAlign: 'left', margin: 0 }}>
+            <h1 className="global-hero-title" style={{ textAlign: 'center', margin: 0 }}>
               <span className="global-title-red">CONTÁCTANOS</span>
             </h1>
             <p className="contacto-subtitle">¿Tienes alguna duda o sugerencia?<br/>Contáctanos y serás escuchado.</p>
@@ -52,7 +52,7 @@ export default function ContactoPage() {
         <div className="contacto-content-row">
           <section className="contacto-panel card-distressed">
             <h2 className="panel-title">
-              <span className="skull-icon" aria-hidden="true">💀</span> Formulario de Contacto
+              Formulario de Contacto
             </h2>
 
             <form className="contacto-form-new" onSubmit={handleSubmit}>

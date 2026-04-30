@@ -80,3 +80,34 @@
   display: block;
   margin-bottom: 4px;
 }
+
+/* Responsividad para móviles */
+@media (max-width: 768px) {
+  .virtual-assistant-panel {
+    bottom: 15px;
+    right: 15px;
+    width: 160px;
+    gap: 10px;
+  }
+
+  .mascot-img {
+    max-width: 80px;
+  }
+
+  .mascot-speech-bubble {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+    border-width: 1.5px;
+  }
+
+  .mascot-speech-bubble::before {
+    bottom: -8px;
+    border-width: 8px 8px 0 8px;
+  }
+
+  .mascot-speech-bubble::after {
+    bottom: -6px;
+    border-width: 6px 6px 0 6px;
+  }
+}
+
