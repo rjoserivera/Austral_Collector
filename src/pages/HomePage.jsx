@@ -28,7 +28,7 @@ function FiguraCard({ fig, onToggle, onClick }) {
           }}
           aria-label="Like"
         >
-          {fig.userLiked ? '❤' : '♡'} {fig.likes}
+          {fig.userLiked ? '❤' : '♡'} {fig.total_likes !== undefined ? fig.total_likes : (fig.likes || 0)}
         </button>
       </div>
     </article>
@@ -48,7 +48,7 @@ function PlayIcon() {
 export default function HomePage() {
   const [data, setData] = useState({
     ultimas: [], votadas: [], eventos: [], videos: [], destacado: null, ultimos_cosplays: [],
-    promos: []
+    promos: [], config: {}
   })
   const [loading, setLoading] = useState(true)
   const [selectedPost, setSelectedPost] = useState(null)
@@ -512,7 +512,7 @@ export default function HomePage() {
                       <p className="hp-miembro-bio" style={{ margin: 0, color: '#f0e4cc', fontSize: '0.85rem', lineHeight: '1.5', paddingRight: (hasCumpleaneros && validCumpleaneros.length > 1) ? '40px' : '0' }}>
                         {hasCumpleaneros
                           ? (data.config?.txt_cumple || "¡El Gremio de Coleccionistas celebra tu día! Te deseamos un excelente cumpleaños y que tu colección siga creciendo.")
-                          : (targetUserObj.user.biografia || data.config?.txt_destacado || "Por su constante participación, increíbles piezas y valiosos aportes a la comunidad de Austral Collector. ¡Gracias por ser parte del gremio!")}
+                          : (data.config?.txt_destacado || (targetUserObj.user.biografia && targetUserObj.user.biografia.trim()) || "Por su constante participación, increíbles piezas y valiosos aportes a la comunidad de Austral Collector. ¡Gracias por ser parte del gremio!")}
                       </p>
 
                       {/* Dots for carousel, moved to bottom bar */}

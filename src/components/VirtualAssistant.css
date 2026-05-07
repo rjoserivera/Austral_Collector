@@ -9,6 +9,7 @@
   align-items: center;
   gap: 16px;
   text-align: center;
+  pointer-events: none; /* Permite que los clics pasen a través del contenedor invisible */
 }
 
 .mascot-img {
@@ -18,6 +19,7 @@
   animation: float 4s ease-in-out infinite;
   cursor: pointer;
   transition: transform 0.2s;
+  pointer-events: auto; /* Reactiva los clics en la mascota */
 }
 
 .mascot-img:hover {
@@ -50,6 +52,7 @@
   font-size: 0.95rem;
   line-height: 1.4;
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  pointer-events: auto; /* Reactiva los clics en el cuadro de texto */
 }
 
 .mascot-speech-bubble::before {

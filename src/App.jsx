@@ -87,7 +87,7 @@ function App() {
             <h2 style={{ color: 'var(--color-gold)', fontFamily: 'var(--font-title)', marginBottom: '12px' }}>
               ⚠️ Cambio Requerido
             </h2>
-            <p style={{ color: 'var(--color-cream)', fontSize: '0.95rem', marginBottom: '24px' }}>
+            <p style={{ color: '#ffffff', fontSize: '1rem', marginBottom: '24px', opacity: 0.9, lineHeight: 1.5 }}>
               Estás usando una clave temporal. Por tu seguridad, debes crear una nueva contraseña antes de continuar.
             </p>
             <PasswordChangeForm 
@@ -98,17 +98,6 @@ function App() {
                 localStorage.removeItem('austral_auth_require_pass_change')
               }}
             />
-            {/* Ocultamos el botón de cerrar para obligar al cambio, y damos un logout fallback por si acaso */}
-            <button 
-              className="btn-secondary" 
-              style={{ marginTop: '20px', width: '100%', background: 'transparent', border: 'none', color: '#ffb5b5', textDecoration: 'underline' }}
-              onClick={() => {
-                localStorage.clear()
-                navigate('/login')
-              }}
-            >
-              Cancelar e Iniciar Sesión con otra cuenta
-            </button>
           </div>
         </div>
       )}

@@ -1,14 +1,14 @@
 // ============================================
 // ENTORNO LOCAL (XAMPP)
 // ============================================
-export const API_URL  = 'http://localhost/Austral_Collector/api';
-export const BASE_URL = 'http://localhost/Austral_Collector';
+// export const API_URL  = 'http://localhost/Austral_Collector/api';
+// export const BASE_URL = 'http://localhost/Austral_Collector';
 
 // ============================================
 // ENTORNO DE PRODUCCIÓN (LANZAMIENTO WEB)
 // ============================================
-// export const API_URL  = `${window.location.origin}/api`;
-// export const BASE_URL = `${window.location.origin}`;
+export const API_URL  = `${window.location.origin}/api`;
+export const BASE_URL = `${window.location.origin}`;
 
 // ============================================
 // HELPER DE PETICIONES AUTENTICADAS

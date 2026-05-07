@@ -56,3 +56,10 @@ PRD_TestSprite.md
 # User Uploads (Ignore content but keep directory if needed)
 #uploads/**/*
 #!uploads/.gitkeep
+
+# Deploy and temporary scripts
+scripts/
+deploy_cpanel.zip
+deploy_stage/
+temp_check/
+scratch/

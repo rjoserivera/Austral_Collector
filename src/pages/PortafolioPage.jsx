@@ -114,86 +114,86 @@ export default function PortafolioPage() {
                   onClick={() => setSelectedImg(g)}
                   style={{ cursor: 'zoom-in' }}
                 >
-                  <img
-                    src={`http://localhost/Austral_Collector/${g.imagen_url}`}
-                    alt={g.descripcion || `Galería ${idx + 1}`}
-                    className="pp-galeria-img"
-                    loading="lazy"
-                    onError={e => { e.target.src = '/mock_fig1.png' }}
-                  />
-                  <div className="pp-galeria-desc">
-                    {g.descripcion || '\u00A0'}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Videos */}
-        <div className="pp-media-block" id="pp-videos">
-          <h2 className="pp-section-title">▶ Videos</h2>
-          {loading ? (
-            <div className="pp-empty-state">Cargando videos...</div>
-          ) : videos.length === 0 ? (
-            <div className="pp-empty-state">
-              <span className="pp-empty-icon">🎬</span>
-              <p>Los videos estarán disponibles pronto.</p>
-            </div>
-          ) : (
-            <div className="pp-videos-grid">
-              {videos.map((v, idx) => {
-                const ytId = getYtId(v.link_yt)
-                const thumbUrl = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : '/mock_community.png'
-                return (
-                  <div key={v.id || idx} className="pp-video-card card" id={`pp-vid-${v.id || idx}`}>
-                    <div className="pp-video-thumb" onClick={() => setSelectedVideo(ytId)}>
-                      <img src={thumbUrl} alt={v.titulo || `Video ${idx + 1}`} className="pp-video-img" loading="lazy"
-                        onError={e => { e.target.src = '/mock_community.png' }}/>
-                      <div className="pp-video-overlay"><PlayIcon/></div>
-                    </div>
-                    <div className="pp-video-info">
-                      <p className="pp-v-info-desc">{v.descripcion || '\u00A0'}</p>
+                    <img
+                      src={`${BASE_URL}/${g.imagen_url}`}
+                      alt={g.descripcion || `Galería ${idx + 1}`}
+                      className="pp-galeria-img"
+                      loading="lazy"
+                      onError={e => { e.target.src = '/mock_fig1.png' }}
+                    />
+                    <div className="pp-galeria-desc">
+                      {g.descripcion || '\u00A0'}
                     </div>
                   </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ── ÚNETE A LA COMUNIDAD ──────────────────────────── */}
-      <section className="pp-comunidad" id="pp-comunidad">
-        <div className="pp-comunidad-inner section-wrapper">
-          <div className="pp-comunidad-content">
-            <h2 className="pp-comunidad-title">Únete a la Comunidad</h2>
-            <p className="pp-comunidad-desc">Comparte tu colección con otros apasionados.</p>
-            <button onClick={(e) => { if (currentUser) { e.preventDefault(); toast.info('Usted ya ha iniciado sesión'); } else { window.location.href='/login?mode=register'; } }} id="pp-btn-comunidad" className="btn-primary pp-comunidad-btn" style={{ textAlign: "center", textDecoration: "none", display: "inline-block", padding: "14px 40px", fontSize: "1.1rem", fontWeight: "800", letterSpacing: "0.05em", background: "var(--color-red)", boxShadow: "0 8px 30px rgba(139, 32, 32, 0.5)", color: "#ffffff" }}>Unirse a la Comunidad</button>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="pp-comunidad-image" aria-hidden="true">
-            {comunidadImg ? (
-              <img
-                src={comunidadImg.startsWith('uploads/') ? `${BASE_URL}/${comunidadImg}` : comunidadImg}
-                alt="Comunidad de coleccionistas"
-                className="pp-comunidad-img"
-                onError={e => e.target.style.display='none'}
+
+          {/* Videos */}
+          <div className="pp-media-block" id="pp-videos">
+            <h2 className="pp-section-title">▶ Videos</h2>
+            {loading ? (
+              <div className="pp-empty-state">Cargando videos...</div>
+            ) : videos.length === 0 ? (
+              <div className="pp-empty-state">
+                <span className="pp-empty-icon">🎬</span>
+                <p>Los videos estarán disponibles pronto.</p>
+              </div>
+            ) : (
+              <div className="pp-videos-grid">
+                {videos.map((v, idx) => {
+                  const ytId = getYtId(v.link_yt)
+                  const thumbUrl = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : '/mock_community.png'
+                  return (
+                    <div key={v.id || idx} className="pp-video-card card" id={`pp-vid-${v.id || idx}`}>
+                      <div className="pp-video-thumb" onClick={() => setSelectedVideo(ytId)}>
+                        <img src={thumbUrl} alt={v.titulo || `Video ${idx + 1}`} className="pp-video-img" loading="lazy"
+                          onError={e => { e.target.src = '/mock_community.png' }}/>
+                        <div className="pp-video-overlay"><PlayIcon/></div>
+                      </div>
+                      <div className="pp-video-info">
+                        <p className="pp-v-info-desc">{v.descripcion || '\u00A0'}</p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ── ÚNETE A LA COMUNIDAD ──────────────────────────── */}
+        <section className="pp-comunidad" id="pp-comunidad">
+          <div className="pp-comunidad-inner section-wrapper">
+            <div className="pp-comunidad-content">
+              <h2 className="pp-comunidad-title">Únete a la Comunidad</h2>
+              <p className="pp-comunidad-desc">Comparte tu colección con otros apasionados.</p>
+              <button onClick={(e) => { if (currentUser) { e.preventDefault(); toast.info('Usted ya ha iniciado sesión'); } else { window.location.href='/login?mode=register'; } }} id="pp-btn-comunidad" className="btn-primary pp-comunidad-btn" style={{ textAlign: "center", textDecoration: "none", display: "inline-block", padding: "14px 40px", fontSize: "1.1rem", fontWeight: "800", letterSpacing: "0.05em", background: "var(--color-red)", boxShadow: "0 8px 30px rgba(139, 32, 32, 0.5)", color: "#ffffff" }}>Unirse a la Comunidad</button>
+            </div>
+            <div className="pp-comunidad-image" aria-hidden="true">
+              {comunidadImg ? (
+                <img
+                  src={comunidadImg.startsWith('uploads/') ? `${BASE_URL}/${comunidadImg}` : comunidadImg}
+                  alt="Comunidad de coleccionistas"
+                  className="pp-comunidad-img"
+                  onError={e => e.target.style.display='none'}
+                />
+              ) : null}
+            </div>
+          </div>
+        </section>
+
+        {/* ── LIGHTBOX MODAL (IMAGEN) ───────────────────────── */}
+        {selectedImg && (
+          <div className="pp-modal-overlay" onClick={() => setSelectedImg(null)}>
+            <div className="pp-modal-content" onClick={e => e.stopPropagation()}>
+              <button className="pp-modal-close" onClick={() => setSelectedImg(null)}>×</button>
+              <img 
+                src={`${BASE_URL}/${selectedImg.imagen_url}`} 
+                alt="Zoom imagen" 
+                className="pp-modal-img" 
               />
-            ) : null}
-          </div>
-        </div>
-      </section>
-
-      {/* ── LIGHTBOX MODAL (IMAGEN) ───────────────────────── */}
-      {selectedImg && (
-        <div className="pp-modal-overlay" onClick={() => setSelectedImg(null)}>
-          <div className="pp-modal-content" onClick={e => e.stopPropagation()}>
-            <button className="pp-modal-close" onClick={() => setSelectedImg(null)}>×</button>
-            <img 
-              src={`http://localhost/Austral_Collector/${selectedImg.imagen_url}`} 
-              alt="Zoom imagen" 
-              className="pp-modal-img" 
-            />
             {selectedImg.descripcion && (
               <div className="pp-modal-info">
                 <p className="pp-modal-desc">{selectedImg.descripcion}</p>

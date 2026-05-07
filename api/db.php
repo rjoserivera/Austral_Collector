@@ -15,14 +15,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') == 'OPTIONS') {
 
 $host = 'localhost';
 // Producción cPanel
-// $db   = 'alphadocere_austral_collector';
-// $user = 'alphadocere_joseph';
-// $pass = 'Tomas216.uwu';
+$db   = 'alphadocere_austral_collector';
+$user = 'alphadocere_joseph';
+$pass = 'Tomas216.uwu';
 
 // Local XAMPP
-$db   = 'austral_collector_db';
-$user = 'root';
-$pass = '';
+// $db   = 'austral_collector_db';
+// $user = 'root';
+// $pass = '';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";

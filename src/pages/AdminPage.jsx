@@ -1551,15 +1551,26 @@ function AdminIdentidad({ adminId }) {
     })
   }
   const handleGalDescUpdate = async (item) => {
-    return authFetch(`${API_URL}/galeria_portafolio.php`, {
-      method: 'PUT',
-      body: JSON.stringify({ id: item.id, descripcion: item.descripcion, orden: item.orden })
+    const token = localStorage.getItem('austral_auth_token')
+    const fd = new FormData()
+    fd.append('id', item.id)
+    fd.append('descripcion', item.descripcion || '')
+    fd.append('orden', item.orden)
+    if (item.newFile) fd.append('imagen', item.newFile)
+
+    return fetch(`${API_URL}/galeria_portafolio.php`, {
+      method: 'POST',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      body: fd
     }).then(r => r.json()).then(d => {
       if(!d.success) {
-        toast.error('Error al guardar descripción.')
+        toast.error('Error al guardar: ' + (d.error || ''))
         throw new Error('Error al guardar')
       }
-      return d
+      if (d.imagen_url) {
+         return { ...item, imagen_url: d.imagen_url, newFile: null, preview_url: null }
+      }
+      return item
     })
   }
 
@@ -1858,14 +1869,28 @@ function AdminIdentidad({ adminId }) {
           <div className="admin-modal-content" style={{ width: '460px' }}>
 
             <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.4rem', borderBottom:'1px solid rgba(255,215,0,0.3)', paddingBottom:'12px' }}>
-              ✏️ Editar Descripción
+              ✏️ Editar Foto
             </h3>
             <img
-              src={`${window.location.origin.includes('5173') ? 'http://localhost' : ''}/Austral_Collector/${editGalItem.imagen_url}`}
+              src={editGalItem.preview_url || `${BASE_URL}/${editGalItem.imagen_url}`}
               alt="Preview"
               style={{ width:'100%', height:'180px', objectFit:'cover', borderRadius:'8px', border:'1px solid rgba(255,215,0,0.3)', marginBottom:'16px' }}
               onError={e => { e.target.style.background='#1a3d4a'; e.target.src=''; }}
             />
+            <div className="admin-form-group" style={{ marginBottom: '16px' }}>
+              <label>Cambiar imagen (opcional)</label>
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={e => {
+                  const f = e.target.files[0];
+                  if (f) {
+                    setEditGalItem({...editGalItem, newFile: f, preview_url: URL.createObjectURL(f)});
+                  }
+                }}
+                style={{ display:'block', marginTop:'6px', color:'#f0e4cc' }} 
+              />
+            </div>
             <div className="admin-form-group">
               <label>Descripción de la foto</label>
               <textarea 
@@ -1881,10 +1906,10 @@ function AdminIdentidad({ adminId }) {
                 className="btn-primary" 
                 style={{ flex:1 }}
                 onClick={() => {
-                  handleGalDescUpdate(editGalItem).then(() => {
-                    setGaleriaItems(prev => prev.map(g => g.id === editGalItem.id ? editGalItem : g));
+                  handleGalDescUpdate(editGalItem).then((updatedItem) => {
+                    setGaleriaItems(prev => prev.map(g => g.id === updatedItem.id ? updatedItem : g));
                     setEditGalItem(null);
-                    toast.success('✅ Descripción actualizada.');
+                    toast.success('✅ Foto actualizada.');
                   }).catch(() => {});
                 }} 
               >
@@ -1973,7 +1998,7 @@ function AdminIdentidad({ adminId }) {
                 }}
               >
                 <img
-                  src={`${window.location.origin.includes('5173') ? 'http://localhost' : ''}/Austral_Collector/${item.imagen_url}`}
+                  src={`${BASE_URL}/${item.imagen_url}`}
                   alt={item.descripcion || 'Galería'}
                   style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', pointerEvents:'none' }}
                   onError={e => { e.target.style.background='#1a3d4a'; e.target.src=''; }}
@@ -2572,7 +2597,11 @@ function AdminModeracion({ adminId }) {
 
   const loadData = () => {
     setLoading(true)
-    authFetch(`${API_URL}/publicaciones.php`)
+    const authUserStr = localStorage.getItem('austral_auth_user')
+    let viewer = ''
+    try { if (authUserStr) viewer = JSON.parse(authUserStr).username } catch(e) {}
+    
+    authFetch(`${API_URL}/publicaciones.php?viewer_username=${viewer}`)
       .then(r => r.json())
       .then(d => setPosts(d.data || []))
       .finally(() => setLoading(false))
@@ -2613,6 +2642,42 @@ function AdminModeracion({ adminId }) {
     .finally(() => setIsDeleting(false))
   }
 
+  const handleLike = (id) => {
+    const authUserStr = localStorage.getItem('austral_auth_user')
+    let currentUser = null
+    try { if (authUserStr) currentUser = JSON.parse(authUserStr) } catch(e) { currentUser = null }
+    
+    if (!currentUser) {
+      toast.info('Debes iniciar sesión para dar me gusta.')
+      return
+    }
+
+    fetch(`${API_URL}/auth/toggle_like.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: currentUser.username, post_id: id })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        setPosts(prev => prev.map(f => {
+          if (f.id !== id) return f
+          return { ...f, userLiked: d.action === 'liked', total_likes: d.total_likes }
+        }))
+        if (selectedPost && selectedPost.id === id) {
+          setSelectedPost(prev => ({
+            ...prev,
+            userLiked: d.action === 'liked',
+            total_likes: d.total_likes
+          }))
+        }
+      } else {
+        toast.error(d.error || 'Error al procesar el like.')
+      }
+    })
+    .catch(e => console.error("Error toggling like:", e))
+  }
+
   const filteredPosts = posts.filter(p => {
     const q = searchTerm.toLowerCase()
     const matchesSearch = p.nombre.toLowerCase().includes(q) || p.autor.toLowerCase().includes(q)
@@ -2624,16 +2689,16 @@ function AdminModeracion({ adminId }) {
   const currentItems = filteredPosts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   const handleOpenPost = (p) => {
-    // Si los hashtags vienen como string JSON, parsearlos
-    let hashtags = p.hashtags
-    if (typeof hashtags === 'string') {
-      try { hashtags = JSON.parse(hashtags) } catch(e) { hashtags = [] }
-    }
+    // La API ya devuelve arrays para hashtags e imagenes_extra
+    let hashtags = Array.isArray(p.hashtags) ? p.hashtags : []
+    let extra = Array.isArray(p.imagenes_extra) ? p.imagenes_extra : []
     
-    // Si imagenes_extra viene como string JSON, parsearlo
-    let extra = p.imagenes_extra
-    if (typeof extra === 'string') {
-      try { extra = JSON.parse(extra) } catch(e) { extra = [] }
+    // Si por algún motivo vinieran como string (ej. caché antigua)
+    if (typeof p.hashtags === 'string') {
+      try { hashtags = JSON.parse(p.hashtags) } catch(e) { hashtags = [] }
+    }
+    if (typeof p.imagenes_extra === 'string') {
+      try { extra = JSON.parse(p.imagenes_extra) } catch(e) { extra = [] }
     }
 
     setSelectedPost({ ...p, hashtags, imagenes_extra: extra })
@@ -2790,7 +2855,7 @@ function AdminModeracion({ adminId }) {
         post={selectedPost}
         isOpen={!!selectedPost}
         onClose={() => setSelectedPost(null)}
-        onLike={() => {}} 
+        onLike={handleLike} 
         onTagClick={() => {}} 
       />
     </div>
@@ -3088,6 +3153,15 @@ function AdminMascota({ adminId }) {
 
   const handleSave = (e) => {
     e.preventDefault();
+
+    // Validar que ningún texto esté en blanco
+    for (const [key, val] of Object.entries(texts)) {
+      if (!val || !val.trim()) {
+        toast.error(`El texto para '${key}' no puede estar vacío.`);
+        return;
+      }
+    }
+
     setSaving(true);
     authFetch(`${API_URL}/mascot_texts.php`, {
       method: 'PUT',

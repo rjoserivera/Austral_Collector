@@ -19,6 +19,16 @@ try {
         $descripcion = trim($_POST['descripcion'] ?? '');
         $orden = intval($_POST['orden'] ?? 0);
 
+        $id = intval($_POST['id'] ?? 0);
+
+        if ($id > 0 && empty($_FILES['imagen']['tmp_name'])) {
+            // Allow POST to just update description if no new image
+            $stmt = $pdo->prepare("UPDATE galeria_portafolio SET descripcion = ?, orden = ? WHERE id = ?");
+            $stmt->execute([$descripcion, $orden, $id]);
+            echo json_encode(['success' => true]);
+            exit;
+        }
+
         if (empty($_FILES['imagen']['tmp_name'])) {
             echo json_encode(['success' => false, 'error' => 'No se recibió ninguna imagen.']);
             exit;
@@ -50,11 +60,29 @@ try {
         }
 
         $imagen_url = 'uploads/portafolio/' . $filename;
-        $stmt = $pdo->prepare("INSERT INTO galeria_portafolio (descripcion, imagen_url, orden) VALUES (?, ?, ?)");
-        $stmt->execute([$descripcion, $imagen_url, $orden]);
-        $newId = $pdo->lastInsertId();
 
-        echo json_encode(['success' => true, 'id' => $newId, 'imagen_url' => $imagen_url]);
+        if ($id > 0) {
+            // Delete old file if updating
+            $stmtOld = $pdo->prepare("SELECT imagen_url FROM galeria_portafolio WHERE id = ?");
+            $stmtOld->execute([$id]);
+            $oldItem = $stmtOld->fetch();
+            if ($oldItem) {
+                $oldPath = __DIR__ . '/../../' . $oldItem['imagen_url'];
+                if (file_exists($oldPath) && is_file($oldPath)) {
+                    unlink($oldPath);
+                }
+            }
+            // Update record
+            $stmt = $pdo->prepare("UPDATE galeria_portafolio SET descripcion = ?, orden = ?, imagen_url = ? WHERE id = ?");
+            $stmt->execute([$descripcion, $orden, $imagen_url, $id]);
+            echo json_encode(['success' => true, 'id' => $id, 'imagen_url' => $imagen_url]);
+        } else {
+            // Insert new
+            $stmt = $pdo->prepare("INSERT INTO galeria_portafolio (descripcion, imagen_url, orden) VALUES (?, ?, ?)");
+            $stmt->execute([$descripcion, $imagen_url, $orden]);
+            $newId = $pdo->lastInsertId();
+            echo json_encode(['success' => true, 'id' => $newId, 'imagen_url' => $imagen_url]);
+        }
 
     } elseif ($method === 'PUT') {
         $data = json_decode(file_get_contents('php://input'), true);

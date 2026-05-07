@@ -36,8 +36,12 @@ try {
     $tempKey = substr(str_shuffle($chars), 0, 8);
 
     // 3. Hashear y actualizar en BD
+    try {
+        $pdo->exec("ALTER TABLE usuarios ADD COLUMN require_password_change TINYINT(1) DEFAULT 0");
+    } catch(PDOException $e) {}
+
     $hashedKey = password_hash($tempKey, PASSWORD_BCRYPT, ['cost' => 12]);
-    $update = $pdo->prepare("UPDATE usuarios SET password = ? WHERE id = ?");
+    $update = $pdo->prepare("UPDATE usuarios SET password = ?, require_password_change = 1 WHERE id = ?");
     $update->execute([$hashedKey, $userId]);
 
     // 4. Enviar correo via SMTP

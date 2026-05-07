@@ -6,9 +6,25 @@ export default function ContactoPage() {
   const handleSubmit = (e) => {
     e.preventDefault()
     
-    const nombre = document.getElementById('nombre').value;
-    const email = document.getElementById('email').value;
-    const mensaje = document.getElementById('mensaje').value;
+    const nombre = document.getElementById('nombre').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const mensaje = document.getElementById('mensaje').value.trim();
+
+    if (!nombre) {
+      toast.error('❌ El nombre no puede estar vacío ni contener solo espacios.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('❌ Ingresa un correo electrónico válido (ej: usuario@dominio.com).');
+      return;
+    }
+
+    if (!mensaje) {
+      toast.error('❌ El mensaje no puede estar vacío ni contener solo espacios.');
+      return;
+    }
 
     fetch(`${API_URL}/public/contacto.php`, {
       method: 'POST',

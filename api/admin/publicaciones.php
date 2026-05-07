@@ -17,13 +17,37 @@ function logAction($pdo, $userId, $tipo, $accion) {
 
 try {
     if ($method === 'GET') {
-        // Fetch all posts with user information
-        $sql = "SELECT p.*, u.username as autor 
+        $viewerName = $_GET['viewer_username'] ?? '';
+        $viewerId = 0;
+        if ($viewerName) {
+            $stmtV = $pdo->prepare("SELECT id FROM usuarios WHERE username = ?");
+            $stmtV->execute([$viewerName]);
+            $viewerId = $stmtV->fetchColumn() ?: 0;
+        }
+
+        // Fetch all posts with user information, total likes and userLiked status
+        $sql = "SELECT p.*, u.username as autor,
+                (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as total_likes,
+                (SELECT 1 FROM likes WHERE user_id = ? AND post_id = p.id) as userLiked
                 FROM posts p 
                 LEFT JOIN usuarios u ON p.user_id = u.id 
                 ORDER BY p.created_at DESC";
-        $stmt = $pdo->query($sql);
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$viewerId]);
         $posts = $stmt->fetchAll();
+        
+        // Enrich posts with hashtags
+        foreach ($posts as &$post) {
+            $hStmt = $pdo->prepare("SELECT h.nombre FROM hashtags h JOIN post_hashtags ph ON ph.hashtag_id = h.id WHERE ph.post_id = ?");
+            $hStmt->execute([$post['id']]);
+            $post['hashtags'] = $hStmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            // Ensure images_extra is an array for the frontend
+            if (isset($post['imagenes_extra']) && is_string($post['imagenes_extra'])) {
+                $post['imagenes_extra'] = json_decode($post['imagenes_extra'], true) ?? [];
+            }
+        }
+        unset($post);
         
         echo json_encode(['success' => true, 'data' => $posts]);
     } 

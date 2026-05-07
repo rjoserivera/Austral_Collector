@@ -44,10 +44,14 @@ function addWatermark($targetPath)
     $th = imagesy($target);
 
     // ── 2. Load watermark PNG ─────────────────────────────────
-    $wmPath = dirname(__DIR__) . '/public/timbre agua pagina web 25opacidad.png';
+    $wmPath = dirname(__DIR__) . '/timbre agua pagina web 25opacidad.png';
     if (!file_exists($wmPath)) {
-        imagedestroy($target);
-        return false;
+        // Fallback for local dev environment
+        $wmPath = dirname(__DIR__) . '/public/timbre agua pagina web 25opacidad.png';
+        if (!file_exists($wmPath)) {
+            imagedestroy($target);
+            return false;
+        }
     }
 
     $wm = @imagecreatefrompng($wmPath);

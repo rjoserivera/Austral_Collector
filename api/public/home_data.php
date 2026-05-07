@@ -13,6 +13,10 @@ try {
         $viewerId = $stmtV->fetchColumn() ?: 0;
     }
 
+    // 0. Fetch all relevant configuration keys first
+    $stmtCfg = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave IN ('miembro_destacado', 'txt_destacado', 'txt_cumple', 'txt_noticias')");
+    $globalConfig = $stmtCfg->fetchAll(PDO::FETCH_KEY_PAIR);
+
     // 1. Latest posts (Ultimas) - Only Figuras
     $stmtUltimas = $pdo->prepare("SELECT p.*, u.username as autor, u.avatar_url as autor_avatar,
         u.verification_type as autor_verification_type, u.verification_badge as autor_verification_badge,
@@ -24,7 +28,6 @@ try {
     $stmtUltimas->execute([$viewerId]);
     $ultimas = $stmtUltimas->fetchAll();
 
-    // Enrich ultimas
     foreach ($ultimas as &$post) {
         $post['imagenes_extra'] = isset($post['imagenes_extra'])
             ? json_decode($post['imagenes_extra'], true) ?? []
@@ -47,7 +50,6 @@ try {
     $stmtVotadas->execute([$viewerId]);
     $votadas = $stmtVotadas->fetchAll();
 
-    // Enrich votadas
     foreach ($votadas as &$post) {
         $post['imagenes_extra'] = isset($post['imagenes_extra'])
             ? json_decode($post['imagenes_extra'], true) ?? []
@@ -60,14 +62,12 @@ try {
     unset($post);
 
     // 3. Featured videos
-    // Try to get specific IDs from configuration
-    $stmtCfg = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave LIKE 'video_destacado_%'");
-    $videoConfigs = $stmtCfg->fetchAll(PDO::FETCH_KEY_PAIR);
+    $stmtVidCfg = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave LIKE 'video_destacado_%'");
+    $videoConfigs = $stmtVidCfg->fetchAll(PDO::FETCH_KEY_PAIR);
     $videoIds = array_filter(array_values($videoConfigs));
 
     if (!empty($videoIds)) {
         $placeholders = implode(',', array_fill(0, count($videoIds), '?'));
-        // Order by the specific IDs provided in config slots
         $stmtVideos = $pdo->prepare("SELECT * FROM videos WHERE id IN ($placeholders) ORDER BY FIELD(id, $placeholders)");
         $stmtVideos->execute(array_merge($videoIds, $videoIds));
         $videos = $stmtVideos->fetchAll();
@@ -81,15 +81,13 @@ try {
     $eventos = $stmtEventos->fetchAll();
 
     // 5. Featured member (Destacado del Mes)
-    // Check configuration first
-    $miembroId = $pdo->query("SELECT valor FROM configuracion WHERE clave = 'miembro_destacado'")->fetchColumn();
+    $miembroId = $globalConfig['miembro_destacado'] ?? '';
     
     if ($miembroId) {
         $stmtDestacadoUser = $pdo->prepare("SELECT * FROM usuarios WHERE id = ?");
         $stmtDestacadoUser->execute([$miembroId]);
         $destacadoUser = $stmtDestacadoUser->fetch();
     } else {
-        // Fallback momentáneo: el usuario con más me gustas en total
         $stmtDestacado = $pdo->query("
             SELECT u.*, 
             (SELECT COUNT(*) FROM likes l JOIN posts p ON l.post_id = p.id WHERE p.user_id = u.id) as total_likes 
@@ -104,9 +102,6 @@ try {
     $destacado = null;
     if ($destacadoUser) {
         unset($destacadoUser['password']);
-        
-        // Extended stats including ratings
-        // Using positional parameters to avoid issues with named parameter reuse
         $stmtStats = $pdo->prepare("
             SELECT 
                 (SELECT COUNT(*) FROM posts WHERE user_id = ?) as posts, 
@@ -117,7 +112,6 @@ try {
         $stmtStats->execute([$destacadoUser['id'], $destacadoUser['id'], $destacadoUser['id'], $destacadoUser['id']]);
         $stats = $stmtStats->fetch();
         
-        // Fallback for nulls
         $stats['average_rating'] = isset($stats['average_rating']) ? (float)$stats['average_rating'] : 0.0;
         $stats['total_ratings']   = isset($stats['total_ratings'])   ? (int)$stats['total_ratings']   : 0;
         
@@ -133,7 +127,6 @@ try {
     $stmtCosplay->execute([$viewerId]);
     $ultimos_cosplays = $stmtCosplay->fetchAll();
 
-    // Enrich cosplays
     foreach ($ultimos_cosplays as &$post) {
         $post['imagenes_extra'] = isset($post['imagenes_extra'])
             ? json_decode($post['imagenes_extra'], true) ?? []
@@ -145,7 +138,7 @@ try {
     }
     unset($post);
 
-    // 7. Cumpleaneros: Buscar si hay alguien de cumpleaños este mes y que no haya pasado
+    // 7. Cumpleaneros
     $stmtCumple = $pdo->query("
         SELECT *, 
         CASE 
@@ -180,15 +173,11 @@ try {
         $cumpleaneros[] = ['user' => $u, 'stats' => $statsC];
     }
 
-    // 8. Global Dynamic Text Configs
-    $stmtConfigGen = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave IN ('txt_destacado', 'txt_cumple')");
-    $globalConfig = $stmtConfigGen->fetchAll(PDO::FETCH_KEY_PAIR);
-
-    // 9. Portafolio custom media
+    // 8. Portafolio custom media
     $stmtPortaConfig = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave LIKE 'portafolio_%'");
     $portafolio_config = $stmtPortaConfig->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    // 10. Secciones Promocionales del Home
+    // 9. Secciones Promocionales del Home
     $stmtPromos = $pdo->query("SELECT * FROM hp_promociones WHERE activo = 1 ORDER BY orden ASC, id ASC");
     $promos = $stmtPromos->fetchAll();
 
