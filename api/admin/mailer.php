@@ -62,7 +62,7 @@ function sendModerationEmail($toEmail, $username, $postName, $postType, $motivo)
     $port = 465;
     
     try {
-        $socket = fsockopen($host, $port, $errno, $errstr, 15);
+        $socket = @fsockopen($host, $port, $errno, $errstr, 15);
         if (!$socket) throw new Exception("No se pudo conectar: $errstr");
 
         $getResponse = function($socket) {
@@ -167,7 +167,7 @@ function sendTempKeyEmail($toEmail, $username, $tempKey) {
     $port = 465;
     
     try {
-        $socket = fsockopen($host, $port, $errno, $errstr, 15);
+        $socket = @fsockopen($host, $port, $errno, $errstr, 15);
         if (!$socket) throw new Exception("Error de conexión");
 
         $getResponse = function($socket) {
@@ -263,7 +263,7 @@ function sendCustomEmail($toEmail, $username, $subject, $messageText) {
     $port = 465;
     
     try {
-        $socket = fsockopen($host, $port, $errno, $errstr, 20);
+        $socket = @fsockopen($host, $port, $errno, $errstr, 20);
         if (!$socket) throw new Exception("Error de conexión");
 
         $getResponse = function($socket) {

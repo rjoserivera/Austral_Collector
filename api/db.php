@@ -3,7 +3,23 @@
 // Created by Antigravity
 define('JWT_SECRET', 'AustralCollector_Secure_Key_2026_!!');
 
+// Global Headers for API
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: *');
+
+if (($_SERVER['REQUEST_METHOD'] ?? '') == 'OPTIONS') {
+    exit;
+}
+
 $host = 'localhost';
+// Producción cPanel
+// $db   = 'alphadocere_austral_collector';
+// $user = 'alphadocere_joseph';
+// $pass = 'Tomas216.uwu';
+
+// Local XAMPP
 $db   = 'austral_collector_db';
 $user = 'root';
 $pass = '';
@@ -21,14 +37,4 @@ try {
 } catch (\PDOException $e) {
      die(json_encode(['error' => 'Error de conexión: ' . $e->getMessage()]));
 }
-
-// Global Headers for API
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: *');
-
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    exit;
-}
-?>
+// End of db.php

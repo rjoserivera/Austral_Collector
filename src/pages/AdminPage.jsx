@@ -633,138 +633,142 @@ function AdminUsuarios({ adminId }) {
       </div>
       
       {formMode && (
-        <div className="admin-form-card">
-          <h3 className="admin-form-title">{formMode === 'create' ? 'Registrar Nuevo Usuario' : 'Editar Usuario'}</h3>
-          <form onSubmit={submitForm}>
-            <div className="admin-form-row">
-              <div className="admin-form-group">
-                <label>Nombre de Usuario *</label>
-                <input type="text" className="admin-input" placeholder="Ej: CollectorMaster"
-                  value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} />
-              </div>
-              <div className="admin-form-group">
-                <label>Correo Electrónico *</label>
-                <input type="email" className="admin-input" placeholder="Ej: collector@correo.com"
-                  value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-              </div>
-            </div>
-
-            <div className="admin-form-row">
-              <div className="admin-form-group">
-                <label>Nombre real</label>
-                <input type="text" className="admin-input" placeholder="Opcional"
-                  value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} />
-              </div>
-              <div className="admin-form-group">
-                <label>Apellido</label>
-                <input type="text" className="admin-input" placeholder="Opcional"
-                  value={formData.apellido} onChange={e => setFormData({...formData, apellido: e.target.value})} />
-              </div>
-            </div>
-            
-            <div className="admin-form-row">
-              <div className="admin-form-group">
-                <label>{formMode === 'create' ? 'Contraseña Provisional *' : 'Nueva Contraseña (vacío para no cambiar)'}</label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <input type="text" className="admin-input" placeholder="Mínimo 6 caracteres"
-                    value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} 
-                    style={{ flex: 1 }} />
-                  <button type="button" className="btn-primary" onClick={generatePassword} title="Generar clave aleatoria" style={{ padding: '8px 12px' }}>
-                    ✨
-                  </button>
-                  {formData.password && (
-                    <button type="button" className="btn-outline" onClick={copyToClipboard} title="Copiar al portapapeles" style={{ padding: '8px 12px', borderColor: 'var(--color-gold)' }}>
-                      📋
-                    </button>
-                  )}
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:1001, display:'flex', alignItems:'center', justifyContent:'center', padding: '20px' }}>
+          <div style={{ width:'700px', background:'#0d2830', border:'1px solid var(--color-gold)', borderRadius:'12px', padding:'2.5rem', position:'relative', boxShadow:'0 20px 40px rgba(0,0,0,0.6)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.4rem', borderBottom:'1px solid rgba(255,215,0,0.3)', paddingBottom:'12px' }}>
+              {formMode === 'create' ? '➕ Registrar Nuevo Usuario' : '✏️ Editar Usuario'}
+            </h3>
+            <form onSubmit={submitForm}>
+              <div className="admin-form-row">
+                <div className="admin-form-group">
+                  <label style={{ color: '#f0e4cc' }}>Nombre de Usuario *</label>
+                  <input type="text" className="admin-input" placeholder="Ej: CollectorMaster"
+                    value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} />
+                </div>
+                <div className="admin-form-group">
+                  <label style={{ color: '#f0e4cc' }}>Correo Electrónico *</label>
+                  <input type="email" className="admin-input" placeholder="Ej: collector@correo.com"
+                    value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
                 </div>
               </div>
-              <div className="admin-form-group">
-                <label>Fecha de Nacimiento</label>
-                <input type="date" className="admin-input" 
-                  value={formData.fecha_nacimiento} onChange={e => setFormData({...formData, fecha_nacimiento: e.target.value})} />
-              </div>
-            </div>
 
-            <div className="admin-form-row">
-              <div className="admin-form-group">
-                <label>Rol del Sistema</label>
-                <select className="admin-select" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
-                  <option value="user">Coleccionista (Estándar)</option>
-                  <option value="admin">Administrador (Acceso Total)</option>
-                </select>
-              </div>
-              {formMode === 'edit' && (
+              <div className="admin-form-row">
                 <div className="admin-form-group">
-                  <label>Estado de Cuenta</label>
-                  <select className="admin-select" value={formData.is_active} onChange={e => setFormData({...formData, is_active: e.target.value})}>
-                    <option value="1">Activa</option>
-                    <option value="0">Baneada/Inactiva</option>
+                  <label style={{ color: '#f0e4cc' }}>Nombre real</label>
+                  <input type="text" className="admin-input" placeholder="Opcional"
+                    value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} />
+                </div>
+                <div className="admin-form-group">
+                  <label style={{ color: '#f0e4cc' }}>Apellido</label>
+                  <input type="text" className="admin-input" placeholder="Opcional"
+                    value={formData.apellido} onChange={e => setFormData({...formData, apellido: e.target.value})} />
+                </div>
+              </div>
+              
+              <div className="admin-form-row">
+                <div className="admin-form-group">
+                  <label style={{ color: '#f0e4cc' }}>{formMode === 'create' ? 'Contraseña Provisional *' : 'Nueva Contraseña (vacío para no cambiar)'}</label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input type="text" className="admin-input" placeholder="Mínimo 6 caracteres"
+                      value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} 
+                      style={{ flex: 1 }} />
+                    <button type="button" className="btn-primary" onClick={generatePassword} title="Generar clave aleatoria" style={{ padding: '8px 12px' }}>
+                      ✨
+                    </button>
+                    {formData.password && (
+                      <button type="button" className="btn-outline" onClick={copyToClipboard} title="Copiar al portapapeles" style={{ padding: '8px 12px', borderColor: 'var(--color-gold)' }}>
+                        📋
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="admin-form-group">
+                  <label style={{ color: '#f0e4cc' }}>Fecha de Nacimiento</label>
+                  <input type="date" className="admin-input" 
+                    value={formData.fecha_nacimiento} onChange={e => setFormData({...formData, fecha_nacimiento: e.target.value})} />
+                </div>
+              </div>
+
+              <div className="admin-form-row">
+                <div className="admin-form-group">
+                  <label style={{ color: '#f0e4cc' }}>Rol del Sistema</label>
+                  <select className="admin-select" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
+                    <option value="user">Coleccionista (Estándar)</option>
+                    <option value="admin">Administrador (Acceso Total)</option>
                   </select>
                 </div>
-              )}
-            </div>
-
-            {/* ── Verificación ── */}
-            <div className="admin-form-row" style={{ alignItems: 'flex-start' }}>
-              <div className="admin-form-group">
-                <label>✅ Tipo de Verificación</label>
-                <select
-                  className="admin-select"
-                  value={formData.verification_type}
-                  onChange={e => {
-                    const vt = e.target.value
-                    setFormData({...formData, verification_type: vt, verification_badge: vt !== 'external' ? null : formData.verification_badge})
-                    if (vt !== 'external') { setBadgeFile(null); setBadgePreview(null) }
-                  }}
-                >
-                  <option value="none">Sin verificación</option>
-                  <option value="austral">⭐ Austral Collection (oficial)</option>
-                  <option value="external">🔗 Colaborador Externo</option>
-                </select>
-              </div>
-              {formData.verification_type === 'external' && (
-                <div className="admin-form-group">
-                  <label>🖼️ Badge del Colaborador (PNG/JPG, máx 2MB)</label>
-                  <span style={{ fontSize: '0.75rem', color: '#aaa', display: 'block', marginBottom: '8px' }}>Te recomendamos que ocupes una imagen de estas dimensiones: 128x128 px (1:1).</span>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    {badgePreview && (
-                      <img
-                        src={badgePreview}
-                        alt="Badge preview"
-                        style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: '50%', border: '2px solid var(--color-gold)', background: '#0d2830' }}
-                      />
-                    )}
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp,image/gif"
-                      className="admin-input"
-                      style={{ flex: 1 }}
-                      onChange={e => {
-                        const file = e.target.files?.[0]
-                        if (file) {
-                          setBadgeFile(file)
-                          setBadgePreview(URL.createObjectURL(file))
-                        }
-                      }}
-                    />
+                {formMode === 'edit' && (
+                  <div className="admin-form-group">
+                    <label style={{ color: '#f0e4cc' }}>Estado de Cuenta</label>
+                    <select className="admin-select" value={formData.is_active} onChange={e => setFormData({...formData, is_active: e.target.value})}>
+                      <option value="1">Activa</option>
+                      <option value="0">Baneada/Inactiva</option>
+                    </select>
                   </div>
-                  {formData.verification_badge && !badgeFile && (
-                    <span style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '4px', display: 'block' }}>Badge actual guardado ✓</span>
-                  )}
+                )}
+              </div>
+
+              {/* ── Verificación ── */}
+              <div className="admin-form-row" style={{ alignItems: 'flex-start' }}>
+                <div className="admin-form-group">
+                  <label style={{ color: '#f0e4cc' }}>✅ Tipo de Verificación</label>
+                  <select
+                    className="admin-select"
+                    value={formData.verification_type}
+                    onChange={e => {
+                      const vt = e.target.value
+                      setFormData({...formData, verification_type: vt, verification_badge: vt !== 'external' ? null : formData.verification_badge})
+                      if (vt !== 'external') { setBadgeFile(null); setBadgePreview(null) }
+                    }}
+                  >
+                    <option value="none">Sin verificación</option>
+                    <option value="austral">⭐ Austral Collection (oficial)</option>
+                    <option value="external">🔗 Colaborador Externo</option>
+                  </select>
                 </div>
-              )}
-            </div>
-            
-            <div className="admin-form-actions">
-              <button type="button" className="btn-outline btn-sm" onClick={() => setFormMode(null)} disabled={isSaving} style={{ borderColor: 'rgba(255,255,255,0.4)', color: '#fff' }}>
-                Cancelar
-              </button>
-              <button type="submit" className="btn-primary btn-sm" disabled={isSaving}>
-                {isSaving ? 'Guardando...' : '💾 Confirmar'}
-              </button>
-            </div>
-          </form>
+                {formData.verification_type === 'external' && (
+                  <div className="admin-form-group">
+                    <label style={{ color: '#f0e4cc' }}>🖼️ Badge del Colaborador (PNG/JPG, máx 2MB)</label>
+                    <span style={{ fontSize: '0.75rem', color: '#aaa', display: 'block', marginBottom: '8px' }}>Te recomendamos que ocupes una imagen de estas dimensiones: 128x128 px (1:1).</span>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      {badgePreview && (
+                        <img
+                          src={badgePreview}
+                          alt="Badge preview"
+                          style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: '50%', border: '2px solid var(--color-gold)', background: '#0d2830' }}
+                        />
+                      )}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/gif"
+                        className="admin-input"
+                        style={{ flex: 1 }}
+                        onChange={e => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            setBadgeFile(file)
+                            setBadgePreview(URL.createObjectURL(file))
+                          }
+                        }}
+                      />
+                    </div>
+                    {formData.verification_badge && !badgeFile && (
+                      <span style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '4px', display: 'block' }}>Badge actual guardado ✓</span>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              <div className="admin-form-actions" style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button type="button" className="btn-outline btn-sm" onClick={() => setFormMode(null)} disabled={isSaving} style={{ borderColor: 'rgba(240,228,204,0.7)', color: 'rgba(240,228,204,0.7)' }}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn-primary btn-sm" disabled={isSaving}>
+                  {isSaving ? 'Guardando...' : '💾 Confirmar'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
@@ -1897,7 +1901,6 @@ function AdminIdentidad({ adminId }) {
       {/* ── A: NUESTRA IDENTIDAD ──────────────────── */}
       <div className="admin-sec-header">
         <h2 className="admin-sec-title">⭐ Nuestra Identidad</h2>
-        <button className="btn-outline btn-sm" onClick={loadAll}>🔄 Recargar Datos</button>
       </div>
 
       <div className="identidad-grid">
@@ -1940,7 +1943,7 @@ function AdminIdentidad({ adminId }) {
           <div style={{ textAlign:'center', padding:'40px 20px', background:'rgba(0,0,0,0.06)', borderRadius:'10px', border:'1px dashed rgba(139,90,43,0.35)', color:'#3a2a0f' }}>
             <div style={{ fontSize:'2.5rem', marginBottom:'8px' }}>📷</div>
             <p style={{ fontWeight:500 }}>No hay fotos en la galería aún.</p>
-            <button className="btn-outline btn-sm" style={{ marginTop:'12px' }} onClick={openGalModal}>
+            <button className="btn-primary btn-sm" style={{ marginTop:'12px' }} onClick={openGalModal}>
               ➕ Agregar primera foto
             </button>
           </div>
@@ -3110,57 +3113,82 @@ function AdminMascota({ adminId }) {
         Configura lo que dice la mascota de Austral Collector dependiendo de la página en la que se encuentre el usuario. Puedes usar saltos de línea para separar el texto o HTML básico.
       </p>
 
-      <form onSubmit={handleSave} className="admin-form-card" style={{ maxWidth: '800px' }}>
-        <div className="admin-form-group" style={{ marginBottom: '15px' }}>
-          <label>Página de Inicio</label>
-          <textarea 
-            className="admin-input" 
-            rows="3" 
-            value={texts.inicio} 
-            onChange={(e) => handleChange('inicio', e.target.value)} 
-            placeholder="Ej: ¡Hola! Bienvenido a Austral Collector."
-          />
-        </div>
-        <div className="admin-form-group" style={{ marginBottom: '15px' }}>
-          <label>Página Nosotros / Identidad</label>
-          <textarea 
-            className="admin-input" 
-            rows="3" 
-            value={texts.nosotros} 
-            onChange={(e) => handleChange('nosotros', e.target.value)} 
-          />
-        </div>
-        <div className="admin-form-group" style={{ marginBottom: '15px' }}>
-          <label>Página Galería / Post</label>
-          <textarea 
-            className="admin-input" 
-            rows="3" 
-            value={texts.galeria} 
-            onChange={(e) => handleChange('galeria', e.target.value)} 
-          />
-        </div>
-        <div className="admin-form-group" style={{ marginBottom: '15px' }}>
-          <label>Página Miembros / Perfiles</label>
-          <textarea 
-            className="admin-input" 
-            rows="3" 
-            value={texts.miembros} 
-            onChange={(e) => handleChange('miembros', e.target.value)} 
-          />
-        </div>
-        <div className="admin-form-group" style={{ marginBottom: '20px' }}>
-          <label>Página de Contacto</label>
-          <textarea 
-            className="admin-input" 
-            rows="3" 
-            value={texts.contacto} 
-            onChange={(e) => handleChange('contacto', e.target.value)} 
-          />
+      <form onSubmit={handleSave} style={{ maxWidth: '1100px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+          
+          <div className="admin-form-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ color: 'var(--color-gold)', fontSize: '1rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              🏠 Página de Inicio
+            </h3>
+            <textarea 
+              className="admin-input" 
+              rows="5" 
+              value={texts.inicio} 
+              onChange={(e) => handleChange('inicio', e.target.value)} 
+              placeholder="Ej: ¡Hola! Bienvenido a Austral Collector."
+              style={{ fontSize: '0.95rem', flex: 1, resize: 'none' }}
+            />
+          </div>
+
+          <div className="admin-form-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ color: 'var(--color-gold)', fontSize: '1rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              📜 Nosotros / Identidad
+            </h3>
+            <textarea 
+              className="admin-input" 
+              rows="5" 
+              value={texts.nosotros} 
+              onChange={(e) => handleChange('nosotros', e.target.value)} 
+              style={{ fontSize: '0.95rem', flex: 1, resize: 'none' }}
+            />
+          </div>
+
+          <div className="admin-form-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ color: 'var(--color-gold)', fontSize: '1rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              🖼️ Galería / Post
+            </h3>
+            <textarea 
+              className="admin-input" 
+              rows="5" 
+              value={texts.galeria} 
+              onChange={(e) => handleChange('galeria', e.target.value)} 
+              style={{ fontSize: '0.95rem', flex: 1, resize: 'none' }}
+            />
+          </div>
+
+          <div className="admin-form-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ color: 'var(--color-gold)', fontSize: '1rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              👥 Miembros / Perfiles
+            </h3>
+            <textarea 
+              className="admin-input" 
+              rows="5" 
+              value={texts.miembros} 
+              onChange={(e) => handleChange('miembros', e.target.value)} 
+              style={{ fontSize: '0.95rem', flex: 1, resize: 'none' }}
+            />
+          </div>
+
+          <div className="admin-form-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ color: 'var(--color-gold)', fontSize: '1rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              ✉️ Página de Contacto
+            </h3>
+            <textarea 
+              className="admin-input" 
+              rows="5" 
+              value={texts.contacto} 
+              onChange={(e) => handleChange('contacto', e.target.value)} 
+              style={{ fontSize: '0.95rem', flex: 1, resize: 'none' }}
+            />
+          </div>
+
         </div>
 
-        <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Guardando...' : '💾 Guardar Textos'}
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+          <button type="submit" className="btn-primary" disabled={saving} style={{ padding: '12px 30px', fontSize: '1.05rem' }}>
+            {saving ? 'Guardando...' : '💾 Guardar Todos los Textos'}
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -23,7 +23,7 @@
 .db-section-title {
   font-family: var(--font-heading);
   font-size: 1.1rem;
-  color: var(--color-gold);
+  color: #1e4d5a;
   margin-bottom: 20px;
   font-weight: 700;
   display: flex;
@@ -52,7 +52,7 @@
 .db-label { 
   display: block; 
   font-size: .8rem; 
-  color: #e8d9c0;   /* crema claro — visible sobre fondo oscuro */
+  color: #f0e4cc;   /* crema claro visible sobre fondo oscuro */
   margin-bottom: 8px;
   font-family: var(--font-heading);
   letter-spacing: .05em;
@@ -63,7 +63,7 @@
   width: 100%;
   background: rgba(0,0,0,.5);
   border: 1px solid rgba(201,168,76,.4);
-  color: #e8d9c0;          /* texto claro visible sobre fondo oscuro */
+  color: #f0e4cc;          /* texto claro visible sobre fondo oscuro */
   padding: 12px;
   border-radius: var(--radius-sm);
   font-family: var(--font-body);
@@ -73,6 +73,19 @@
 }
 .db-textarea::placeholder { color: rgba(232,217,192,0.4); }
 .db-textarea:focus { outline:none; border-color: var(--color-gold); }
+
+.db-input {
+  width: 100%;
+  background: rgba(0,0,0,.5);
+  border: 1px solid rgba(201,168,76,.4);
+  color: #f0e4cc;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  transition: border-color .2s;
+}
+.db-input::placeholder { color: rgba(232,217,192,0.4); }
+.db-input:focus { outline:none; border-color: var(--color-gold); }
 
 .db-media-preview {
   display: flex;
@@ -144,7 +157,7 @@
   gap: 16px;
 }
 .db-inventory-header .db-section-title { margin-bottom: 0; }
-.db-inventory-count { font-size: .8rem; color: var(--color-muted); }
+.db-inventory-count { font-size: .8rem; color: #4a3520; }
 
 .db-add-btn {
   font-size: .85rem !important;
@@ -162,7 +175,7 @@
 .db-tab-btn {
   background: none;
   border: none;
-  color: var(--color-muted);
+  color: #5a4530;
   font-family: var(--font-heading);
   font-size: 1rem;
   font-weight: 600;
@@ -173,11 +186,11 @@
   white-space: nowrap;
 }
 .db-tab-btn:hover {
-  color: var(--color-cream);
+  color: #1e4d5a;
 }
 .db-tab-btn.active {
-  color: var(--color-gold);
-  border-bottom-color: var(--color-gold);
+  color: #1e4d5a;
+  border-bottom-color: #1e4d5a;
 }
 
 /* 4 Columns Grid */

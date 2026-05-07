@@ -1,16 +1,14 @@
-// Detectar host dinámicamente para soporte en red local (Celular, Tablet, etc.)
-const currentHost = window.location.hostname;
-
-export const API_URL  = `http://${currentHost}/Austral_Collector/api`;
-export const BASE_URL = `http://${currentHost}/Austral_Collector`;
-
+// ============================================
+// ENTORNO LOCAL (XAMPP)
+// ============================================
+export const API_URL  = 'http://localhost/Austral_Collector/api';
+export const BASE_URL = 'http://localhost/Austral_Collector';
 
 // ============================================
 // ENTORNO DE PRODUCCIÓN (LANZAMIENTO WEB)
-// Descomentar lo de abajo y comentar lo de arriba cuando se suba al servidor real
 // ============================================
-// export const API_URL  = 'https://www.australcollector.com/api';
-// export const BASE_URL = 'https://www.australcollector.com';
+// export const API_URL  = `${window.location.origin}/api`;
+// export const BASE_URL = `${window.location.origin}`;
 
 // ============================================
 // HELPER DE PETICIONES AUTENTICADAS

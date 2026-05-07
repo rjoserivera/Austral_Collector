@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from '../contexts/NotificationContext.jsx';
 import './LoginPage.css';
@@ -13,6 +13,20 @@ export default function LoginPage() {
   const [mode, setMode] = useState('login'); // 'login' or 'register'
   
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Prevent logged-in users from accessing the login page
+    const token = localStorage.getItem('austral_auth_token');
+    const userRaw = localStorage.getItem('austral_auth_user');
+    if (token && userRaw) {
+      try {
+        const userObj = JSON.parse(userRaw);
+        navigate(`/perfil/${userObj.id}`, { replace: true });
+      } catch (e) {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [navigate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -34,7 +48,7 @@ export default function LoginPage() {
     .then(data => {
       if (data.success && data.user) {
         if (data.alert_destacado) {
-          toast.add('Atención: No hay ningún destacado configurado ni cumpleañeros este mes. Ve al panel para asignar uno.', 'warning', 8000);
+          toast.add('Atención: No hay ningún cumpleañero ni destacado configurado. Se mostrará la publicación con más "Me gusta" por el momento.', 'warning', 10000);
         }
         localStorage.setItem('austral_auth_user', JSON.stringify(data.user));
         localStorage.setItem('austral_auth_role', data.user.role);
@@ -47,7 +61,8 @@ export default function LoginPage() {
           navigate('/');
         } else {
           localStorage.removeItem('austral_auth_require_pass_change');
-          navigate(data.user.role === 'admin' ? '/admin' : '/');
+          // Navigate to the user's public profile page instead of the admin dashboard
+          navigate(`/perfil/${data.user.id}`);
         }
 
       } else {

@@ -139,7 +139,7 @@ export default function NavBar() {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 style={{ padding: '8px 20px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
-                {authRole === 'admin' ? '🛡️' : '👨‍🚀'} {authUser} ▾
+                {authRole === 'admin' ? '👑' : '👤'} {authUser} ▾
               </button>
               
               {dropdownOpen && (

@@ -48,17 +48,17 @@ export default function PasswordChangeForm({ username, apiUrl, onSuccess }) {
       <input 
         type="password" placeholder="Contraseña actual temporal" 
         value={passActual} onChange={e => setPassActual(e.target.value)} 
-        className="login-input" style={{ fontSize: '0.85rem', padding: '8px 12px', width: '100%' }} required 
+        className="db-input" style={{ fontSize: '0.85rem', padding: '8px 12px', width: '100%' }} required 
       />
       <input 
         type="password" placeholder="Tu NUEVA contraseña" 
         value={passNuevo} onChange={e => setPassNuevo(e.target.value)} 
-        className="login-input" style={{ fontSize: '0.85rem', padding: '8px 12px', width: '100%' }} required 
+        className="db-input" style={{ fontSize: '0.85rem', padding: '8px 12px', width: '100%' }} required 
       />
       <input 
         type="password" placeholder="Confirmar NUEVA contraseña" 
         value={passConfirm} onChange={e => setPassConfirm(e.target.value)} 
-        className="login-input" style={{ fontSize: '0.85rem', padding: '8px 12px', width: '100%' }} required 
+        className="db-input" style={{ fontSize: '0.85rem', padding: '8px 12px', width: '100%' }} required 
       />
       <button type="submit" className="btn-primary" style={{ fontSize: '0.85rem', padding: '10px 12px', width: '100%', justifyContent: 'center' }} disabled={saving}>
         {saving ? 'Actualizando...' : '🔐 Actualizar Contraseña'}
