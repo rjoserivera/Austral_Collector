@@ -1,0 +1,66 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Documentación de Cambios</title>
+<style>
+  body { font-family: 'Calibri', 'Arial', sans-serif; line-height: 1.5; color: #333; }
+  h1 { color: #1e4d5a; border-bottom: 2px solid #1e4d5a; padding-bottom: 5px; }
+  h2 { color: #1e4d5a; margin-top: 25px; border-left: 4px solid #1e4d5a; padding-left: 10px; }
+  p { margin: 10px 0; }
+  ul { margin-bottom: 15px; }
+  li { margin-bottom: 8px; }
+  code { background: #f4f4f4; padding: 2px 4px; border-radius: 4px; font-family: Consolas, monospace; }
+  .note { background-color: #f4f7f8; padding: 15px; border-left: 5px solid #1e4d5a; margin: 20px 0; border-radius: 0 8px 8px 0; }
+  .footer { margin-top: 40px; font-size: 0.9em; color: #777; text-align: center; border-top: 1px solid #eee; padding-top: 10px; }
+</style>
+</head>
+<body>
+  <h1>Documentación de Actualizaciones — Austral Collector</h1>
+  <p><strong>Fecha:</strong> 9 de Mayo, 2026</p>
+  <p><strong>Proyecto:</strong> Plataforma Austral Collector</p>
+  
+  <h2>1. Portafolio Unificado (Secciones por Grupos)</h2>
+  <p>Se ha rediseñado completamente la lógica del portafolio para permitir una organización jerárquica y mixta.</p>
+  <ul>
+    <li><strong>Refactorización de Base de Datos:</strong> Se implementaron las tablas <code>portafolio_grupos</code> (para las categorías) y <code>portafolio_items</code> (para el contenido multimedia).</li>
+    <li><strong>Gestión de Contenido:</strong> Ahora es posible agrupar fotos y videos de YouTube bajo una misma sección, permitiendo una navegación más intuitiva para los usuarios.</li>
+    <li><strong>Interfaz Administrativa:</strong> Se reemplazaron las antiguas pestañas de "Galería" y "Videos" por un gestor único que permite crear, editar y reordenar secciones completas mediante <i>drag and drop</i>.</li>
+  </ul>
+
+  <h2>2. Mejoras en Administración y Branding</h2>
+  <p>Se optimizó el panel de control para facilitar la gestión de la identidad visual del sitio.</p>
+  <ul>
+    <li><strong>Módulo de Logo Independiente:</strong> Se creó una pestaña exclusiva llamada <strong>"Logo de Inicio"</strong>. Esto separa la configuración del logo del Hero principal de los textos de misión/visión, evitando confusiones.</li>
+    <li><strong>Logo de Navegación (Navbar):</strong> Se configuró el sitio para utilizar permanentemente el archivo <code>logo_sin_fondo2.png</code> en la cabecera, garantizando nitidez y consistencia estética.</li>
+    <li><strong>Sección Identidad:</strong> Se corrigieron errores de renderizado en "Nosotros" que afectaban la visualización en ciertos navegadores.</li>
+  </ul>
+
+  <h2>3. Corrección de Orientación de Imágenes (Fix EXIF)</h2>
+  <p>Se solucionó un problema crítico relacionado con la subida de fotografías desde dispositivos móviles.</p>
+  <ul>
+    <li><strong>Problema:</strong> Al aplicar la marca de agua, el servidor eliminaba los metadatos de rotación, causando que las fotos verticales se vieran horizontales.</li>
+    <li><strong>Solución:</strong> Se integró un sistema de rotación física automática en el archivo <code>image_utils.php</code>. El servidor ahora detecta la orientación original y "fija" la posición correcta de los píxeles antes de guardar la imagen definitiva.</li>
+    <li><strong>Alcance:</strong> Esta mejora afecta al portafolio, a las fotos de perfil y a las publicaciones de la comunidad.</li>
+  </ul>
+
+  <h2>4. Optimización de la Mascota Virtual (Robot)</h2>
+  <p>Se mejoró la interacción del asistente virtual en dispositivos móviles para mejorar la usabilidad.</p>
+  <ul>
+    <li><strong>Ocultamiento Inteligente:</strong> El robot ahora se desvanece automáticamente cuando el usuario hace scroll o interactúa con la pantalla en móviles, liberando espacio visual.</li>
+    <li><strong>Temporizador de Reaparición:</strong> La mascota vuelve a aparecer suavemente tras 5 segundos de inactividad, asegurando que esté disponible solo cuando el usuario no está ocupado navegando.</li>
+  </ul>
+
+  <h2>5. Notificaciones y Correos Electrónicos</h2>
+  <p>Se profesionalizó la comunicación automática del sistema.</p>
+  <ul>
+    <li><strong>Logo en Correos:</strong> Se actualizó la imagen de cabecera en todos los correos (claves temporales, moderación, avisos) al nuevo logo <code>logo_sin_fondo2.png</code>.</li>
+    <li><strong>Compatibilidad de Imagen:</strong> Se ajustó el código HTML para asegurar que el logo se visualice correctamente (sin cortes ni errores de carga) en Outlook, Gmail y dispositivos móviles.</li>
+  </ul>
+
+  <div class="note">
+    <p><strong>Nota sobre la Base de Datos:</strong> Se ha generado un archivo unificado llamado <code>austral_collector_db_completo.sql</code> que contiene toda la estructura original junto con las nuevas tablas de portafolio integradas.</p>
+  </div>
+
+  <div class="footer">
+    Documentación generada automáticamente por el Sistema de Administración de Austral Collector.
+  </div>
+</body>
+</html>

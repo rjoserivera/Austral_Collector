@@ -16,6 +16,43 @@ export default function VirtualAssistant() {
       .catch(e => console.error(e));
   }, []);
 
+  const [isIdle, setIsIdle] = useState(true);
+
+  useEffect(() => {
+    let idleTimer;
+    
+    const handleActivity = (e) => {
+      if (window.innerWidth <= 768) {
+        // Al moverse la pantalla, ocultamos la burbuja si estaba abierta
+        if (e && (e.type === 'scroll' || e.type === 'touchmove')) {
+          setShowBubble(false);
+        }
+        setIsIdle(false);
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+          setIsIdle(true);
+        }, 5000); // 5 segundos de inactividad
+      } else {
+        setIsIdle(true); // En escritorio siempre visible
+      }
+    };
+
+    window.addEventListener('scroll', handleActivity, { passive: true });
+    window.addEventListener('touchmove', handleActivity, { passive: true });
+    window.addEventListener('resize', handleActivity, { passive: true });
+
+    // Ejecutar una vez al montar para ocultarlo inicialmente en móvil si se desea,
+    // o simplemente iniciarlo como idle.
+    handleActivity();
+
+    return () => {
+      clearTimeout(idleTimer);
+      window.removeEventListener('scroll', handleActivity);
+      window.removeEventListener('touchmove', handleActivity);
+      window.removeEventListener('resize', handleActivity);
+    };
+  }, []);
+
   // Determine section based on current path
   const path = location.pathname;
   let section = 'inicio';
@@ -30,8 +67,10 @@ export default function VirtualAssistant() {
   // Convert newlines to <br/> if the user inputs plain text with newlines
   const htmlMsg = rawMsg.replace(/\n/g, '<br/>');
 
+  const isHidden = !isIdle && !showBubble;
+
   return (
-    <aside className="virtual-assistant-panel">
+    <aside className={`virtual-assistant-panel ${isHidden ? 'hidden' : ''}`}>
       {showBubble && (
         <div className="mascot-speech-bubble fade-in" dangerouslySetInnerHTML={{ __html: htmlMsg }} />
       )}

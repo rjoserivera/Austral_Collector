@@ -1430,3 +1430,40 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+-- update_portafolio.sql
+-- Ejecutar en Producción y Local para unificar galería y videos.
+
+CREATE TABLE IF NOT EXISTS `portafolio_grupos` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `titulo` VARCHAR(255) NOT NULL,
+  `orden` INT(11) DEFAULT 0,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `portafolio_items` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `grupo_id` INT(11) NOT NULL,
+  `tipo` ENUM('foto', 'video') NOT NULL,
+  `url` VARCHAR(500) NOT NULL,
+  `titulo` VARCHAR(255) DEFAULT NULL,
+  `descripcion` TEXT DEFAULT NULL,
+  `orden` INT(11) DEFAULT 0,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`grupo_id`) REFERENCES `portafolio_grupos`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Migración opcional (Crea un grupo General y mueve los datos existentes)
+INSERT INTO `portafolio_grupos` (`titulo`, `orden`) VALUES ('General', 0);
+SET @grupo_id = LAST_INSERT_ID();
+
+INSERT INTO `portafolio_items` (`grupo_id`, `tipo`, `url`, `descripcion`, `orden`, `created_at`)
+SELECT @grupo_id, 'foto', imagen_url, descripcion, orden, created_at FROM `galeria_portafolio`;
+
+INSERT INTO `portafolio_items` (`grupo_id`, `tipo`, `url`, `titulo`, `descripcion`, `orden`, `created_at`)
+SELECT @grupo_id, 'video', link_yt, titulo, descripcion, orden, created_at FROM `videos_portafolio`;
+
+-- Opcional: Eliminar tablas antiguas (Descomentar si estás seguro)
+-- DROP TABLE `galeria_portafolio`;
+-- DROP TABLE `videos_portafolio`;

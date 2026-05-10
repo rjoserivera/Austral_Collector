@@ -21,8 +21,7 @@ function getYtId(url) {
 }
 
 export default function PortafolioPage() {
-  const [galeria, setGaleria]       = useState([])
-  const [videos, setVideos]         = useState([])
+  const [grupos, setGrupos]         = useState([])
   const [identidad, setIdentidad]   = useState([])
   const [comunidadImg, setComunidad] = useState('')
   const [loading, setLoading]        = useState(true)
@@ -39,8 +38,7 @@ export default function PortafolioPage() {
       .then(r => r.json())
       .then(d => {
         if (d.success) {
-          setGaleria(d.galeria || [])
-          setVideos(d.videos || [])
+          setGrupos(d.grupos || [])
           setComunidad(d.comunidad_img || '')
         }
       })
@@ -92,76 +90,61 @@ export default function PortafolioPage() {
         </div>
       </section>
 
-      {/* ── MEDIA: GALERÍA + VIDEOS ───────────────────────── */}
+      {/* ── MEDIA: SECCIONES (GRUPOS) ───────────────────────── */}
       <section className="pp-media section-wrapper" id="pp-galeria">
-        {/* Galería de Fotografías */}
-        <div className="pp-media-block">
-          <h2 className="pp-section-title">⚜️ Galería de Fotografías</h2>
-          {loading ? (
-            <div className="pp-empty-state">Cargando galería...</div>
-          ) : galeria.length === 0 ? (
-            <div className="pp-empty-state">
-              <span className="pp-empty-icon">📷</span>
-              <p>La galería estará disponible pronto.</p>
+        {loading ? (
+          <div className="pp-empty-state">Cargando portafolio...</div>
+        ) : grupos.length === 0 ? (
+          <div className="pp-empty-state">
+            <span className="pp-empty-icon">📂</span>
+            <p>El portafolio estará disponible pronto.</p>
+          </div>
+        ) : (
+          grupos.map(grupo => (
+            <div className="pp-media-block" key={grupo.id} style={{ marginBottom: '60px' }}>
+              <h2 className="pp-section-title">⚜️ {grupo.titulo}</h2>
+              {(!grupo.items || grupo.items.length === 0) ? (
+                <div className="pp-empty-state" style={{ padding: '20px', minHeight: 'auto' }}>
+                  <p>Aún no hay fotos o videos en esta sección.</p>
+                </div>
+              ) : (
+                <div className="pp-galeria-grid" style={{ gridTemplateColumns: grupo.items.length === 1 ? '1fr' : grupo.items.length <= 3 ? 'repeat(auto-fill, minmax(200px, 1fr))' : 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+                  {grupo.items.map((item, idx) => {
+                    if (item.tipo === 'foto') {
+                      return (
+                        <div key={item.id} className="pp-galeria-item card" onClick={() => setSelectedImg(item)} style={{ cursor: 'zoom-in' }}>
+                          <img src={`${BASE_URL}/${item.url}`} alt={item.titulo || item.descripcion || `Foto ${idx}`} className="pp-galeria-img" loading="lazy" onError={e => { e.target.src = '/mock_fig1.png' }} />
+                          {(item.titulo || item.descripcion) && (
+                            <div className="pp-galeria-desc">
+                              {item.titulo ? <strong style={{ display: 'block', color: '#f0e4cc' }}>{item.titulo}</strong> : null}
+                              {item.descripcion || '\u00A0'}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    } else {
+                      const ytId = getYtId(item.url)
+                      const thumbUrl = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : '/mock_community.png'
+                      return (
+                        <div key={item.id} className="pp-video-card card" onClick={() => setSelectedVideo(item)}>
+                          <div className="pp-video-thumb">
+                            <img src={thumbUrl} alt={item.titulo || `Video ${idx}`} className="pp-video-img" loading="lazy" onError={e => { e.target.src = '/mock_community.png' }}/>
+                            <div className="pp-video-overlay"><PlayIcon/></div>
+                          </div>
+                          <div className="pp-video-info">
+                            {item.titulo ? <strong style={{ display: 'block', color: '#f0e4cc', marginBottom: '4px' }}>{item.titulo}</strong> : null}
+                            <p className="pp-v-info-desc">{item.descripcion || '\u00A0'}</p>
+                          </div>
+                        </div>
+                      )
+                    }
+                  })}
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="pp-galeria-grid" style={{ gridTemplateColumns: galeria.length === 1 ? '1fr' : galeria.length <= 3 ? 'repeat(auto-fill, minmax(200px, 1fr))' : 'repeat(auto-fill, minmax(220px, 1fr))' }}>
-              {galeria.map((g, idx) => (
-                <div 
-                  key={g.id || idx} 
-                  className="pp-galeria-item card" 
-                  id={`pp-gal-${g.id || idx}`}
-                  onClick={() => setSelectedImg(g)}
-                  style={{ cursor: 'zoom-in' }}
-                >
-                    <img
-                      src={`${BASE_URL}/${g.imagen_url}`}
-                      alt={g.descripcion || `Galería ${idx + 1}`}
-                      className="pp-galeria-img"
-                      loading="lazy"
-                      onError={e => { e.target.src = '/mock_fig1.png' }}
-                    />
-                    <div className="pp-galeria-desc">
-                      {g.descripcion || '\u00A0'}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Videos */}
-          <div className="pp-media-block" id="pp-videos">
-            <h2 className="pp-section-title">▶ Videos</h2>
-            {loading ? (
-              <div className="pp-empty-state">Cargando videos...</div>
-            ) : videos.length === 0 ? (
-              <div className="pp-empty-state">
-                <span className="pp-empty-icon">🎬</span>
-                <p>Los videos estarán disponibles pronto.</p>
-              </div>
-            ) : (
-              <div className="pp-videos-grid">
-                {videos.map((v, idx) => {
-                  const ytId = getYtId(v.link_yt)
-                  const thumbUrl = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : '/mock_community.png'
-                  return (
-                    <div key={v.id || idx} className="pp-video-card card" id={`pp-vid-${v.id || idx}`}>
-                      <div className="pp-video-thumb" onClick={() => setSelectedVideo(ytId)}>
-                        <img src={thumbUrl} alt={v.titulo || `Video ${idx + 1}`} className="pp-video-img" loading="lazy"
-                          onError={e => { e.target.src = '/mock_community.png' }}/>
-                        <div className="pp-video-overlay"><PlayIcon/></div>
-                      </div>
-                      <div className="pp-video-info">
-                        <p className="pp-v-info-desc">{v.descripcion || '\u00A0'}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </section>
+          ))
+        )}
+      </section>
 
         {/* ── ÚNETE A LA COMUNIDAD ──────────────────────────── */}
         <section className="pp-comunidad" id="pp-comunidad">
@@ -190,12 +173,13 @@ export default function PortafolioPage() {
             <div className="pp-modal-content" onClick={e => e.stopPropagation()}>
               <button className="pp-modal-close" onClick={() => setSelectedImg(null)}>×</button>
               <img 
-                src={`${BASE_URL}/${selectedImg.imagen_url}`} 
+                src={`${BASE_URL}/${selectedImg.url}`} 
                 alt="Zoom imagen" 
                 className="pp-modal-img" 
               />
-            {selectedImg.descripcion && (
+            {(selectedImg.titulo || selectedImg.descripcion) && (
               <div className="pp-modal-info">
+                {selectedImg.titulo && <strong style={{ display: 'block', marginBottom: '4px', fontSize: '1.1rem' }}>{selectedImg.titulo}</strong>}
                 <p className="pp-modal-desc">{selectedImg.descripcion}</p>
               </div>
             )}
@@ -204,32 +188,32 @@ export default function PortafolioPage() {
       )}
 
       {/* ── VIDEO MODAL (YOUTUBE) ─────────────────────────── */}
-      {selectedVideo && (
-        <div className="pp-modal-overlay" onClick={() => setSelectedVideo(null)} style={{ background: 'rgba(5, 1, 1, 0.94)' }}>
-          <div className="pp-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '1000px' }}>
-            <button className="pp-modal-close" onClick={() => setSelectedVideo(null)} style={{ top: '-45px' }}>✕</button>
-            <div style={{ width: '100%', aspectRatio: '16/9', background: '#000', borderRadius: '8px 8px 0 0', overflow: 'hidden', border: '1.5px solid rgba(201, 168, 76, 0.4)', borderBottom: 'none', boxShadow: '0 15px 50px rgba(0,0,0,0.8)' }}>
-              <iframe 
-                width="100%" 
-                height="100%" 
-                src={`https://www.youtube.com/embed/${selectedVideo}?autoplay=1`} 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
-                allowFullScreen>
-              </iframe>
-            </div>
-            {/* Descripción del video con el mismo estilo que las fotos */}
-            {(() => {
-              const vObj = videos.find(v => getYtId(v.link_yt) === selectedVideo);
-              return vObj && vObj.descripcion ? (
+      {selectedVideo && (() => {
+        const ytId = getYtId(selectedVideo.url);
+        return (
+          <div className="pp-modal-overlay" onClick={() => setSelectedVideo(null)} style={{ background: 'rgba(5, 1, 1, 0.94)' }}>
+            <div className="pp-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '1000px' }}>
+              <button className="pp-modal-close" onClick={() => setSelectedVideo(null)} style={{ top: '-45px' }}>✕</button>
+              <div style={{ width: '100%', aspectRatio: '16/9', background: '#000', borderRadius: '8px 8px 0 0', overflow: 'hidden', border: '1.5px solid rgba(201, 168, 76, 0.4)', borderBottom: 'none', boxShadow: '0 15px 50px rgba(0,0,0,0.8)' }}>
+                <iframe 
+                  width="100%" 
+                  height="100%" 
+                  src={`https://www.youtube.com/embed/${ytId}?autoplay=1`} 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
+                  allowFullScreen>
+                </iframe>
+              </div>
+              {(selectedVideo.titulo || selectedVideo.descripcion) && (
                 <div className="pp-modal-info">
-                  <p className="pp-modal-desc">{vObj.descripcion}</p>
+                  {selectedVideo.titulo && <strong style={{ display: 'block', marginBottom: '4px', fontSize: '1.1rem' }}>{selectedVideo.titulo}</strong>}
+                  <p className="pp-modal-desc">{selectedVideo.descripcion}</p>
                 </div>
-              ) : null;
-            })()}
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
 
     </div>

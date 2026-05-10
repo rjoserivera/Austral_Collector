@@ -48,7 +48,7 @@ $password = $data['password'];
             'id' => $user['id'],
             'username' => $user['username'],
             'role' => $user['role'],
-            'exp' => time() + (60 * 60 * 24) // 24 hours
+            'exp' => time() + (60 * 60 * 24 * 7) // 7 days
         ]);
 
         echo json_encode([

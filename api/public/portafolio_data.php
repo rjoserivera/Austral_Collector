@@ -5,23 +5,33 @@
 require_once '../db.php';
 
 try {
-    // 1. Galería de fotos
-    $stmt = $pdo->query("SELECT * FROM galeria_portafolio ORDER BY orden ASC, id ASC");
-    $galeria = $stmt->fetchAll();
+    // 1. Grupos y sus Items (Reemplaza galeria y videos individuales)
+    $stmtG = $pdo->query("SELECT * FROM portafolio_grupos ORDER BY orden ASC, id ASC");
+    $gruposRaw = $stmtG->fetchAll();
 
-    // 2. Videos dinámicos (Nueva Tabla)
-    $stmtV = $pdo->query("SELECT * FROM videos_portafolio ORDER BY orden ASC, id ASC");
-    $videos = $stmtV->fetchAll();
+    $stmtI = $pdo->query("SELECT * FROM portafolio_items ORDER BY orden ASC, id ASC");
+    $itemsRaw = $stmtI->fetchAll();
 
-    // 3. Configuración (imagen comunidad)
-    $stmt2 = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave = 'portafolio_comunidad'");
-    $config = $stmt2->fetch();
+    $itemsByGroup = [];
+    foreach ($itemsRaw as $item) {
+        $itemsByGroup[$item['grupo_id']][] = $item;
+    }
+
+    $grupos = [];
+    foreach ($gruposRaw as $g) {
+        $g['items'] = $itemsByGroup[$g['id']] ?? [];
+        $grupos[] = $g;
+    }
+
+    // 2. Imagen de la comunidad (Configuración)
+    $stmtC = $pdo->prepare("SELECT valor FROM configuracion WHERE clave = 'portafolio_comunidad'");
+    $stmtC->execute();
+    $comunidad_img = $stmtC->fetchColumn() ?: '';
 
     echo json_encode([
-        'success'       => true,
-        'galeria'       => $galeria,
-        'videos'        => $videos,
-        'comunidad_img' => $config['valor'] ?? '',
+        'success' => true,
+        'grupos' => $grupos,
+        'comunidad_img' => $comunidad_img
     ]);
 
 } catch (PDOException $e) {

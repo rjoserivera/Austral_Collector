@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import './NavBar.css'
 import './NavBarDropdown.css'
 import { useSyncStatus } from '../hooks/useSyncStatus'
+import { API_URL, BASE_URL } from '../config'
 
 export default function NavBar() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -12,6 +13,19 @@ export default function NavBar() {
 
   const location = useLocation()
   const path = location.pathname
+
+  const [siteLogo, setSiteLogo] = useState('/logo_sin_fondo2.png')
+
+  useEffect(() => {
+    fetch(`${API_URL}/get_site_config.php`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.config && d.config.logo_sitio) {
+          setSiteLogo(d.config.logo_sitio.startsWith('uploads/') ? `${BASE_URL}/${d.config.logo_sitio}` : d.config.logo_sitio)
+        }
+      })
+      .catch(e => console.error('Error loading logo:', e))
+  }, [])
 
   const authRole = localStorage.getItem('austral_auth_role')   // 'admin' | 'user' | null
   const authUserRaw = localStorage.getItem('austral_auth_user')
@@ -92,7 +106,7 @@ export default function NavBar() {
 
         {/* Brand */}
         <Link to="/" className="navbar-brand">
-          <img src="/logo_sin_fondo.png" alt="Austral Collector Logo" className="navbar-logo" />
+          <img src={siteLogo} alt="Austral Collector Logo" className="navbar-logo" />
           <span className="navbar-title">
             {isAdmin
               ? <><span className="title-austral">Admin</span> <span className="title-collector">Collector</span></>

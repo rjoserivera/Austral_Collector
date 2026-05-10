@@ -278,7 +278,7 @@ export default function HomePage() {
         <div className="hp-hero-inner section-wrapper" style={{ justifyContent: 'center' }}>
           <div className="hp-hero-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
             <h1 className="hp-hero-title" style={{ marginBottom: '8px' }}>
-              <img src="/logo_sin_fondo2.png" alt="Austral Collector" style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain' }} />
+              <img src={data.config?.logo_sitio ? (data.config.logo_sitio.startsWith('uploads/') ? `${BASE_URL}/${data.config.logo_sitio}` : data.config.logo_sitio) : "/logo_sin_fondo2.png"} alt="Austral Collector" style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain' }} />
             </h1>
             <p className="hp-hero-tagline" style={{ marginBottom: '16px', color: '#ffffff', fontSize: '1.15rem', fontWeight: 'bold', textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5)' }}>Juegos, juguetes, coleccionables de ayer y hoy.</p>
             <div className="hp-hero-actions" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '8px', justifyContent: 'center' }}>

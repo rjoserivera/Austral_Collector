@@ -6,6 +6,51 @@
 // ============================================================
 
 /**
+ * Lee el EXIF de la imagen y la rota físicamente si es necesario, 
+ * para asegurar que no se pierda la orientación al manipularla con GD.
+ */
+function correctImageOrientation($filename) {
+    if (function_exists('exif_read_data')) {
+        $exif = @exif_read_data($filename);
+        if ($exif && isset($exif['Orientation'])) {
+            $orientation = $exif['Orientation'];
+            if ($orientation != 1) {
+                $img = null;
+                $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                if ($ext == 'jpg' || $ext == 'jpeg') {
+                    $img = @imagecreatefromjpeg($filename);
+                } elseif ($ext == 'png') {
+                    $img = @imagecreatefrompng($filename);
+                } elseif ($ext == 'webp') {
+                    $img = @imagecreatefromwebp($filename);
+                }
+                
+                if ($img) {
+                    $deg = 0;
+                    switch ($orientation) {
+                        case 3: $deg = 180; break;
+                        case 6: $deg = 270; break;
+                        case 8: $deg = 90; break;
+                    }
+                    if ($deg) {
+                        $img = imagerotate($img, $deg, 0);
+                    }
+                    
+                    if ($ext == 'jpg' || $ext == 'jpeg') {
+                        imagejpeg($img, $filename, 90);
+                    } elseif ($ext == 'png') {
+                        imagepng($img, $filename);
+                    } elseif ($ext == 'webp') {
+                        imagewebp($img, $filename);
+                    }
+                    imagedestroy($img);
+                }
+            }
+        }
+    }
+}
+
+/**
  * Applies the Austral Collector watermark to an image file.
  *
  * The watermark is scaled proportionally to 22% of the target image width
@@ -18,6 +63,9 @@
  */
 function addWatermark($targetPath)
 {
+    // ── 0. Fix EXIF orientation before loading with GD ───────
+    correctImageOrientation($targetPath);
+
     // ── 1. Detect image type and load ────────────────────────
     $info = @getimagesize($targetPath);
     if (!$info) {

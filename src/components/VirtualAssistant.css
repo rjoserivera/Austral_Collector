@@ -10,6 +10,13 @@
   gap: 16px;
   text-align: center;
   pointer-events: none; /* Permite que los clics pasen a través del contenedor invisible */
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.virtual-assistant-panel.hidden {
+  opacity: 0;
+  pointer-events: none !important;
+  transform: translateY(30px);
 }
 
 .mascot-img {

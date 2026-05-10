@@ -14,7 +14,7 @@ try {
     }
 
     // 0. Fetch all relevant configuration keys first
-    $stmtCfg = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave IN ('miembro_destacado', 'txt_destacado', 'txt_cumple', 'txt_noticias')");
+    $stmtCfg = $pdo->query("SELECT clave, valor FROM configuracion WHERE clave IN ('miembro_destacado', 'txt_destacado', 'txt_cumple', 'txt_noticias', 'logo_sitio')");
     $globalConfig = $stmtCfg->fetchAll(PDO::FETCH_KEY_PAIR);
 
     // 1. Latest posts (Ultimas) - Only Figuras
