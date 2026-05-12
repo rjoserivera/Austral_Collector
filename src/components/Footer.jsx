@@ -35,11 +35,9 @@ export default function Footer() {
           <h4 className="footer-nav-title">Contacto</h4>
           <div className="footer-contact-box" style={{ marginBottom: 0 }}>
             <p className="footer-info-text">Escríbenos ante dudas o sugerencias</p>
-            {/* TODO (PRODUCCIÓN): Cambiar al correo oficial: australcollector@gmail.com
-                Por ahora se usa el correo de desarrollo para envío/recepción.
+            {/* Correo oficial de producción */}
             <a href="mailto:australcollector@gmail.com" className="footer-email">australcollector@gmail.com</a>
-            */}
-            <a href="mailto:austral.cadmin@gmail.com" className="footer-email">austral.cadmin@gmail.com</a>
+            {/* TODO DEV: austral.cadmin@gmail.com (correo de prueba — no usar en producción) */}
           </div>
         </div>
 

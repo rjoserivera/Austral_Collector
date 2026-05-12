@@ -70,7 +70,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
       </Routes>
 
-      {['/', '/portafolio', '/galeria', '/miembros', '/contacto'].includes(location.pathname) && <VirtualAssistant />}
+      {!['/admin', '/login'].includes(location.pathname) && !location.pathname.startsWith('/perfil/') && !location.pathname.startsWith('/dashboard') && <VirtualAssistant />}
       {location.pathname !== '/admin' && <Footer />}
 
       {/* Modal GLobal: Forzar cambio de contraseña */}

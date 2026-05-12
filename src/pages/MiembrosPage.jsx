@@ -152,7 +152,7 @@ export default function MiembrosPage() {
             <div className="mi-card-banner" style={{ backgroundImage: `url('${m.banner_url ? BASE_URL + '/' + m.banner_url : '/mock_banner.png'}')` }} />
             
             <div className="mi-card-avatar-wrap">
-              <img src={m.avatar_url ? `${BASE_URL}/${m.avatar_url}` : '/mock_avatar.png'} alt={m.username} className="mi-card-avatar" loading="lazy" />
+              <img src={m.avatar_url ? `${BASE_URL}/${m.avatar_url}` : '/mock_avatar.png'} alt={m.username} className="mi-card-avatar" loading="lazy" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/mock_avatar.png'; }} />
             </div>
 
             <div className="mi-card-body">

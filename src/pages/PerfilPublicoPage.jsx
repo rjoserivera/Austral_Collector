@@ -196,7 +196,7 @@ export default function PerfilPublicoPage() {
         <section className="perfil-info-card">
           <div className="perfil-avatar-wrap">
             <div className="perfil-avatar-ring"/>
-            <img src={user.avatar_url ? `${BASE_URL}/${user.avatar_url}` : '/mock_avatar.png'} alt={user.username} className="perfil-avatar"/>
+            <img src={user.avatar_url ? `${BASE_URL}/${user.avatar_url}` : '/mock_avatar.png'} alt={user.username} className="perfil-avatar" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/mock_avatar.png'; }}/>
           </div>
           <div className="perfil-user-details">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>

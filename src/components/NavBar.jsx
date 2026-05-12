@@ -7,12 +7,19 @@ import { API_URL, BASE_URL } from '../config'
 
 export default function NavBar() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const dropdownRef = useRef(null)
 
   const { status, pendingCount } = useSyncStatus()
 
   const location = useLocation()
   const path = location.pathname
+
+  // Cerrar el menú móvil al cambiar de ruta
+  useEffect(() => {
+    setMobileMenuOpen(false)
+    setDropdownOpen(false)
+  }, [location.pathname])
 
   const [siteLogo, setSiteLogo] = useState('/logo_sin_fondo2.png')
 
@@ -27,7 +34,7 @@ export default function NavBar() {
       .catch(e => console.error('Error loading logo:', e))
   }, [])
 
-  const authRole = localStorage.getItem('austral_auth_role')   // 'admin' | 'user' | null
+  const authRole = localStorage.getItem('austral_auth_role')
   const authUserRaw = localStorage.getItem('austral_auth_user')
   let authUser = null
   try {
@@ -36,15 +43,11 @@ export default function NavBar() {
       authUser = typeof parsed === 'object' ? parsed.username : parsed
     }
   } catch(e) {
-    authUser = authUserRaw // fallback: era un string plano (formato antiguo)
+    authUser = authUserRaw
   }
 
-  const isAdmin    = path.startsWith('/admin')
-  const isPrivate  = path.startsWith('/dashboard') || path.startsWith('/perfil') || isAdmin
-  const isPortafolio = path === '/portafolio'
-  const isGaleria    = path === '/galeria'
+  const isAdmin = path.startsWith('/admin')
 
-  // ── Grupos de links ────────────────────────────────────
   const defaultLinks = [
     { to: '/',           label: 'Inicio'    },
     { to: '/portafolio', label: 'Nosotros'  },
@@ -53,40 +56,13 @@ export default function NavBar() {
     { to: '/contacto',   label: 'Contacto'  },
   ]
 
-  const adminLinks = [
-    { to: '/admin',      label: 'Panel de Control'       },
-    { to: '/dashboard',  label: 'Mi Dashboard'           },
-  ]
-
-  const privateLinks = [
-    { to: '/',          label: 'Volver al Inicio'   },
-    { to: '/galeria',   label: 'Explorar Galería'   },
-    { to: `/perfil/${authUser}`, label: 'Ver Perfil' },
-    // Link a admin solo si el usuario tiene rol admin
-    ...(authRole === 'admin' ? [{ to: '/admin', label: '⚙️ Admin' }] : []),
-  ]
-
-  const portafolioLinks = [
-    { to: '/',           label: 'Inicio'   },
-    { to: '/portafolio', label: 'Nosotros' },
-    { to: '/contacto',   label: 'Contacto' },
-  ]
-
-  const galeriaLinks = [
-    { to: '/',           label: 'Inicio'   },
-    { to: '/galeria',    label: 'Galería'  },
-    { to: '/miembros',   label: 'Miembros' },
-    { to: '/contacto',   label: 'Contacto' },
-  ]
-
-  // ── Selección de links según ruta ──────────────────────
-  // El usuario solicitó que la barra de navegación sea la misma en todas las pantallas.
   let links = defaultLinks
 
   const handleLogout = () => {
     localStorage.removeItem('austral_auth_user')
     localStorage.removeItem('austral_auth_role')
     setDropdownOpen(false)
+    setMobileMenuOpen(false)
   }
 
   // Cerrar dropdown al hacer click afuera
@@ -115,7 +91,7 @@ export default function NavBar() {
           </span>
         </Link>
 
-        {/* Links */}
+        {/* Links — Desktop */}
         <ul className="navbar-links">
           {links.map(({ to, label }) => (
             <li key={label}>
@@ -130,7 +106,7 @@ export default function NavBar() {
           ))}
         </ul>
 
-        {/* Actions */}
+        {/* Actions (Sync + Usuario/Login) */}
         <div className="navbar-actions">
           
           {/* Indicador Global de Red/Sync */}
@@ -151,9 +127,9 @@ export default function NavBar() {
               <button 
                 className={`btn-primary ${authRole === 'admin' ? 'btn-admin-nav' : ''}`}
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                style={{ padding: '8px 20px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+                style={{ padding: '8px 16px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
-                {authRole === 'admin' ? '👑' : '👤'} {authUser} ▾
+                {authRole === 'admin' ? '👑' : '👤'} <span className="nav-username">{authUser}</span> ▾
               </button>
               
               {dropdownOpen && (
@@ -182,13 +158,38 @@ export default function NavBar() {
               )}
             </div>
           ) : (
-            <Link to="/login" className="btn-primary" style={{ padding: '8px 20px', fontSize: '0.75rem' }}>
+            <Link to="/login" className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.75rem' }}>
               Iniciar Sesión
             </Link>
           )}
+
+          {/* Botón Hamburguesa — solo en móvil */}
+          <button
+            className="navbar-hamburger"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Menú de navegación"
+          >
+            {mobileMenuOpen ? '✕' : '☰'}
+          </button>
         </div>
 
       </div>
+
+      {/* Menú desplegable móvil */}
+      {mobileMenuOpen && (
+        <div className="navbar-mobile-menu">
+          {links.map(({ to, label }) => (
+            <NavLink
+              key={label}
+              to={to}
+              className={({ isActive }) => `mobile-nav-link ${isActive ? 'mobile-nav-active' : ''}`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {label}
+            </NavLink>
+          ))}
+        </div>
+      )}
     </nav>
   )
 }

@@ -23,8 +23,8 @@ export default function VirtualAssistant() {
     
     const handleActivity = (e) => {
       if (window.innerWidth <= 768) {
-        // Al moverse la pantalla, ocultamos la burbuja si estaba abierta
-        if (e && (e.type === 'scroll' || e.type === 'touchmove')) {
+        // Al interactuar con la pantalla, ocultamos la burbuja si estaba abierta
+        if (e && (e.type === 'scroll' || e.type === 'touchmove' || e.type === 'touchstart' || e.type === 'click')) {
           setShowBubble(false);
         }
         setIsIdle(false);
@@ -37,19 +37,15 @@ export default function VirtualAssistant() {
       }
     };
 
-    window.addEventListener('scroll', handleActivity, { passive: true });
-    window.addEventListener('touchmove', handleActivity, { passive: true });
-    window.addEventListener('resize', handleActivity, { passive: true });
+    const events = ['scroll', 'touchmove', 'touchstart', 'mousedown', 'click', 'resize', 'keydown', 'mousemove'];
+    events.forEach(event => window.addEventListener(event, handleActivity, { passive: true }));
 
-    // Ejecutar una vez al montar para ocultarlo inicialmente en móvil si se desea,
-    // o simplemente iniciarlo como idle.
+    // Ejecutar una vez al montar para ocultarlo inicialmente en móvil si se desea
     handleActivity();
 
     return () => {
       clearTimeout(idleTimer);
-      window.removeEventListener('scroll', handleActivity);
-      window.removeEventListener('touchmove', handleActivity);
-      window.removeEventListener('resize', handleActivity);
+      events.forEach(event => window.removeEventListener(event, handleActivity));
     };
   }, []);
 

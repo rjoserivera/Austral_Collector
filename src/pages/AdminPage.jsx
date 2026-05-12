@@ -313,6 +313,8 @@ function AdminUsuarios({ adminId }) {
   const [messageModal, setMessageModal] = useState(null)
   const [messageForm, setMessageForm] = useState({ asunto: '', mensaje: '' })
   const [isSendingMsg, setIsSendingMsg] = useState(false)
+  const [sentCount, setSentCount] = useState(0)
+  const [totalToSend, setTotalToSend] = useState(0)
 
   // Form handling (Create / Edit)
   const [formMode, setFormMode] = useState(null)
@@ -490,27 +492,66 @@ function AdminUsuarios({ adminId }) {
     if (!messageForm.asunto || !messageForm.mensaje) return toast.info('Por favor llena todos los campos.')
     
     setIsSendingMsg(true)
-    authFetch(`${API_URL}/enviar_mensaje.php`, {
-      method: 'POST',
-      body: JSON.stringify({
-        user_id: messageModal.mass ? null : messageModal.user_id,
-        mass_send: messageModal.mass,
-        asunto: messageForm.asunto,
-        mensaje: messageForm.mensaje
-      })
-    })
-    .then(r => r.json())
-    .then(d => {
-      if (d.success) {
-        toast.success(d.message || 'Mensaje enviado con éxito.')
-        setMessageModal(null)
-        setMessageForm({ asunto: '', mensaje: '' })
+    setSentCount(0)
+
+    try {
+      if (messageModal.mass) {
+        const activeUsers = usuarios.filter(u => u.is_active == 1 && u.email)
+        setTotalToSend(activeUsers.length)
+        
+        let count = 0
+        const batchSize = 5;
+        for (let i = 0; i < activeUsers.length; i += batchSize) {
+          const batch = activeUsers.slice(i, i + batchSize);
+          await Promise.all(batch.map(async (user) => {
+            try {
+              const res = await authFetch(`${API_URL}/enviar_mensaje.php`, {
+                method: 'POST',
+                body: JSON.stringify({
+                  user_id: user.id,
+                  mass_send: false,
+                  asunto: messageForm.asunto,
+                  mensaje: messageForm.mensaje
+                })
+              })
+              const d = await res.json()
+              if (d.success) {
+                count++
+                setSentCount(count)
+              }
+            } catch (err) {
+              console.error('Error enviando a:', user.email, err)
+            }
+          }));
+        }
+        toast.success(`Proceso finalizado. Se enviaron ${count} correos con éxito.`)
       } else {
-        toast.error('Error: ' + d.error)
+        const res = await authFetch(`${API_URL}/enviar_mensaje.php`, {
+          method: 'POST',
+          body: JSON.stringify({
+            user_id: messageModal.user_id,
+            mass_send: false,
+            asunto: messageForm.asunto,
+            mensaje: messageForm.mensaje
+          })
+        })
+        const d = await res.json()
+        if (d.success) {
+          toast.success(d.message || 'Mensaje enviado con éxito.')
+        } else {
+          toast.error('Error: ' + d.error)
+        }
       }
-    })
-    .catch(e => toast.error('Error: ' + e.message))
-    .finally(() => setIsSendingMsg(false))
+      
+      setMessageModal(null)
+      setMessageForm({ asunto: '', mensaje: '' })
+    } catch (e) {
+      toast.error('Error: ' + e.message)
+    } finally {
+      setIsSendingMsg(false)
+      setSentCount(0)
+      setTotalToSend(0)
+    }
   }
 
   const processedUsers = useMemo(() => {
@@ -559,9 +600,20 @@ function AdminUsuarios({ adminId }) {
     <div className="admin-section">
       {/* Modal de Mensaje */}
       {messageModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <form className="admin-modal-form" style={{ width: '500px' }} onSubmit={handleSendMessage}>
-            <h3 style={{ borderBottom: '1px solid var(--color-gold)', paddingBottom: '10px', marginBottom: '20px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <form className="admin-modal-form" 
+            style={{ 
+              width: '500px', 
+              background: '#0d2830', 
+              border: '1px solid var(--color-gold)', 
+              borderRadius: '12px', 
+              padding: '2.5rem', 
+              position: 'relative', 
+              boxShadow: '0 20px 40px rgba(0,0,0,0.6)' 
+            }} 
+            onSubmit={handleSendMessage}
+          >
+            <h3 style={{ color: 'var(--color-gold)', borderBottom: '1px solid rgba(255,215,0,0.3)', paddingBottom: '12px', marginBottom: '20px', fontSize: '1.4rem' }}>
               {messageModal.mass ? '📢 Publicar Anuncio General' : `✉️ Enviar Mensaje a ${messageModal.username}`}
             </h3>
             <div className="admin-form-group">
@@ -585,7 +637,7 @@ function AdminUsuarios({ adminId }) {
             </div>
             <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
               <button type="submit" className="btn-primary" disabled={isSendingMsg} style={{ flex: 1 }}>
-                {isSendingMsg ? 'Enviando...' : 'Enviar Ahora'}
+                {isSendingMsg ? (totalToSend > 0 ? `Enviando ${sentCount}/${totalToSend}...` : 'Enviando...') : 'Enviar Ahora'}
               </button>
               <button type="button" className="btn-outline" onClick={() => setMessageModal(null)} disabled={isSendingMsg}>
                 Cancelar

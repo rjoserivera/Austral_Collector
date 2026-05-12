@@ -7,7 +7,7 @@ import { getOfflinePosts } from '../utils/offlineSync'
 
 export default function GaleriaPage() {
   const [search, setSearch]             = useState('')
-  const [filterCat, setFilterCat]       = useState('Todas')
+  const [selectedTags, setSelectedTags]   = useState([])
   const [figuras, setFiguras]           = useState([])
   const [selectedPost, setSelectedPost] = useState(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -77,7 +77,7 @@ export default function GaleriaPage() {
       const params = new URLSearchParams(window.location.search);
       const tag = params.get('tag');
       if (tag) {
-        setFilterCat(tag);
+        setSelectedTags([tag]);
       }
 
       // Filtro de 'tipo' en URL eliminado porque la galeria es unica (Figuras)
@@ -165,16 +165,15 @@ export default function GaleriaPage() {
 
   const filtered = currentTabFiguras.filter(fig => {
     const matchName = fig.nombre.toLowerCase().includes(search.toLowerCase())
-    const matchCat  = filterCat === 'Todas' || (fig.hashtags && fig.hashtags.includes(filterCat))
+    const matchCat  = selectedTags.length === 0 || selectedTags.some(tag => fig.hashtags && fig.hashtags.includes(tag))
     return matchName && matchCat
   })
 
   const applyCategorySuggestion = (cat) => {
-    if (filterCat === cat) {
-      setFilterCat('Todas')
-    } else {
-      setFilterCat(cat)
-    }
+    setSelectedTags(prev => {
+      if (prev.includes(cat)) return prev.filter(t => t !== cat)
+      return [...prev, cat]
+    })
     setSearch('')
     setShowSuggestions(false)
     setCurrentPage(1)
@@ -288,17 +287,23 @@ export default function GaleriaPage() {
             </select>
           </div>
 
-          {/* Mostrar Categoría Activa (Badge Desmarcable) */}
-          {filterCat !== 'Todas' && (
+          {/* Mostrar Categorías Activas (Badges Desmarcables — Multi) */}
+          {selectedTags.length > 0 && (
             <div className="galeria-active-filter">
               <span className="gaf-label">Filtrando por:</span>
-              <button 
-                className="gaf-tag" 
-                onClick={() => { setFilterCat('Todas'); setCurrentPage(1); }}
-                title="Quitar filtro"
-              >
-                #{filterCat} <span className="gaf-close">✕</span>
-              </button>
+              {selectedTags.map(tag => (
+                <button
+                  key={tag}
+                  className="gaf-tag"
+                  onClick={() => { setSelectedTags(prev => prev.filter(t => t !== tag)); setCurrentPage(1); }}
+                  title="Quitar filtro"
+                >
+                  #{tag} <span className="gaf-close">✕</span>
+                </button>
+              ))}
+              {selectedTags.length > 1 && (
+                <button className="gaf-tag" style={{ opacity: 0.6 }} onClick={() => { setSelectedTags([]); setCurrentPage(1); }}>Limpiar todo</button>
+              )}
             </div>
           )}
         </div>

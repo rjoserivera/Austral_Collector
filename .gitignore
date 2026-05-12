@@ -63,3 +63,8 @@ deploy_cpanel.zip
 deploy_stage/
 temp_check/
 scratch/
+
+# Documentation
+Documentacion_Cambios_Austral_Collector.doc
+*.doc
+*.docx

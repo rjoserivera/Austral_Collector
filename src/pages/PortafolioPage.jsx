@@ -108,7 +108,7 @@ export default function PortafolioPage() {
                   <p>Aún no hay fotos o videos en esta sección.</p>
                 </div>
               ) : (
-                <div className="pp-galeria-grid" style={{ gridTemplateColumns: grupo.items.length === 1 ? '1fr' : grupo.items.length <= 3 ? 'repeat(auto-fill, minmax(200px, 1fr))' : 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+                <div className="pp-galeria-grid" style={{ gridTemplateColumns: grupo.items.length === 1 ? 'minmax(auto, 380px)' : grupo.items.length <= 3 ? 'repeat(auto-fill, minmax(200px, 1fr))' : 'repeat(auto-fill, minmax(220px, 1fr))' }}>
                   {grupo.items.map((item, idx) => {
                     if (item.tipo === 'foto') {
                       return (
