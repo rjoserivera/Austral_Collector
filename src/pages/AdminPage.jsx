@@ -1112,13 +1112,9 @@ function AdminVideos({ adminId }) {
             const selectedVideo = videos.find(v => String(v.id) === String(selectedId));
             let ytId = null;
             if (selectedVideo && selectedVideo.link_yt) {
-              const url = selectedVideo.link_yt;
-              if (url.includes('youtu.be/')) ytId = url.split('youtu.be/')[1];
-              else if (url.includes('watch?v=')) ytId = url.split('watch?v=')[1];
-              else if (url.includes('embed/')) ytId = url.split('embed/')[1];
-              if (ytId) {
-                ytId = ytId.split('&')[0].split('?')[0];
-              }
+              const regExp = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([^&?]+)/;
+              const match = selectedVideo.link_yt.match(regExp);
+              if (match) ytId = match[1];
             }
 
             return (
@@ -1689,11 +1685,10 @@ function AdminIdentidad({ adminId }) {
 
   // ── Drag & Drop ──
   const getYtId = (url) => {
-    if (!url) return null
-    const m = url.match(/[?&]v=([^&]+)/)
-    if (m) return m[1]
-    const sl = url.split('/')
-    return sl[sl.length - 1] || null
+    if (!url) return null;
+    const regExp = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([^&?]+)/;
+    const match = url.match(regExp);
+    return match ? match[1] : null;
   }
 
   // ── Comunidad helpers ──

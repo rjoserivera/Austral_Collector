@@ -207,6 +207,19 @@ export default function DashboardPage() {
     }).catch(e => console.error("Error guardando reorden manual: ", e));
   }
 
+  const handleTogglePin = (fig) => {
+    const isPinned = fig.is_pinned == 1;
+    const newStatus = isPinned ? 0 : 1;
+    fetch(`${API_URL}/auth/toggle_pin.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ post_id: fig.id, is_pinned: newStatus })
+    }).then(r => r.json()).then(d => {
+      if(d.success) loadData();
+      else toast.error('Error al fijar publicación.');
+    }).catch(e => console.error(e));
+  };
+
   const currentFilteredFiguras = figuras.filter(f => (f.tipo || 'figura') === activeTab);
   const totalPages = Math.ceil(currentFilteredFiguras.length / ITEMS_PER_PAGE);
   const currentItems = currentFilteredFiguras.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -324,7 +337,7 @@ export default function DashboardPage() {
             {currentItems.map((fig, index) => (
               <article
                 key={`${fig.id}-${fig.tipo}`}
-                className={`db-card card ${draggedIndex === ((currentPage - 1) * ITEMS_PER_PAGE + index) ? 'dragging' : ''}`}
+                className={`db-card card ${draggedIndex === ((currentPage - 1) * ITEMS_PER_PAGE + index) ? 'dragging' : ''} ${fig.is_pinned == 1 ? 'pinned-card' : ''}`}
                 draggable
                 onDragStart={(e) => handleDragStart(e, index)}
                 onDragEnter={(e) => handleDragEnter(e, index)}
@@ -361,6 +374,7 @@ export default function DashboardPage() {
                       title="Escribe la posición y presiona Enter"
                     />
                   </div>
+                  <button className="db-action-btn pin-btn" title={fig.is_pinned == 1 ? "Desfijar" : "Fijar en esta posición"} onClick={() => handleTogglePin(fig)} style={{ background: fig.is_pinned == 1 ? '#dfc08a' : '', color: fig.is_pinned == 1 ? '#000' : '', fontSize: '1.2rem' }}>{fig.is_pinned == 1 ? '📌' : '📍'}</button>
                   <button className="db-action-btn edit" title="Editar" onClick={() => setEditingPost(fig)}>✏️</button>
                   <button className="db-action-btn delete" title="Eliminar" onClick={() => handleDelete(fig)}>🗑️</button>
                 </div>

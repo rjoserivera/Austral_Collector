@@ -642,11 +642,10 @@ export default function HomePage() {
             <div className="gold-divider" />
             <div className="hp-videos-sidebar-grid">
               {data.videos.length > 0 ? data.videos.slice(0, 4).map(v => {
-                // Parse Youtube ID to get thumbnail
                 let ytid = v.link_yt;
-                const match = v.link_yt.match(/[?&]v=([^&]+)/);
+                const regExp = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([^&?]+)/;
+                const match = (v.link_yt || '').match(regExp);
                 if (match) ytid = match[1];
-                else { const sl = v.link_yt.split('/'); ytid = sl[sl.length - 1]; }
 
                 return (
                   <div key={v.id} className="hp-video-side-thumb clickable" id={`hp-vid-${v.id}`} onClick={() => setSelectedVideo(ytid)} style={{ cursor: 'pointer' }}>
@@ -740,7 +739,7 @@ export default function HomePage() {
         <div className="evento-modal-overlay" onClick={() => setSelectedEvento(null)}>
           <div className="evento-modal-card" onClick={e => e.stopPropagation()}>
             <button className="evento-modal-close" onClick={() => setSelectedEvento(null)}>✕</button>
-            <img className="evento-modal-img" src={selectedEvento.imagen_url ? `${BASE_URL}/${selectedEvento.imagen_url}` : '/mock_event1.png'} alt={selectedEvento.titulo} />
+            <img className="evento-modal-img" src={selectedEvento.imagen_url ? `${BASE_URL}/${selectedEvento.imagen_url}` : '/mock_event1.png'} alt={selectedEvento.titulo} style={{ width: '100%', height: '320px', objectFit: 'contain', backgroundColor: '#05141a' }} />
             <div className="evento-modal-body">
               <h2 className="evento-modal-titulo">{selectedEvento.titulo}</h2>
               <div className="evento-modal-fecha">

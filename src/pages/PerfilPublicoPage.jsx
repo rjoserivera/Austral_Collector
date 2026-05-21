@@ -311,7 +311,8 @@ export default function PerfilPublicoPage() {
                   <img src={fig.local_image || (fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png')} alt={fig.nombre} className="hp-figura-img" loading="lazy" />
                   {fig.anio && <div className="hp-figura-year">{fig.anio}</div>}
                   <div className="hp-figura-year" style={{ top: '8px', right: '8px', left: 'auto', background: 'rgba(45,110,126,.9)' }}>{fig.tipo || 'figura'}</div>
-                  {fig.isOfflineSync && <div style={{ position: 'absolute', top: '10px', left: '10px', background: '#d35400', color: 'white', fontSize: '0.75rem', padding: '4px 8px', borderRadius: '12px', zIndex: 10 }} title="Pendiente de subida">⏳ Pendiente</div>}
+                  {fig.is_pinned == 1 && <div style={{ position: 'absolute', top: '8px', left: '8px', fontSize: '1.4rem', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))', zIndex: 10 }} title="Publicación fijada">📌</div>}
+                  {fig.isOfflineSync && <div style={{ position: 'absolute', top: fig.is_pinned ? '40px' : '10px', left: '10px', background: '#d35400', color: 'white', fontSize: '0.75rem', padding: '4px 8px', borderRadius: '12px', zIndex: 10 }} title="Pendiente de subida">⏳ Pendiente</div>}
                 </div>
                 <div className="hp-figura-body">
                   <h3 className="hp-figura-name">{fig.nombre}</h3>

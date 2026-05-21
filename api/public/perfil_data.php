@@ -4,6 +4,7 @@
 
 require_once '../db.php';
 
+
 $username = $_GET['username'] ?? '';
 
 if (empty($username)) {
@@ -36,11 +37,24 @@ if ($viewerName) {
     $viewerId = $stmtV->fetchColumn() ?: 0;
 }
 
+$hasIsPinned = false;
+try {
+    $pdo->query("SELECT is_pinned FROM posts LIMIT 1");
+    $hasIsPinned = true;
+} catch (Exception $e) {
+    // Si falla, intentamos crear la columna
+    try {
+        $pdo->exec("ALTER TABLE posts ADD COLUMN is_pinned TINYINT(1) DEFAULT 0");
+    } catch (Exception $e2) {}
+}
+
+$orderBy = $hasIsPinned ? "is_pinned DESC, orden ASC, created_at DESC" : "orden ASC, created_at DESC";
+
 $stmtPosts = $pdo->prepare(
     "SELECT p.*,
      (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as total_likes,
      (SELECT 1 FROM likes WHERE user_id = ? AND post_id = p.id) as userLiked
-     FROM posts p WHERE user_id = ? ORDER BY orden ASC, created_at DESC"
+     FROM posts p WHERE user_id = ? ORDER BY $orderBy"
 );
 $stmtPosts->execute([$viewerId, $user['id']]);
 $posts = $stmtPosts->fetchAll();

@@ -45,7 +45,8 @@
 .evento-thumb {
   width: 72px;
   height: 56px;
-  object-fit: cover;
+  object-fit: contain;
+  background-color: #05141a;
   border-radius: 6px;
   border: 1.5px solid rgba(200, 169, 110, 0.4);
   display: block;

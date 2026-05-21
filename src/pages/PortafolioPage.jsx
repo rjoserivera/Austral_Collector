@@ -13,11 +13,10 @@ function PlayIcon() {
 }
 
 function getYtId(url) {
-  if (!url) return null
-  const m = url.match(/[?&]v=([^&]+)/)
-  if (m) return m[1]
-  const sl = url.split('/')
-  return sl[sl.length - 1] || null
+  if (!url) return null;
+  const regExp = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([^&?]+)/;
+  const match = url.match(regExp);
+  return match ? match[1] : null;
 }
 
 export default function PortafolioPage() {
