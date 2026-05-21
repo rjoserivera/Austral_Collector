@@ -163,15 +163,16 @@ export default function NavBar() {
             </Link>
           )}
 
-          {/* Botón Hamburguesa — solo en móvil */}
-          <button
-            className="navbar-hamburger"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Menú de navegación"
-          >
-            {mobileMenuOpen ? '✕' : '☰'}
-          </button>
         </div>
+
+        {/* Botón Hamburguesa — solo en móvil */}
+        <button
+          className="navbar-hamburger"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Menú de navegación"
+        >
+          {mobileMenuOpen ? '✕' : '☰'}
+        </button>
 
       </div>
 

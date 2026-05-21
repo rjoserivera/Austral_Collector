@@ -121,7 +121,7 @@ export default function DashboardPage() {
     e.dataTransfer.effectAllowed = 'move'
     // Firefox necesita esto
     e.dataTransfer.setData('text/html', e.target)
-    
+
     // Dejar una clase arrastrando para bajar opacidad visualmente origin
     setTimeout(() => {
       e.target.classList.add('db-dragging')
@@ -136,17 +136,17 @@ export default function DashboardPage() {
     setFiguras(prev => {
       const currentFilteredList = prev.filter(f => (f.tipo || 'figura') === activeTab);
       const draggedItem = currentFilteredList[draggedIndex];
-      
+
       const newFilteredList = [...currentFilteredList];
       newFilteredList.splice(draggedIndex, 1);
       newFilteredList.splice(actualIndex, 0, draggedItem);
-      
+
       let filteredCounter = 0;
       return prev.map(f => {
-         if ((f.tipo || 'figura') === activeTab) {
-             return newFilteredList[filteredCounter++];
-         }
-         return f;
+        if ((f.tipo || 'figura') === activeTab) {
+          return newFilteredList[filteredCounter++];
+        }
+        return f;
       });
     })
     setDraggedIndex(actualIndex)
@@ -171,34 +171,34 @@ export default function DashboardPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orden: ordenData })
     })
-    .catch(e => console.error("Error guardando reorden: ", e))
+      .catch(e => console.error("Error guardando reorden: ", e))
   }
 
   const handleManualReorder = (currentIndexOnPage, newPositionStr) => {
     const currentFilteredList = figuras.filter(f => (f.tipo || 'figura') === activeTab);
     const actualCurrentIndex = (currentPage - 1) * ITEMS_PER_PAGE + currentIndexOnPage;
-    
+
     let newPos = parseInt(newPositionStr, 10);
     if (isNaN(newPos) || newPos < 1) newPos = 1;
     if (newPos > currentFilteredList.length) newPos = currentFilteredList.length;
-    
+
     const actualNewIndex = newPos - 1;
     if (actualCurrentIndex === actualNewIndex) return;
 
     const newFilteredList = [...currentFilteredList];
     const itemToMove = newFilteredList.splice(actualCurrentIndex, 1)[0];
     newFilteredList.splice(actualNewIndex, 0, itemToMove);
-    
+
     let filteredCounter = 0;
     const newList = figuras.map(f => {
-       if ((f.tipo || 'figura') === activeTab) {
-           return newFilteredList[filteredCounter++];
-       }
-       return f;
+      if ((f.tipo || 'figura') === activeTab) {
+        return newFilteredList[filteredCounter++];
+      }
+      return f;
     });
-    
+
     setFiguras(newList);
-    
+
     const ordenData = newList.map((fig) => ({ id: fig.id, tipo: fig.tipo }));
     fetch(`${API_URL}/auth/reordenar_posts.php`, {
       method: 'POST',
@@ -214,18 +214,23 @@ export default function DashboardPage() {
   return (
     <div className="dashboard-page section-wrapper">
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 className="db-title">Bienvenido, {userName}</h1>
           <p className="db-subtitle">Administra tu perfil público y tu inventario de figuras.</p>
         </div>
-        {userRole === 'admin' && (
-          <Link to="/admin" className="btn-primary" style={{ background: '#1e4d5a', color: '#fff', padding: '12px 24px' }}>
-            ⚙️ Ir al Panel de Control
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <Link to={`/perfil/${userName}`} className="btn-primary" style={{ background: 'var(--color-gold)', color: '#1e4d5a', padding: '12px 24px', fontWeight: 'bold' }}>
+            🔙 Volver al Perfil
           </Link>
-        )}
+          {userRole === 'admin' && (
+            <Link to="/admin" className="btn-primary" style={{ background: '#1e4d5a', color: '#fff', padding: '12px 24px' }}>
+              ⚙️ Panel Admin
+            </Link>
+          )}
+        </div>
       </div>
-      <div className="gold-divider" style={{ margin: '16px 0 32px' }}/>
+      <div className="gold-divider" style={{ margin: '16px 0 32px' }} />
 
       <div className="db-layout">
 
@@ -242,13 +247,13 @@ export default function DashboardPage() {
             <label className="db-label">Avatar (Foto Circular)</label>
             <span style={{ fontSize: '0.75rem', color: '#aaa', display: 'block', marginBottom: '8px' }}>Te recomendamos que ocupes una imagen de estas dimensiones: 400x400 px (1:1).</span>
             <div className="db-media-preview">
-              <img src={avatar} alt="Mi Avatar" className="db-avatar-img"/>
+              <img src={avatar} alt="Mi Avatar" className="db-avatar-img" />
               <div className="db-media-actions">
                 <button className="btn-outline db-btn-sm" onClick={() => avatarInputRef.current.click()}>✏️ Editar</button>
                 <button className="btn-outline db-btn-sm btn-danger" onClick={() => { setAvatar('/mock_avatar.png'); setAvatarFile(null); }}>🗑️ Eliminar</button>
               </div>
-              <input ref={avatarInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={handleAvatarChange}/>
-              {avatarFile && <small style={{color:'#8cf08c',marginTop:'4px'}}>✅ Nueva foto lista para guardar</small>}
+              <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
+              {avatarFile && <small style={{ color: '#8cf08c', marginTop: '4px' }}>✅ Nueva foto lista para guardar</small>}
             </div>
           </div>
 
@@ -257,14 +262,14 @@ export default function DashboardPage() {
             <span style={{ fontSize: '0.75rem', color: '#aaa', display: 'block', marginBottom: '8px' }}>Te recomendamos que ocupes una imagen de estas dimensiones: 1200x400 px (horizontal 3:1).</span>
             <div className="db-media-preview">
               <div className="db-banner-img-wrap">
-                <img src={banner} alt="Fondo Cabecera" className="db-banner-img"/>
+                <img src={banner} alt="Fondo Cabecera" className="db-banner-img" />
               </div>
               <div className="db-media-actions">
                 <button className="btn-outline db-btn-sm" onClick={() => bannerInputRef.current.click()}>✏️ Editar</button>
                 <button className="btn-outline db-btn-sm btn-danger" onClick={() => { setBanner('/mock_banner.png'); setBannerFile(null); }}>🗑️ Eliminar</button>
               </div>
-              <input ref={bannerInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={handleBannerChange}/>
-              {bannerFile && <small style={{color:'#8cf08c',marginTop:'4px'}}>✅ Nuevo banner listo para guardar</small>}
+              <input ref={bannerInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBannerChange} />
+              {bannerFile && <small style={{ color: '#8cf08c', marginTop: '4px' }}>✅ Nuevo banner listo para guardar</small>}
             </div>
           </div>
 
@@ -277,8 +282,8 @@ export default function DashboardPage() {
           {/* ── CAMBIAR CONTRASEÑA ── */}
           <div className="db-password-section">
             <h3 className="db-section-subtitle">🔑 Cambiar Contraseña</h3>
-            <PasswordChangeForm 
-              username={userName} 
+            <PasswordChangeForm
+              username={userName}
               apiUrl={API_URL}
               onSuccess={() => {
                 localStorage.removeItem('austral_auth_require_pass_change')
@@ -301,14 +306,14 @@ export default function DashboardPage() {
           </div>
 
           <div className="db-tabs-container" style={{ marginBottom: '24px', borderBottom: '1px solid rgba(201,168,76,0.2)' }}>
-            <button 
-              className={`db-tab-btn ${activeTab === 'figura' ? 'active' : ''}`} 
+            <button
+              className={`db-tab-btn ${activeTab === 'figura' ? 'active' : ''}`}
               onClick={() => { setActiveTab('figura'); setCurrentPage(1); }}
             >
               Figuras ({figuras.filter(f => (f.tipo || 'figura') === 'figura').length})
             </button>
-            <button 
-              className={`db-tab-btn ${activeTab === 'cosplay' ? 'active' : ''}`} 
+            <button
+              className={`db-tab-btn ${activeTab === 'cosplay' ? 'active' : ''}`}
               onClick={() => { setActiveTab('cosplay'); setCurrentPage(1); }}
             >
               Cosplays ({figuras.filter(f => f.tipo === 'cosplay').length})
@@ -317,8 +322,8 @@ export default function DashboardPage() {
 
           <div className="db-grid-4 cpm-reorderable-grid">
             {currentItems.map((fig, index) => (
-              <article 
-                key={`${fig.id}-${fig.tipo}`} 
+              <article
+                key={`${fig.id}-${fig.tipo}`}
                 className={`db-card card ${draggedIndex === ((currentPage - 1) * ITEMS_PER_PAGE + index) ? 'dragging' : ''}`}
                 draggable
                 onDragStart={(e) => handleDragStart(e, index)}
@@ -328,7 +333,7 @@ export default function DashboardPage() {
                 style={{ cursor: 'grab' }}
               >
                 <div className="db-card-img-wrap" style={{ pointerEvents: 'none' }}>
-                  <img src={fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png'} alt={fig.nombre} className="db-card-img" loading="lazy"/>
+                  <img src={fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png'} alt={fig.nombre} className="db-card-img" loading="lazy" />
                   <span style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
                     {fig.tipo === 'figura' ? '🗿 Figura' : '🎭 Cosplay'}
                   </span>
@@ -344,11 +349,11 @@ export default function DashboardPage() {
                 <div className="db-card-overlay">
                   <div style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(0,0,0,0.85)', padding: '6px', borderRadius: '6px', border: '1px solid var(--color-gold)', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'default' }} onClick={e => e.stopPropagation()} onDragStart={e => e.preventDefault()}>
                     <span style={{ fontSize: '0.75rem', color: '#dfc08a', fontWeight: 'bold' }}>Nº</span>
-                    <input 
-                      key={`pos-${fig.id}-${(currentPage - 1) * ITEMS_PER_PAGE + index}`} 
-                      type="number" 
-                      min="1" 
-                      max={currentFilteredFiguras.length} 
+                    <input
+                      key={`pos-${fig.id}-${(currentPage - 1) * ITEMS_PER_PAGE + index}`}
+                      type="number"
+                      min="1"
+                      max={currentFilteredFiguras.length}
                       defaultValue={((currentPage - 1) * ITEMS_PER_PAGE + index) + 1}
                       onBlur={(e) => handleManualReorder(index, e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
@@ -365,8 +370,8 @@ export default function DashboardPage() {
 
           {totalPages > 1 && (
             <div className="db-pagination">
-              <button 
-                disabled={currentPage === 1} 
+              <button
+                disabled={currentPage === 1}
                 onClick={() => { setCurrentPage(prev => prev - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                 className="db-pagination-btn"
               >
@@ -383,8 +388,8 @@ export default function DashboardPage() {
                   </button>
                 ))}
               </div>
-              <button 
-                disabled={currentPage === totalPages} 
+              <button
+                disabled={currentPage === totalPages}
                 onClick={() => { setCurrentPage(prev => prev + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                 className="db-pagination-btn"
               >

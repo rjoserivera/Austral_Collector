@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import './VirtualAssistant.css';
 
@@ -6,6 +6,7 @@ export default function VirtualAssistant() {
   const [showBubble, setShowBubble] = useState(false);
   const [texts, setTexts] = useState({});
   const location = useLocation();
+  const mascotRef = useRef(null);
 
   useEffect(() => {
     fetch('/api/public/mascot_texts.php')
@@ -16,6 +17,13 @@ export default function VirtualAssistant() {
       .catch(e => console.error(e));
   }, []);
 
+  // Auto-show bubble when page/route changes
+  useEffect(() => {
+    setShowBubble(false);
+    const timer = setTimeout(() => setShowBubble(true), 1000);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
+
   const [isIdle, setIsIdle] = useState(true);
 
   useEffect(() => {
@@ -23,15 +31,27 @@ export default function VirtualAssistant() {
     
     const handleActivity = (e) => {
       if (window.innerWidth <= 768) {
-        // Al interactuar con la pantalla, ocultamos la burbuja si estaba abierta
-        if (e && (e.type === 'scroll' || e.type === 'touchmove' || e.type === 'touchstart' || e.type === 'click')) {
-          setShowBubble(false);
+        const isMascotTouch = mascotRef.current && e && mascotRef.current.contains(e.target);
+
+        if (isMascotTouch) {
+          // Si toca la mascota: solo reinicia el timer, NO la oculta
+          clearTimeout(idleTimer);
+          idleTimer = setTimeout(() => {
+            setIsIdle(true);
+            setShowBubble(true);
+          }, 5000);
+        } else {
+          // Actividad normal: ocultar mascota si estaba tocando fuera
+          if (e && (e.type === 'scroll' || e.type === 'touchmove' || e.type === 'touchstart' || e.type === 'click')) {
+            setShowBubble(false);
+          }
+          setIsIdle(false);
+          clearTimeout(idleTimer);
+          idleTimer = setTimeout(() => {
+            setIsIdle(true);
+            setShowBubble(true);
+          }, 5000); // 5 segundos de inactividad
         }
-        setIsIdle(false);
-        clearTimeout(idleTimer);
-        idleTimer = setTimeout(() => {
-          setIsIdle(true);
-        }, 5000); // 5 segundos de inactividad
       } else {
         setIsIdle(true); // En escritorio siempre visible
       }
@@ -52,7 +72,7 @@ export default function VirtualAssistant() {
   // Determine section based on current path
   const path = location.pathname;
   let section = 'inicio';
-  if (path.includes('nosotros') || path.includes('identidad')) section = 'nosotros';
+  if (path.includes('nosotros') || path.includes('identidad') || path.includes('portafolio')) section = 'nosotros';
   else if (path.includes('galeria') || path.includes('post')) section = 'galeria';
   else if (path.includes('miembros') || path.includes('perfil')) section = 'miembros';
   else if (path.includes('contacto')) section = 'contacto';
@@ -71,10 +91,11 @@ export default function VirtualAssistant() {
         <div className="mascot-speech-bubble fade-in" dangerouslySetInnerHTML={{ __html: htmlMsg }} />
       )}
       <img 
+        ref={mascotRef}
         src="/austral_saludando.png" 
         alt="Mascota Austral" 
         className="mascot-img" 
-        onClick={() => setShowBubble(!showBubble)}
+        onClick={() => setShowBubble(prev => !prev)}
         title="¡Hazme clic!"
       />
     </aside>

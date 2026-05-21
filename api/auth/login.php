@@ -62,6 +62,27 @@ $password = $data['password'];
             'require_password_change' => isset($user['require_password_change']) ? (bool)$user['require_password_change'] : false
         ]);
 } else {
+    // Determine user_id if username exists but password failed
+    $failedUserId = null;
+    if ($user) {
+        $failedUserId = $user['id'];
+    } else {
+        $stmtCheck = $pdo->prepare("SELECT id FROM usuarios WHERE username = ? OR email = ?");
+        $stmtCheck->execute([$username, $username]);
+        $existing = $stmtCheck->fetch();
+        if ($existing) $failedUserId = $existing['id'];
+    }
+
+    try {
+        $pdo->exec("ALTER TABLE logs MODIFY user_id INT NULL");
+    } catch(PDOException $e) {}
+
+    try {
+        $logStmt = $pdo->prepare("INSERT INTO logs (user_id, tipo, accion) VALUES (?, 'login', ?)");
+        $logAction = "Intento de inicio de sesión fallido para usuario: " . $username;
+        $logStmt->execute([$failedUserId, $logAction]);
+    } catch(PDOException $e) {}
+
     http_response_code(401);
     echo json_encode(['error' => 'Credenciales inválidas o cuenta inactiva']);
 }

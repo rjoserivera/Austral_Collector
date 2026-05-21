@@ -8,6 +8,36 @@ import PostModal from '../components/PostModal'
 import { getOfflinePosts } from '../utils/offlineSync'
 import VerifiedBadge from '../components/VerifiedBadge'
 
+const linkify = (text) => {
+  if (!text) return text;
+  // Dividimos el texto usando una expresión regular que captura la URL completa
+  const parts = text.split(/(https?:\/\/\S+)/g);
+  
+  return parts.map((part, i) => {
+    if (part && part.startsWith('http')) {
+      return (
+        <a 
+          key={i} 
+          href={part} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="bio-link"
+          style={{ 
+            color: '#f1c40f', 
+            textDecoration: 'underline', 
+            wordBreak: 'break-all',
+            fontWeight: 'bold',
+            display: 'inline-block' // Asegura que sea un bloque clickeable claro
+          }}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
+
 export default function PerfilPublicoPage() {
   const { id } = useParams()
   const [user, setUser] = useState(null)
@@ -18,10 +48,10 @@ export default function PerfilPublicoPage() {
   const [selectedPost, setSelectedPost] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const POSTS_PER_PAGE = 20
-  
+
   const authUserStr = localStorage.getItem('austral_auth_user')
   let loggedUserName = null;
-  try { if (authUserStr) loggedUserName = JSON.parse(authUserStr).username; } catch(e) {}
+  try { if (authUserStr) loggedUserName = JSON.parse(authUserStr).username; } catch (e) { }
 
   const loadData = async () => {
     const viewerParam = loggedUserName ? `&viewer_username=${loggedUserName}` : ''
@@ -37,11 +67,11 @@ export default function PerfilPublicoPage() {
     try {
       const r = await fetch(`${API_URL}/public/perfil_data.php?username=${id}${viewerParam}`);
       const d = await r.json();
-      if(d.success) {
+      if (d.success) {
         fetchedUser = d.data;
         localStorage.setItem(`austral_perfil_cache_${id}`, JSON.stringify(d.data));
       }
-    } catch(e) {
+    } catch (e) {
       console.error("Error fetching profile, attempting to load cache:", e);
       if (!navigator.onLine) {
         setOfflineError(true);
@@ -50,7 +80,7 @@ export default function PerfilPublicoPage() {
       if (cached) {
         try {
           fetchedUser = JSON.parse(cached);
-        } catch(err) {
+        } catch (err) {
           console.error("Cache parsing failed:", err);
         }
       }
@@ -81,7 +111,7 @@ export default function PerfilPublicoPage() {
     } catch (e) {
       console.warn('Error loading offline posts:', e);
     }
-    
+
     setUser(finalUser);
   }
 
@@ -100,22 +130,22 @@ export default function PerfilPublicoPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: loggedUserName, post_id: postId, tipo: tipo || 'figura' })
     })
-    .then(r => r.json())
-    .then(d => {
-      if (d.success) {
-        setUser(prev => {
-           const newCollection = prev.collection.map(fig => 
-             fig.id === postId && (fig.tipo || 'figura') === (tipo || 'figura')
-               ? { ...fig, total_likes: d.total_likes, userLiked: d.action === 'liked' }
-               : fig
-           )
-           return { ...prev, collection: newCollection }
-        })
-      } else {
-        toast.error(d.error || 'Error al procesar el like.')
-      }
-    })
-    .catch(e => console.error("Error toggling like:", e))
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          setUser(prev => {
+            const newCollection = prev.collection.map(fig =>
+              fig.id === postId && (fig.tipo || 'figura') === (tipo || 'figura')
+                ? { ...fig, total_likes: d.total_likes, userLiked: d.action === 'liked' }
+                : fig
+            )
+            return { ...prev, collection: newCollection }
+          })
+        } else {
+          toast.error(d.error || 'Error al procesar el like.')
+        }
+      })
+      .catch(e => console.error("Error toggling like:", e))
   }
 
   const handleRateProfile = (score) => {
@@ -125,15 +155,15 @@ export default function PerfilPublicoPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ viewer_username: loggedUserName, rated_user_id: user.id, score })
     })
-    .then(r => r.json())
-    .then(d => {
-      if (d.success) {
-        loadData(); // reload stats and user info dynamically
-      } else {
-        toast.error(d.error || 'Error al calificar perfil.');
-      }
-    })
-    .catch(e => console.error("Error rating profile:", e))
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          loadData(); // reload stats and user info dynamically
+        } else {
+          toast.error(d.error || 'Error al calificar perfil.');
+        }
+      })
+      .catch(e => console.error("Error rating profile:", e))
   }
 
   const handleDeleteRating = () => {
@@ -143,15 +173,15 @@ export default function PerfilPublicoPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ viewer_username: loggedUserName, rated_user_id: user.id })
     })
-    .then(r => r.json())
-    .then(d => {
-      if (d.success) {
-        loadData(); // reload stats
-      } else {
-        toast.error(d.error || 'Error al remover calificación.');
-      }
-    })
-    .catch(e => console.error("Error deleting rating:", e))
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          loadData(); // reload stats
+        } else {
+          toast.error(d.error || 'Error al remover calificación.');
+        }
+      })
+      .catch(e => console.error("Error deleting rating:", e))
   }
 
   // Filtrar por tab activo y paginar (Deben estar antes del return condicional)
@@ -167,7 +197,7 @@ export default function PerfilPublicoPage() {
   useEffect(() => { setCurrentPage(1); }, [activeTab]);
 
   if (!user) {
-    return <div className="perfil-page" style={{padding: '100px', textAlign: 'center', color: '#aaa'}}>
+    return <div className="perfil-page" style={{ padding: '100px', textAlign: 'center', color: '#aaa' }}>
       Cargando perfil o el usuario no existe...
     </div>
   }
@@ -182,7 +212,7 @@ export default function PerfilPublicoPage() {
     <div className="perfil-page">
       {/* ── BANNER PANORÁMICO ──────────────────────────────────── */}
       <section className="perfil-header" style={{ backgroundImage: `url('${user.banner_url ? BASE_URL + '/' + user.banner_url : '/mock_banner.png'}')` }}>
-        <div className="perfil-overlay" aria-hidden="true"/>
+        <div className="perfil-overlay" aria-hidden="true" />
       </section>
 
       {offlineError && (
@@ -195,8 +225,8 @@ export default function PerfilPublicoPage() {
         {/* ── CABECERA / INFO USUARIO ────────────────────────────── */}
         <section className="perfil-info-card">
           <div className="perfil-avatar-wrap">
-            <div className="perfil-avatar-ring"/>
-            <img src={user.avatar_url ? `${BASE_URL}/${user.avatar_url}` : '/mock_avatar.png'} alt={user.username} className="perfil-avatar" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/mock_avatar.png'; }}/>
+            <div className="perfil-avatar-ring" />
+            <img src={user.avatar_url ? `${BASE_URL}/${user.avatar_url}` : '/mock_avatar.png'} alt={user.username} className="perfil-avatar" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/mock_avatar.png'; }} />
           </div>
           <div className="perfil-user-details">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -205,9 +235,9 @@ export default function PerfilPublicoPage() {
                 <VerifiedBadge type={user.verification_type} badgeUrl={user.verification_badge} size={26} />
                 {user.role === 'admin' && <span title="Administrador" style={{ fontSize: '1.3rem', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>👑</span>}
               </h1>
-              
-              <div 
-                className="perfil-global-rating" 
+
+              <div
+                className="perfil-global-rating"
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: (!isOwner && loggedUserName) ? 'pointer' : 'default' }}
                 onClick={() => { if (!isOwner && loggedUserName) setShowRatingModal(true); }}
                 title={(!isOwner && loggedUserName) ? 'Pulsa para calificar' : ''}
@@ -216,11 +246,11 @@ export default function PerfilPublicoPage() {
                 <strong style={{ fontSize: '1.1rem', color: '#f0e4cc', lineHeight: 1 }}>
                   {parseFloat(user.stats?.average_rating || 0).toFixed(1)}
                 </strong>
-                <span style={{ fontSize: '0.85rem', color: 'rgba(240, 228, 204, 0.6)'}}>({user.stats?.total_ratings || 0})</span>
+                <span style={{ fontSize: '0.85rem', color: 'rgba(240, 228, 204, 0.6)' }}>({user.stats?.total_ratings || 0})</span>
                 {!isOwner && loggedUserName && (
-                   <span style={{ fontSize: '0.85rem', marginLeft: '4px', filter: 'grayscale(0.2)' }}>
-                     {user.stats?.viewer_rating ? '✏️' : '📝'}
-                   </span>
+                  <span style={{ fontSize: '0.85rem', marginLeft: '4px', filter: 'grayscale(0.2)' }}>
+                    {user.stats?.viewer_rating ? '✏️' : '📝'}
+                  </span>
                 )}
               </div>
             </div>
@@ -236,11 +266,11 @@ export default function PerfilPublicoPage() {
                 </>
               )}
             </div>
-            
+
             {/* Rating widget moved next to username header */}
 
-            <p className="perfil-bio">{user.biografia || 'Sin biografía disponible.'}</p>
-            
+            <p className="perfil-bio">{user.biografia ? linkify(user.biografia) : 'Sin biografía disponible.'}</p>
+
             {isOwner && (
               <div className="perfil-owner-actions">
                 <Link to="/dashboard" className="perfil-btn-outline">✏️ Editar Perfil</Link>
@@ -252,36 +282,36 @@ export default function PerfilPublicoPage() {
           </div>
         </section>
 
-        <div className="gold-divider" style={{ margin: '40px 0 32px' }}/>
+        <div className="gold-divider" style={{ margin: '40px 0 32px' }} />
 
         {/* ── GALERÍA DE PORTAFOLIO ──────────────────────────────── */}
         <section className="perfil-portafolio">
           <div className="perfil-portafolio-header">
             <h2 className="perfil-section-title">⚜️ Portafolio de Colección</h2>
             <div className="perfil-tabs-container">
-              <button 
-                className={`perfil-tab-btn ${activeTab === 'figura' ? 'active' : ''}`} 
+              <button
+                className={`perfil-tab-btn ${activeTab === 'figura' ? 'active' : ''}`}
                 onClick={() => setActiveTab('figura')}
               >
                 Figuras ({figurasCount})
               </button>
-              <button 
-                className={`perfil-tab-btn ${activeTab === 'cosplay' ? 'active' : ''}`} 
+              <button
+                className={`perfil-tab-btn ${activeTab === 'cosplay' ? 'active' : ''}`}
                 onClick={() => setActiveTab('cosplay')}
               >
                 Cosplay ({cosplayCount})
               </button>
             </div>
           </div>
-          
+
           <div className="perfil-grid-4">
             {paginatedCollection.map(fig => (
               <article key={fig.id} className="hp-figura-card card" onClick={() => setSelectedPost(fig)}>
                 <div className="hp-figura-img-wrap" style={{ position: 'relative' }}>
-                  <img src={fig.local_image || (fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png')} alt={fig.nombre} className="hp-figura-img" loading="lazy"/>
+                  <img src={fig.local_image || (fig.imagen_url ? `${BASE_URL}/${fig.imagen_url}` : '/mock_fig1.png')} alt={fig.nombre} className="hp-figura-img" loading="lazy" />
                   {fig.anio && <div className="hp-figura-year">{fig.anio}</div>}
-                  <div className="hp-figura-year" style={{top: '8px', right: '8px', left: 'auto', background: 'rgba(45,110,126,.9)'}}>{fig.tipo || 'figura'}</div>
-                  {fig.isOfflineSync && <div style={{position:'absolute', top:'10px', left:'10px', background:'#d35400', color:'white', fontSize:'0.75rem', padding:'4px 8px', borderRadius:'12px', zIndex:10}} title="Pendiente de subida">⏳ Pendiente</div>}
+                  <div className="hp-figura-year" style={{ top: '8px', right: '8px', left: 'auto', background: 'rgba(45,110,126,.9)' }}>{fig.tipo || 'figura'}</div>
+                  {fig.isOfflineSync && <div style={{ position: 'absolute', top: '10px', left: '10px', background: '#d35400', color: 'white', fontSize: '0.75rem', padding: '4px 8px', borderRadius: '12px', zIndex: 10 }} title="Pendiente de subida">⏳ Pendiente</div>}
                 </div>
                 <div className="hp-figura-body">
                   <h3 className="hp-figura-name">{fig.nombre}</h3>
@@ -289,7 +319,7 @@ export default function PerfilPublicoPage() {
                   <p className="hp-figura-desc">{fig.descripcion || 'Sin descripción.'}</p>
                   <div>
                     <button className="hp-heart-btn" onClick={(e) => { e.stopPropagation(); handleLike(fig.id, fig.tipo); }}>
-                       {fig.userLiked ? '❤' : '♡'} {fig.total_likes || 0}
+                      {fig.userLiked ? '❤' : '♡'} {fig.total_likes || 0}
                     </button>
                   </div>
                 </div>
@@ -300,8 +330,8 @@ export default function PerfilPublicoPage() {
           {/* PAGINACIÓN */}
           {totalPages > 1 && (
             <div className="galeria-pagination" style={{ marginTop: '32px' }}>
-              <button 
-                disabled={currentPage === 1} 
+              <button
+                disabled={currentPage === 1}
                 onClick={() => { setCurrentPage(prev => Math.max(1, prev - 1)); window.scrollTo({ top: 400, behavior: 'smooth' }); }}
                 className="pagination-btn"
               >
@@ -318,8 +348,8 @@ export default function PerfilPublicoPage() {
                   </button>
                 ))}
               </div>
-              <button 
-                disabled={currentPage === totalPages} 
+              <button
+                disabled={currentPage === totalPages}
                 onClick={() => { setCurrentPage(prev => Math.min(totalPages, prev + 1)); window.scrollTo({ top: 400, behavior: 'smooth' }); }}
                 className="pagination-btn"
               >
@@ -338,10 +368,10 @@ export default function PerfilPublicoPage() {
           <div className="prw-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '350px', textAlign: 'center', background: 'radial-gradient(ellipse at center, #2e1a1a 0%, #170d0d 100%)', border: '1px solid var(--color-gold-light)' }}>
             <button className="prw-modal-close" onClick={() => setShowRatingModal(false)}>✕</button>
             <h2 style={{ fontFamily: 'var(--font-title)', color: 'var(--color-gold)', marginBottom: '16px', fontSize: '1.8rem' }}>
-               Calificar Perfil
+              Calificar Perfil
             </h2>
             <p style={{ color: 'rgba(240, 228, 204, 0.8)', fontSize: '0.9rem', marginBottom: '24px' }}>
-               {user.stats?.viewer_rating ? `Actualmente calificaste a ${user.username} con ${user.stats.viewer_rating} estrellas. ¿Deseas modificarlo?` : `¿Cuántas estrellas de reputación le darías a la colección de ${user.username}?`}
+              {user.stats?.viewer_rating ? `Actualmente calificaste a ${user.username} con ${user.stats.viewer_rating} estrellas. ¿Deseas modificarlo?` : `¿Cuántas estrellas de reputación le darías a la colección de ${user.username}?`}
             </p>
 
             <div className="prw-stars" style={{ justifyContent: 'center', marginBottom: '32px' }}>
@@ -359,12 +389,12 @@ export default function PerfilPublicoPage() {
             </div>
 
             {user.stats?.viewer_rating && (
-              <button 
-                 className="prw-remove-btn" 
-                 style={{ display: 'block', margin: '0 auto', fontSize: '0.85rem' }}
-                 onClick={() => { handleDeleteRating(); setShowRatingModal(false); }}
+              <button
+                className="prw-remove-btn"
+                style={{ display: 'block', margin: '0 auto', fontSize: '0.85rem' }}
+                onClick={() => { handleDeleteRating(); setShowRatingModal(false); }}
               >
-                 Remover mi calificación
+                Remover mi calificación
               </button>
             )}
           </div>

@@ -24,6 +24,12 @@
             ]
           },
           {
+            "group": "Requerimientos",
+            "pages": [
+              "historias"
+            ]
+          },
+          {
             "group": "Panel de Administración",
             "pages": [
               "admin/panel"
@@ -53,8 +59,13 @@
           "icon": "users"
         },
         {
+          "anchor": "Diagramas HTML",
+          "href": "/diagramas.html",
+          "icon": "diagram-project"
+        },
+        {
           "anchor": "GitHub",
-          "href": "https://github.com/tu-usuario/austral-collector",
+          "href": "https://github.com/rjoserivera/Austral_Collector",
           "icon": "github"
         }
       ]

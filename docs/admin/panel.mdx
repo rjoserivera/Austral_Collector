@@ -1,13 +1,13 @@
 ---
 title: Panel de Administración
-description: Guía de uso del panel de control exclusivo para administradores de Austral Collector.
+description: Guía completa de todas las secciones del panel de control de Austral Collector.
 ---
 
 ## Acceso
 
-El panel de administración está disponible en la ruta `/admin`. Solo los usuarios con rol `admin` pueden acceder.
+El panel de administración está disponible en la ruta `/admin`. Solo los usuarios con rol `admin` pueden acceder. Al intentar acceder sin ese rol, el sistema redirige automáticamente a `/login`.
 
-Al intentar acceder sin ser administrador, el sistema redirige automáticamente a `/login`.
+En **móvil**, el panel usa un sidebar off-canvas activado con el botón hamburguesa (☰) del header.
 
 <Warning>Nunca compartas las credenciales de administrador. El panel tiene acceso completo a todos los datos de la plataforma.</Warning>
 
@@ -17,28 +17,30 @@ Al intentar acceder sin ser administrador, el sistema redirige automáticamente 
 
 ### 📊 Dashboard General
 
-Vista inicial con métricas en tiempo real:
+Vista inicial con métricas en tiempo real y resumen de actividad:
 
-| Métrica | Descripción |
+| Widget | Descripción |
 |---|---|
-| Total de usuarios | Número de miembros registrados |
-| Usuarios activos | Miembros con sesión reciente |
-| Total de figuras | Colecciones registradas |
-| Total de posts | Publicaciones de la comunidad |
-| Mensajes de contacto | Formularios recibidos sin leer |
-
-También incluye un **registro de actividad** con las últimas acciones realizadas en el sistema.
+| Total de usuarios | Miembros registrados en la plataforma |
+| Total de publicaciones | Figuras y cosplays publicados |
+| Total de colecciones | Grupos del portafolio curado |
+| Figuras verificadas | Publicaciones con badge de verificación |
+| Sistemas Operativos | Indicador verde de conexión a BD |
+| Cumpleañeros del mes | Miembros que cumplen años este mes |
+| Actividad reciente | Últimas 5 acciones registradas en el log |
 
 ---
 
 ### 👥 Gestión de Usuarios
 
-Accede a la lista completa de usuarios con opciones de:
+Lista completa de usuarios con búsqueda, paginación y acciones por fila.
 
+**Acciones disponibles:**
 - **Crear usuario** — Alta de nuevo miembro con todos sus datos
 - **Editar usuario** — Modificar nombre, email, rol y estado
 - **Activar / Desactivar** — Bloquear acceso sin eliminar la cuenta
-- **Enviar clave temporal** — Genera y envía una contraseña temporal por email
+- **Enviar clave temporal** — Genera y envía contraseña temporal por email
+- **Cambiar rol** — Promover a `admin` o degradar a `member`
 
 **Campos del usuario:**
 
@@ -48,19 +50,27 @@ Accede a la lista completa de usuarios con opciones de:
 | `email` | string | Correo electrónico |
 | `nombre` | string | Nombre real |
 | `apellido` | string | Apellido |
-| `fecha_nacimiento` | date | Fecha de nacimiento |
+| `fecha_nacimiento` | date | Fecha de nacimiento (para cumpleañeros) |
 | `role` | enum | `admin` o `member` |
-| `is_active` | boolean | Estado de la cuenta |
+| `is_active` | boolean | Estado activo/inactivo de la cuenta |
 
 ---
 
-### 📰 Gestión de Publicaciones
+### 🛡️ Moderación de Publicaciones
 
-Visualiza y modera todas las publicaciones de los miembros:
+Visualiza y modera todas las publicaciones de los miembros.
 
-- Ver publicaciones de cualquier usuario
+**Funcionalidades:**
+- Ver todas las publicaciones con filtro por tipo (`figura` / `cosplay`)
+- Buscar por nombre de publicación o autor
+- Abrir el modal de detalle de cualquier publicación
 - Eliminar publicaciones inapropiadas
-- Buscar por usuario o contenido
+
+**Flujo de eliminación con advertencia:**
+1. Admin hace clic en "Eliminar" sobre una publicación
+2. Se abre un modal que solicita el **motivo de la eliminación** (obligatorio)
+3. Al confirmar, el sistema elimina la publicación y **envía un correo de advertencia** al autor automáticamente
+4. La acción se registra en el log de actividad
 
 ---
 
@@ -86,49 +96,122 @@ Los eventos aparecen en el componente `NoticiasEventos` de la HomePage.
 
 Configura las imágenes que se muestran en la página **Portafolio** (`/portafolio`).
 
-- Subir imágenes a la galería curada
-- Agregar descripción a cada imagen
+- Subir imágenes por archivo o URL
+- Agregar título y descripción a cada imagen
+- Organizar imágenes en grupos/secciones
 - Reordenar o eliminar imágenes existentes
-- Cambiar la imagen del **banner de comunidad**
+- Cambiar la imagen del **banner de comunidad** ("Únete a la Comunidad")
 
 ---
 
-### 🎬 Videos de la Comunidad
+### 🎬 Promocion Videos
 
-Configura los videos de YouTube que se muestran en la HomePage y en el Portafolio.
+Configura los videos de YouTube que aparecen en la **HomePage** y en el **Portafolio**.
 
-- Ingresar URLs de YouTube para cada slot
-- Hasta **4 videos** configurables
-- Los videos se muestran como embeds en la plataforma
+- Selecciona videos de una lista de videos registrados en el sistema
+- Hasta **4 video slots** configurables para la Home
+- Se muestra preview de la miniatura del video seleccionado
+- Los videos se muestran en el componente `VideosComunidad`
 
 ---
 
-### 🎨 Identidad Visual (Admin)
+### ⭐ Promociones Home
+
+Gestiona las imágenes de promoción que aparecen en la página principal.
+
+- Agregar nueva promoción con imagen y enlace de destino
+- Ver tabla de promociones activas (imagen, nombre, enlace)
+- Eliminar promociones existentes
+
+---
+
+### 🏆 Destacados
+
+Configura el miembro destacado y los mensajes especiales de la comunidad.
+
+**Miembro Destacado del Mes:**
+- Busca un usuario por nombre
+- Selecciónalo del dropdown para que aparezca en la HomePage
+- Se muestra su avatar, nombre y estadísticas en `MiembroDestacado`
+
+**Mensajes de Biografía:**
+- **Mensaje de Destacado** — Texto que acompaña al miembro destacado si no tiene biografía propia
+- **Mensaje de Cumpleañero** — Texto para el coleccionista que cumple años este mes
+
+---
+
+### 🎨 Identidad Visual
 
 Actualiza los elementos de identidad visual del sitio:
 
 | Elemento | Descripción |
 |---|---|
-| Logo principal | Imagen del logo de la plataforma |
-| Mascota | Imagen de la mascota de Austral Collector |
-| Banner hero | Imagen principal del HeroBanner |
+| Logo de inicio | Imagen del logo que aparece en el Hero de la HomePage |
+| Mascota | Imagen de la mascota virtual (VirtualAssistant) |
+| Banner hero | Imagen de fondo del HeroBanner |
+| Banner comunidad | Imagen del CTA "Únete a la Comunidad" |
+
+Cada elemento puede configurarse subiendo un archivo de imagen o ingresando una URL externa.
 
 ---
 
-### 👑 Miembro Destacado
+### 💬 Textos de la Mascota
 
-Selecciona manualmente el coleccionista que aparece como **"Miembro Destacado del Mes"** en la página principal.
+Configura los mensajes que muestra la mascota virtual en cada sección del sitio.
 
-- Busca por nombre de usuario
-- Al seleccionarlo, se muestra su avatar, nombre y estadísticas en el HomePage
+| Sección | Descripción |
+|---|---|
+| `inicio` | Mensaje al visitar la página principal |
+| `nosotros` | Mensaje en Portafolio / Identidad |
+| `galeria` | Mensaje en la Galería |
+| `miembros` | Mensaje en el Directorio y Perfiles |
+| `contacto` | Mensaje en la página de Contacto |
+
+Los mensajes aceptan HTML básico (`<strong>`, `<br/>`, `<small>`).
+
+---
+
+### ✅ Verificación de Miembros
+
+Otorga o revoca el badge de verificación a los perfiles.
+
+- Lista de todos los miembros con su estado de verificación actual
+- Botón de toggle para activar/desactivar el badge
+- El badge aparece como un ícono en el perfil público y en el directorio de miembros
+
+---
+
+### 📋 Log de Actividad
+
+Historial completo y auditable de todas las acciones del sistema.
+
+**Filtros disponibles:**
+- Por responsable (nombre de usuario)
+- Por categoría de acción (Login, Figura, Cosplay, Admin, Usuario, Alerta)
+- Por rango de fechas (Desde / Hasta)
+
+**Tipos de acción (badge de color):**
+
+| Tipo | Badge | Descripción |
+|---|---|---|
+| `login` | 🟢 Verde | Inicio de sesión |
+| `alerta` | 🔴 Rojo | Eliminación con advertencia |
+| `figura` | ⚫ Gris | Acciones sobre figuras |
+| `cosplay` | 🩵 Cyan | Acciones sobre cosplays |
+| `admin` | 🔵 Azul | Acciones administrativas |
+| `usuario` | 🟣 Morado | Cambios de perfil/usuario |
+| `identidad` | ⭐ Dorado | Cambios de identidad visual |
+
+El log tiene paginación de 20 registros por página y muestra fecha/hora exacta de cada acción.
 
 ---
 
 ### 📧 Sistema de Correos
 
-El panel utiliza un sistema de correos configurado en `api/admin/mailer.php` para:
+El panel utiliza el motor de correos configurado en `api/admin/mailer.php` para:
 
 - Enviar claves temporales a usuarios
-- Recibir mensajes del formulario de contacto
+- Enviar advertencias por eliminación de contenido al autor
+- Recibir mensajes del formulario de contacto (re-envío al admin)
 
-<Note>Revisa la configuración SMTP en `mailer.php` antes de usar el sistema de correos en producción.</Note>
+<Note>Configura los parámetros SMTP (`HOST`, `USER`, `PASS`, `PORT`) en las variables de entorno del servidor antes de usar el sistema de correos en producción.</Note>

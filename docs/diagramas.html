@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Diagramas del Sistema — Austral Collector</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --gold: #dfc08a; --teal: #1e4d5a; --rust: #8b2020;
+    --bg: #0d1b22; --card: #122330; --border: rgba(223,192,138,0.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #e8d9c0; min-height: 100vh; }
+  header { background: linear-gradient(135deg,#0a1e2a,#1e4d5a); padding: 32px 40px; border-bottom: 2px solid var(--gold); }
+  header h1 { font-size: 1.9rem; color: var(--gold); letter-spacing: 0.05em; }
+  header p { color: rgba(232,217,192,0.65); margin-top: 6px; font-size: 0.95rem; }
+  nav { display: flex; gap: 10px; flex-wrap: wrap; padding: 18px 40px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); }
+  nav a { color: var(--gold); text-decoration: none; font-size: 0.82rem; padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px; transition: all 0.2s; }
+  nav a:hover { background: rgba(223,192,138,0.12); border-color: var(--gold); }
+  main { max-width: 1200px; margin: 0 auto; padding: 40px 24px; display: flex; flex-direction: column; gap: 48px; }
+  .diagram-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .diagram-card header { background: rgba(30,77,90,0.7); padding: 20px 28px; border-bottom: 1px solid var(--border); }
+  .diagram-card header h2 { font-size: 1.15rem; color: var(--gold); }
+  .diagram-card header p { font-size: 0.82rem; color: rgba(232,217,192,0.6); margin-top: 4px; }
+  .diagram-body { padding: 28px; overflow-x: auto; }
+  .mermaid { background: transparent !important; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; padding: 16px 28px; background: rgba(0,0,0,0.2); border-top: 1px solid var(--border); }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: rgba(232,217,192,0.7); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🗺️ Diagramas del Sistema — Austral Collector</h1>
+  <p>Documentación visual de la arquitectura, flujos, base de datos y secuencias del sistema</p>
+</header>
+<nav>
+  <a href="#arquitectura">Arquitectura General</a>
+  <a href="#flujo-principal">Flujo Principal</a>
+  <a href="#autenticacion">Autenticación JWT</a>
+  <a href="#offline">Flujo Offline PWA</a>
+  <a href="#admin">Panel Admin</a>
+  <a href="#base-datos">Base de Datos</a>
+  <a href="#componentes">Componentes React</a>
+  <a href="#historias">Actores y Casos de Uso</a>
+</nav>
+<main>
+
+<!-- 1. ARQUITECTURA GENERAL -->
+<div class="diagram-card" id="arquitectura">
+  <header>
+    <h2>1. Arquitectura General del Sistema</h2>
+    <p>Capas del sistema: cliente React, API PHP, base de datos y almacenamiento de medios</p>
+  </header>
+  <div class="diagram-body">
+    <div class="mermaid">
+graph TB
+  subgraph BROWSER["🌐 Navegador / PWA"]
+    REACT["React 19 + Vite 8<br/>SPA"]
+    SW["Service Worker<br/>Workbox"]
+    IDB["IndexedDB<br/>Posts Offline"]
+  end
+  subgraph SERVER["🖥️ Servidor Web (Apache + PHP 8)"]
+    subgraph API["API REST PHP"]
+      PUB["api/public/*<br/>Sin autenticación"]
+      AUTH["api/auth/*<br/>JWT requerido"]
+      ADMIN["api/admin/*<br/>Solo rol admin"]
+    end
+    UPLOADS["📁 /uploads<br/>Imágenes y medios"]
+    MAILER["📧 Mailer SMTP"]
+  end
+  subgraph DB["🗄️ MySQL"]
+    TABLES["Tablas:<br/>usuarios · publicaciones<br/>figuras · eventos · config<br/>ratings · activity_log"]
+  end
+
+  REACT -- "fetch + JWT" --> PUB
+  REACT -- "fetch + JWT" --> AUTH
+  REACT -- "fetch + JWT" --> ADMIN
+  SW -. "cache" .-> PUB
+  IDB -. "sync al reconectar" .-> AUTH
+  PUB --> TABLES
+  AUTH --> TABLES
+  ADMIN --> TABLES
+  AUTH --> UPLOADS
+  ADMIN --> UPLOADS
+  ADMIN --> MAILER
+
+  style BROWSER fill:#0d2a3d,stroke:#2d6e7e,color:#e8d9c0
+  style SERVER fill:#1a1a0d,stroke:#8b7020,color:#e8d9c0
+  style DB fill:#0d2010,stroke:#2d6e3e,color:#e8d9c0
+    </div>
+  </div>
+  <div class="legend">
+    <span class="legend-item"><span class="dot" style="background:#2d6e7e"></span>Frontend React</span>
+    <span class="legend-item"><span class="dot" style="background:#8b7020"></span>Backend PHP</span>
+    <span class="legend-item"><span class="dot" style="background:#2d6e3e"></span>Persistencia MySQL</span>
+  </div>
+</div>
+
+<!-- 2. FLUJO PRINCIPAL -->
+<div class="diagram-card" id="flujo-principal">
+  <header>
+    <h2>2. Flujo de Navegación Principal</h2>
+    <p>Rutas de la aplicación y componentes que componen cada página</p>
+  </header>
+  <div class="diagram-body">
+    <div class="mermaid">
+flowchart TD
+  ROOT["main.jsx<br/>Punto de entrada"] --> APP["App.jsx<br/>Router + Estado global de sesión"]
+  APP --> NAV["NavBar.jsx<br/>Barra de navegación"]
+  APP --> FOOT["Footer.jsx"]
+  APP --> VA["VirtualAssistant.jsx<br/>Mascota contextual"]
+
+  APP -->|"/"| HOME["HomePage"]
+  APP -->|"/galeria"| GAL["GaleriaPage"]
+  APP -->|"/miembros"| MIE["MiembrosPage"]
+  APP -->|"/perfil/:id"| PERF["PerfilPublicoPage"]
+  APP -->|"/portafolio"| PORT["PortafolioPage"]
+  APP -->|"/contacto"| CONT["ContactoPage"]
+  APP -->|"/login"| LOGIN["LoginPage"]
+  APP -->|"/dashboard"| DASH["DashboardPage<br/>🔒 auth"]
+  APP -->|"/admin"| ADMN["AdminPage<br/>🛡️ admin"]
+
+  HOME --> HB["HeroBanner"]
+  HOME --> UF["UltimasFiguras"]
+  HOME --> FMV["FigurasMasVotadas"]
+  HOME --> MD["MiembroDestacado"]
+  HOME --> NE["NoticiasEventos"]
+  HOME --> VC["VideosComunidad"]
+  HOME --> CTA["CTAFinal"]
+
+  GAL --> PM["PostModal"]
+  DASH --> CPM["CreatePostModal"]
+  PERF --> PM
+
+  style ROOT fill:#1a3d4a,stroke:#dfc08a,color:#f0e4cc
+  style APP fill:#1a3d4a,stroke:#dfc08a,color:#f0e4cc
+  style ADMN fill:#3d1a1a,stroke:#8b2020,color:#f0e4cc
+  style DASH fill:#1a2d3d,stroke:#2d6e7e,color:#f0e4cc
+    </div>
+  </div>
+</div>
+
+<!-- 3. AUTENTICACIÓN JWT -->
+<div class="diagram-card" id="autenticacion">
+  <header>
+    <h2>3. Flujo de Autenticación JWT</h2>
+    <p>Inicio de sesión, validación de token y manejo de clave temporal</p>
+  </header>
+  <div class="diagram-body">
+    <div class="mermaid">
+sequenceDiagram
+  actor U as Usuario
+  participant FE as React Frontend
+  participant API as api/auth/login.php
+  participant DB as MySQL
+
+  U->>FE: Ingresa usuario + contraseña
+  FE->>API: POST /auth/login.php {username, password}
+  API->>DB: SELECT * FROM usuarios WHERE username=?
+  DB-->>API: Datos del usuario
+  API->>API: Verificar password_hash()
+  alt Credenciales válidas
+    API-->>FE: {token, user, require_pass_change}
+    FE->>FE: localStorage.setItem(token, user, role)
+    alt require_pass_change === true
+      FE->>U: Modal bloqueante de cambio de contraseña
+      U->>FE: Ingresa nueva contraseña
+      FE->>API: POST /auth/cambiar_password.php
+      API->>DB: UPDATE usuarios SET password=?
+      API-->>FE: {success: true}
+      FE->>FE: localStorage.removeItem(require_pass_change)
+    end
+    FE->>U: Redirige a /dashboard
+  else Credenciales inválidas
+    API-->>FE: {error: "Credenciales incorrectas"} 401
+    FE->>U: Muestra toast de error
+  else Cuenta desactivada
+    API-->>FE: {error: "Cuenta desactivada"} 403
+    FE->>U: Muestra toast de advertencia
+  end
+    </div>
+  </div>
+</div>
+
+<!-- 4. FLUJO OFFLINE PWA -->
+<div class="diagram-card" id="offline">
+  <header>
+    <h2>4. Flujo Offline — PWA con IndexedDB</h2>
+    <p>Cómo se gestionan las publicaciones cuando el usuario no tiene conexión</p>
+  </header>
+  <div class="diagram-body">
+    <div class="mermaid">
+sequenceDiagram
+  actor U as Usuario
+  participant FE as Dashboard React
+  participant SW as Service Worker
+  participant IDB as IndexedDB
+  participant API as api/auth/publicar_post.php
+
+  U->>FE: Crea una publicación
+  FE->>FE: ¿navigator.onLine?
+  alt Online
+    FE->>API: POST publicar_post.php (multipart)
+    API-->>FE: {success: true}
+    FE->>U: Toast "Publicado exitosamente"
+  else Offline
+    FE->>IDB: saveOfflinePost(postData)
+    IDB-->>FE: Guardado en cola
+    FE->>U: Toast "Guardado offline — se sincronizará al reconectar"
+    FE->>FE: useSyncStatus → status: 'pending'
+  end
+
+  Note over FE,API: Cuando recupera conexión...
+  FE->>FE: window 'online' event
+  FE->>IDB: getOfflinePosts()
+  IDB-->>FE: [post1, post2, ...]
+  loop Por cada post pendiente
+    FE->>API: POST publicar_post.php
+    API-->>FE: {success: true}
+    FE->>IDB: removeOfflinePost(id)
+  end
+  FE->>U: Toast "Posts sincronizados"
+  FE->>FE: useSyncStatus → status: 'online'
+    </div>
+  </div>
+</div>
+
+<!-- 5. PANEL ADMIN -->
+<div class="diagram-card" id="admin">
+  <header>
+    <h2>5. Estructura del Panel de Administración</h2>
+    <p>Secciones del panel y sus responsabilidades</p>
+  </header>
+  <div class="diagram-body">
+    <div class="mermaid">
+flowchart LR
+  ADMIN["🛡️ AdminPage<br/>rol: admin"]
+
+  ADMIN --> D1["📊 Dashboard\nEstadísticas + Actividad reciente"]
+  ADMIN --> D2["👥 Usuarios\nCRUD + Roles + Clave temporal"]
+  ADMIN --> D3["🛡️ Moderación\nRevisar y eliminar publicaciones"]
+  ADMIN --> D4["📅 Eventos\nCRUD de eventos de la comunidad"]
+  ADMIN --> D5["🖼️ Portafolio\nGalería curada + Banner comunidad"]
+  ADMIN --> D6["🎬 Videos\nSlots de YouTube para Home"]
+  ADMIN --> D7["⭐ Promociones\nImágenes promocionales Home"]
+  ADMIN --> D8["🏆 Destacados\nMiembro del mes + Mensajes bio"]
+  ADMIN --> D9["🎨 Identidad Visual\nLogo + Mascota + Banner hero"]
+  ADMIN --> D10["💬 Textos Mascota\nMensajes por sección del sitio"]
+  ADMIN --> D11["✅ Verificación\nBadges de miembros verificados"]
+  ADMIN --> D12["📋 Log Actividad\nHistorial con filtros y paginación"]
+
+  style ADMIN fill:#3d1a1a,stroke:#8b2020,color:#ffcccc
+  style D1 fill:#1a2d3d,stroke:#2d6e7e,color:#e8d9c0
+  style D2 fill:#1a2d3d,stroke:#2d6e7e,color:#e8d9c0
+  style D3 fill:#2d1a1a,stroke:#7e2d2d,color:#e8d9c0
+  style D4 fill:#1a3d1a,stroke:#2d7e2d,color:#e8d9c0
+  style D5 fill:#2d2d1a,stroke:#7e7e2d,color:#e8d9c0
+  style D6 fill:#2d2d1a,stroke:#7e7e2d,color:#e8d9c0
+  style D7 fill:#2d2d1a,stroke:#7e7e2d,color:#e8d9c0
+  style D8 fill:#1a2d1a,stroke:#2d7e4e,color:#e8d9c0
+  style D9 fill:#2d1a2d,stroke:#7e2d7e,color:#e8d9c0
+  style D10 fill:#1a2d3d,stroke:#2d6e7e,color:#e8d9c0
+  style D11 fill:#1a3d1a,stroke:#2d7e2d,color:#e8d9c0
+  style D12 fill:#2d1a1a,stroke:#7e5020,color:#e8d9c0
+    </div>
+  </div>
+</div>
+
+<!-- 6. BASE DE DATOS -->
+<div class="diagram-card" id="base-datos">
+  <header>
+    <h2>6. Esquema de Base de Datos (ER)</h2>
+    <p>Tablas principales y relaciones del modelo de datos</p>
+  </header>
+  <div class="diagram-body">
+    <div class="mermaid">
+erDiagram
+  usuarios {
+    int id PK
+    string username
+    string email
+    string password_hash
+    string nombre
+    string apellido
+    date fecha_nacimiento
+    enum role
+    tinyint is_active
+    string avatar_url
+    string banner_url
+    text bio
+    tinyint is_verified
+    datetime created_at
+  }
+  publicaciones {
+    int id PK
+    int usuario_id FK
+    string titulo
+    text descripcion
+    string imagen_url
+    string tipo
+    int year
+    string categoria
+    string link_yt
+    json hashtags
+    json imagenes_extra
+    int orden
+    datetime created_at
+  }
+  likes {
+    int id PK
+    int usuario_id FK
+    int publicacion_id FK
+    datetime created_at
+  }
+  ratings {
+    int id PK
+    int rater_id FK
+    int rated_id FK
+    int score
+    datetime created_at
+  }
+  eventos {
+    int id PK
+    string titulo
+    text descripcion
+    date fecha
+    string imagen_url
+    string link
+  }
+  site_config {
+    string clave PK
+    text valor
+    datetime updated_at
+  }
+  activity_log {
+    int id PK
+    int usuario_id FK
+    string accion
+    string tipo
+    datetime created_at
+  }
+  promos {
+    int id PK
+    string nombre
+    string imagen_url
+    string link_url
+    int orden
+    datetime created_at
+  }
+
+  usuarios ||--o{ publicaciones : "crea"
+  usuarios ||--o{ likes : "da"
+  publicaciones ||--o{ likes : "recibe"
+  usuarios ||--o{ ratings : "valora"
+  usuarios ||--o{ ratings : "es valorado"
+  usuarios ||--o{ activity_log : "genera"
+    </div>
+  </div>
+</div>
+
+<!-- 7. COMPONENTES REACT -->
+<div class="diagram-card" id="componentes">
+  <header>
+    <h2>7. Árbol de Componentes React</h2>
+    <p>Jerarquía de componentes del frontend</p>
+  </header>
+  <div class="diagram-body">
+    <div class="mermaid">
+flowchart TD
+  MP["main.jsx"] --> NP["NotificationProvider\nToast + Confirm global"]
+  NP --> BRP["BrowserRouter"]
+  BRP --> APPX["App.jsx"]
+
+  APPX --> NAVBAR["NavBar"]
+  APPX --> ROUTES["Routes"]
+  APPX --> FOOTER["Footer"]
+  APPX --> VASSIST["VirtualAssistant\nMascota contextual"]
+  APPX --> PASSCHANGE["PasswordChangeForm\nModal bloqueante"]
+
+  ROUTES --> R1["HomePage\n/ "]
+  ROUTES --> R2["GaleriaPage\n/galeria"]
+  ROUTES --> R3["MiembrosPage\n/miembros"]
+  ROUTES --> R4["PerfilPublicoPage\n/perfil/:id"]
+  ROUTES --> R5["PortafolioPage\n/portafolio"]
+  ROUTES --> R6["ContactoPage\n/contacto"]
+  ROUTES --> R7["LoginPage\n/login"]
+  ROUTES --> R8["DashboardPage\n/dashboard 🔒"]
+  ROUTES --> R9["AdminPage\n/admin 🛡️"]
+
+  R1 --> C1["HeroBanner"]
+  R1 --> C2["UltimasFiguras"]
+  R1 --> C3["FigurasMasVotadas"]
+  R1 --> C4["MiembroDestacado"]
+  R1 --> C5["NoticiasEventos"]
+  R1 --> C6["VideosComunidad"]
+  R1 --> C7["CTAFinal"]
+
+  R2 --> C8["PostModal"]
+  R4 --> C8
+  R4 --> C9["VerifiedBadge"]
+  R8 --> C10["CreatePostModal"]
+  R8 --> C11["useSyncStatus hook"]
+
+  style MP fill:#1a3d4a,stroke:#dfc08a,color:#f0e4cc
+  style R9 fill:#3d1a1a,stroke:#8b2020,color:#ffcccc
+  style R8 fill:#1a2d3d,stroke:#2d6e7e,color:#e8d9c0
+    </div>
+  </div>
+</div>
+
+<!-- 8. ACTORES Y CASOS DE USO -->
+<div class="diagram-card" id="historias">
+  <header>
+    <h2>8. Actores y Casos de Uso</h2>
+    <p>Diagrama de casos de uso por rol de usuario</p>
+  </header>
+  <div class="diagram-body">
+    <div class="mermaid">
+flowchart LR
+  VISIT(["👤 Visitante"])
+  MEMBER(["🧑‍💻 Miembro"])
+  ADMIN(["🛡️ Administrador"])
+
+  subgraph PUB["Acciones Públicas"]
+    UC1["Ver página principal"]
+    UC2["Explorar galería"]
+    UC3["Ver perfiles públicos"]
+    UC4["Ver portafolio"]
+    UC5["Formulario de contacto"]
+    UC6["Iniciar sesión"]
+  end
+
+  subgraph AUTH["Acciones de Miembro"]
+    UC7["Ver dashboard personal"]
+    UC8["Publicar figuras / cosplay"]
+    UC9["Editar publicaciones propias"]
+    UC10["Reordenar publicaciones"]
+    UC11["Dar likes"]
+    UC12["Valorar perfiles ⭐"]
+    UC13["Editar perfil"]
+    UC14["Usar offline / sincronizar"]
+  end
+
+  subgraph ADMN["Acciones de Admin"]
+    UC15["Gestionar usuarios"]
+    UC16["Enviar clave temporal"]
+    UC17["Moderar publicaciones"]
+    UC18["Gestionar eventos"]
+    UC19["Gestionar galería portafolio"]
+    UC20["Configurar videos"]
+    UC21["Gestionar promociones"]
+    UC22["Seleccionar miembro destacado"]
+    UC23["Identidad visual"]
+    UC24["Textos de mascota"]
+    UC25["Badges de verificación"]
+    UC26["Revisar log de actividad"]
+  end
+
+  VISIT --> UC1
+  VISIT --> UC2
+  VISIT --> UC3
+  VISIT --> UC4
+  VISIT --> UC5
+  VISIT --> UC6
+
+  MEMBER --> UC1
+  MEMBER --> UC2
+  MEMBER --> UC3
+  MEMBER --> UC7
+  MEMBER --> UC8
+  MEMBER --> UC9
+  MEMBER --> UC10
+  MEMBER --> UC11
+  MEMBER --> UC12
+  MEMBER --> UC13
+  MEMBER --> UC14
+
+  ADMIN --> MEMBER
+  ADMIN --> UC15
+  ADMIN --> UC16
+  ADMIN --> UC17
+  ADMIN --> UC18
+  ADMIN --> UC19
+  ADMIN --> UC20
+  ADMIN --> UC21
+  ADMIN --> UC22
+  ADMIN --> UC23
+  ADMIN --> UC24
+  ADMIN --> UC25
+  ADMIN --> UC26
+
+  style VISIT fill:#1a3d1a,stroke:#2d7e2d,color:#e8d9c0
+  style MEMBER fill:#1a2d3d,stroke:#2d6e7e,color:#e8d9c0
+  style ADMIN fill:#3d1a1a,stroke:#8b2020,color:#ffcccc
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer style="text-align:center;padding:28px;color:rgba(232,217,192,0.35);font-size:0.78rem;border-top:1px solid rgba(223,192,138,0.15);margin-top:20px;">
+  Austral Collector — Documentación técnica generada automáticamente · Sistema de diagramas con Mermaid.js
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#1e4d5a',
+      primaryTextColor: '#f0e4cc',
+      primaryBorderColor: '#dfc08a',
+      lineColor: '#dfc08a',
+      secondaryColor: '#8b2020',
+      tertiaryColor: '#0d2830',
+      background: '#0d1b22',
+      mainBkg: '#122330',
+      nodeBorder: '#dfc08a',
+      clusterBkg: '#0d2830',
+      titleColor: '#dfc08a',
+      edgeLabelBackground: '#122330',
+      actorBkg: '#1e4d5a',
+      actorBorder: '#dfc08a',
+      actorTextColor: '#f0e4cc',
+      activationBorderColor: '#dfc08a',
+      activationBkgColor: '#0d2830',
+      sequenceNumberColor: '#f0e4cc',
+      noteBkgColor: '#1e3d2a',
+      noteTextColor: '#f0e4cc',
+      signalColor: '#dfc08a'
+    },
+    flowchart: { curve: 'basis', padding: 20 },
+    sequence: { actorMargin: 50, messageMargin: 40 },
+    er: { diagramPadding: 20 }
+  });
+</script>
+</body>
+</html>

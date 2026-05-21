@@ -68,3 +68,8 @@ scratch/
 Documentacion_Cambios_Austral_Collector.doc
 *.doc
 *.docx
+
+# Zip archives
+*.zip
+
+*.sql

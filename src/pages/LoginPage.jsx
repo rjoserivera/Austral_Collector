@@ -28,8 +28,28 @@ export default function LoginPage() {
     }
   }, [navigate]);
 
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutTime, setLockoutTime] = useState(0);
+
+  useEffect(() => {
+    let timer;
+    if (lockoutTime > 0) {
+      timer = setInterval(() => {
+        setLockoutTime(prev => prev - 1);
+      }, 1000);
+    } else if (lockoutTime === 0 && failedAttempts >= 3) {
+      setFailedAttempts(0);
+      setError('');
+    }
+    return () => clearInterval(timer);
+  }, [lockoutTime, failedAttempts]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (lockoutTime > 0) {
+      setError(`Demasiados intentos. Intenta nuevamente en ${lockoutTime} segundos.`);
+      return;
+    }
     setError('');
 
     if (!username || !password) {
@@ -47,6 +67,7 @@ export default function LoginPage() {
     .then(r => r.json())
     .then(data => {
       if (data.success && data.user) {
+        setFailedAttempts(0);
         if (data.alert_destacado) {
           toast.add('Atención: No hay ningún cumpleañero ni destacado configurado. Se mostrará la publicación con más "Me gusta" por el momento.', 'warning', 10000);
         }
@@ -66,7 +87,14 @@ export default function LoginPage() {
         }
 
       } else {
-        setError(data.error || 'Credenciales incorrectas.');
+        const newAttempts = failedAttempts + 1;
+        setFailedAttempts(newAttempts);
+        if (newAttempts >= 3) {
+          setLockoutTime(60);
+          setError('Demasiados intentos fallidos. Por favor, espera 1 minuto.');
+        } else {
+          setError(data.error || 'Credenciales incorrectas.');
+        }
       }
     })
     .catch(err => {
@@ -77,6 +105,7 @@ export default function LoginPage() {
       setLoading(false);
     });
   };
+
 
   return (
     <div className="login-page">
@@ -133,8 +162,8 @@ export default function LoginPage() {
               />
             </div>
 
-            <button type="submit" className="btn-primary login-submit-btn" disabled={loading}>
-              {loading ? 'Verificando...' : 'Ingresar al Gremio'}
+            <button type="submit" className="btn-primary login-submit-btn" disabled={loading || lockoutTime > 0}>
+              {lockoutTime > 0 ? `Bloqueado (${lockoutTime}s)` : loading ? 'Verificando...' : 'Ingresar al Gremio'}
             </button>
           </form>
         ) : (

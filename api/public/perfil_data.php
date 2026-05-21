@@ -46,7 +46,13 @@ $stmtPosts->execute([$viewerId, $user['id']]);
 $posts = $stmtPosts->fetchAll();
 
 // Enrich each post with imagenes_extra (decoded) and hashtags
+// Fix: Se inyectan los datos del autor y su badge para que el modal los muestre correctamente
 foreach ($posts as &$post) {
+    $post['autor'] = $user['username'];
+    $post['autor_avatar'] = $user['avatar_url'];
+    $post['autor_verification_type'] = $user['verification_type'] ?? 'none';
+    $post['autor_verification_badge'] = $user['verification_badge'] ?? null;
+
     // Decode imagenes_extra JSON
     $post['imagenes_extra'] = isset($post['imagenes_extra'])
         ? json_decode($post['imagenes_extra'], true) ?? []

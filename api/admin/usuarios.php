@@ -51,7 +51,11 @@ try {
             $stmt = $pdo->prepare("UPDATE usuarios SET " . $data['field'] . " = ? WHERE id = ?");
             $stmt->execute([$data['value'], $data['id']]);
             
-            logAction($pdo, $data['adminId'] ?? null, 'admin', "Actualizó " . $data['field'] . " del usuario ID: " . $data['id']);
+            $accionStr = "Actualizó " . $data['field'] . " del usuario ID: " . $data['id'];
+            if ($data['field'] === 'is_active') {
+                $accionStr = $data['value'] == 1 ? "Desbaneó al usuario ID: " . $data['id'] : "Baneó al usuario ID: " . $data['id'];
+            }
+            logAction($pdo, $data['adminId'] ?? null, 'admin', $accionStr);
         } else {
             $verType  = $data['verification_type']  ?? 'none';
             $verBadge = $data['verification_badge']  ?? null;

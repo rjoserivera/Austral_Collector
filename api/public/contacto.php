@@ -19,7 +19,7 @@ if (empty($nombre) || empty($email) || empty($mensaje)) {
     exit(json_encode(['success' => false, 'error' => 'Faltan campos obligatorios']));
 }
 
-$adminEmail = "austral.cadmin@gmail.com";
+$adminEmail = "administracion@australcollector.cl";
 $asunto = "🌟 Nuevo Contacto Web: $nombre";
 
 // Vamos a usar la función pública sendCustomEmail del mailer.php existente, 

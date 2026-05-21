@@ -239,7 +239,6 @@ export default function GaleriaPage() {
                 onChange={(e) => {
                   setSearch(e.target.value)
                   setShowSuggestions(true)
-                  setFilterCat('Todas')
                   setCurrentPage(1)
                 }}
                 onFocus={() => setShowSuggestions(true)}
@@ -247,7 +246,7 @@ export default function GaleriaPage() {
               {search && (
                 <button
                   className="galeria-search-clear"
-                  onClick={() => { setSearch(''); setFilterCat('Todas'); setShowSuggestions(false); setCurrentPage(1); }}
+                  onClick={() => { setSearch(''); setSelectedTags([]); setShowSuggestions(false); setCurrentPage(1); }}
                   aria-label="Limpiar"
                 >✕</button>
               )}
@@ -375,7 +374,7 @@ export default function GaleriaPage() {
           </>
         ) : (
           <div className="galeria-empty">
-            <p>No se encontraron resultados para "{search || filterCat}".</p>
+            <p>No se encontraron resultados para "{search}".</p>
           </div>
         )}
       </div>
@@ -386,7 +385,7 @@ export default function GaleriaPage() {
         onClose={() => setSelectedPost(null)}
         onLike={handleLike}
         onTagClick={(tag) => {
-          setFilterCat(tag);
+          setSelectedTags([tag]);
           setSearch('');
           window.scrollTo({ top: 0, behavior: 'smooth' });
           setSelectedPost(null);

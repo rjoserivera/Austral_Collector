@@ -187,6 +187,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  max-width: 100%;
 }
 
 .admin-sec-header {
@@ -473,10 +474,13 @@
 
 /* ── TABLAS ─────────────────────────────────────────────── */
 .admin-table-wrap {
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
   border-radius: 10px;
   border: 1.5px solid rgba(45,110,126,0.25);
   box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  -webkit-overflow-scrolling: touch;
 }
 .admin-table {
   width: 100%;
@@ -806,6 +810,7 @@
 /* ── SELECTS ────────────────────────────────────────────── */
 .admin-select {
   width: 100%;
+  max-width: 100%;
   padding: 9px 12px;
   background: rgba(10,30,40,0.60);
   border: 1.5px solid rgba(200,169,110,0.35);
@@ -814,6 +819,9 @@
   font-family: var(--font-heading);
   font-size: 0.82rem;
   cursor: pointer;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .admin-select-sm {
   padding: 7px 12px;
@@ -854,6 +862,7 @@
   flex-direction: column;
   gap: 6px;
   min-width: 200px;
+  max-width: 100%;
 }
 .admin-form-group label {
   font-family: var(--font-heading);
@@ -863,6 +872,7 @@
 }
 .admin-input {
   width: 100%;
+  max-width: 100%;
   padding: 10px 14px;
   background: rgba(10,30,40,0.60);
   border: 1.5px solid rgba(200,169,110,0.30);
@@ -1219,7 +1229,17 @@
   z-index: 999;
 }
 
+.admin-mensajes-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr 1fr;
+}
+
 @media (max-width: 768px) {
+  .admin-mensajes-grid {
+    grid-template-columns: 1fr;
+  }
+
   
   .admin-page {
     /* Permitir scroll general si es necesario, aunque main lo maneja */

@@ -155,7 +155,7 @@
 /* ── Galería + Videos split ───────────────────────────────── */
 .pp-media {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 36px;
   padding: 0 24px 60px;
 }

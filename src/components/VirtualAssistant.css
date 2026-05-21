@@ -19,6 +19,11 @@
   transform: translateY(30px);
 }
 
+.virtual-assistant-panel.hidden .mascot-img,
+.virtual-assistant-panel.hidden .mascot-speech-bubble {
+  pointer-events: none !important;
+}
+
 .mascot-img {
   width: 100%;
   max-width: 120px;

@@ -1,0 +1,55 @@
+<footer class="footer" id="footer">
+    <div class="footer-container">
+
+        <div class="footer-brand">
+            <img src="<?php echo (strpos($_SERVER['REQUEST_URI'], '/wiki-kreative-gen15.5/') !== false) ? '/wiki-kreative-gen15.5/assets/img/kreative_white_logo.png' : '/assets/img/kreative_white_logo.png'; ?>" alt="Logo" class="footer-logo">
+        </div>
+
+        <div class="footer-section">
+            <h3>Contacto</h3>
+            <ul class="contact-info">
+                <li class="contacto-nombre">Mauro Rojas</li>
+                <li class="contacto-encargado">Director general de alphadocere</li>
+                <li>
+                    <i class="far fa-envelope"></i>
+                    <a href="mailto:administracion@australcollector.cl">administracion@australcollector.cl</a>
+                </li>
+                <li>
+                    <i class="fab fa-whatsapp"></i>
+                    <a href="https://wa.me/945429495" target="_blank">WhatsApp</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3>Síguenos</h3>
+            <ul class="social-links">
+                <li>
+                    <a href="https://www.youtube.com/@alphadocereapoyosocioemoci4979" target="_blank" class="social-link youtube">
+                        <i class="fab fa-youtube"></i>
+                        <span>YouTube</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3>Comunidad</h3>
+            <ul class="social-links">
+                <li>
+                    <a href="https://discord.gg/kreative" target="_blank" class="social-link discord">
+                        <i class="fab fa-discord"></i>
+                        <span>Discord</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        <div class="copyright-container">
+            <p class="copyright">Copyright 2025 Kreative v. Gen 16 Inicial 1.2 | Todos los derechos reservados por empresa Kreative</p>
+        </div>
+    </div>
+</footer>

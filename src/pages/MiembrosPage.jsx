@@ -165,7 +165,6 @@ export default function MiembrosPage() {
                   )}
                 </div>
               </div>
-              <p className="mi-card-headline" title={m.biografia}>{m.biografia || 'Coleccionista'}</p>
               <p className="mi-card-bio">{m.biografia || 'Sin biografía disponible. ¡Un coleccionista misterioso!'}</p>
 
               <div className="mi-card-stats">

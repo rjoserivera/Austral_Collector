@@ -18,9 +18,9 @@ function _buildRawMessage(array $headers, string $body): string {
 // HELPER: Envío via SMTP manual (Gmail SSL 465)
 // -------------------------------------------------------
 function _sendViaSmtp(string $toEmail, string $subject, string $htmlBody): array {
-    $adminEmail  = "austral.cadmin@gmail.com";
-    $appPassword = "rbyk xfwv penr hkkf";
-    $host        = "ssl://smtp.gmail.com";
+    $adminEmail  = "administracion@australcollector.cl";
+    $appPassword = "}s%Eet7n,RO}";
+    $host        = "ssl://mail.australcollector.cl";
     $port        = 465;
     $smtpLog     = "";
     $success     = false;
@@ -146,8 +146,8 @@ function sendModerationEmail($toEmail, $username, $postName, $postType, $motivo)
     </style></head><body>
         <div class='container'>
             <div class='header-logo'>
-                <a href='https://austral.collector.alphadocere.cl/' target='_blank'>
-                    <img src='https://austral.collector.alphadocere.cl/logo_sin_fondo2.png' alt='Austral Collector Logo' width='150' style='display:block;margin:0 auto;border:0;' />
+                <a href='https://australcollector.cl/' target='_blank'>
+                    <img src='https://australcollector.cl/logo_sin_fondo2.png' alt='Austral Collector Logo' width='150' style='display:block;margin:0 auto;border:0;' />
                 </a>
             </div>
             <div class='header'>Hola, {$username}</div>
@@ -160,7 +160,7 @@ function sendModerationEmail($toEmail, $username, $postName, $postType, $motivo)
             </div>
             <p>Si crees que esto es un error, puedes contactarnos respondiendo a este correo.</p>
             <div class='footer'>
-                Equipo de Administración de <a href='https://austral.collector.alphadocere.cl/' target='_blank'>Austral Collector</a>
+                Equipo de Administración de <a href='https://australcollector.cl/' target='_blank'>Austral Collector</a>
             </div>
         </div>
     </body></html>
@@ -188,16 +188,16 @@ function sendTempKeyEmail($toEmail, $username, $tempKey) {
     </style></head><body>
         <div class='container'>
             <div class='header-logo'>
-                <a href='https://austral.collector.alphadocere.cl/' target='_blank'>
-                    <img src='https://austral.collector.alphadocere.cl/logo_sin_fondo2.png' alt='Austral Collector Logo' width='150' style='display:block;margin:0 auto;border:0;' />
+                <a href='https://australcollector.cl/' target='_blank'>
+                    <img src='https://australcollector.cl/logo_sin_fondo2.png' alt='Austral Collector Logo' width='150' style='display:block;margin:0 auto;border:0;' />
                 </a>
             </div>
             <div class='header'>Hola, {$username}</div>
-            <p>Se ha generado una clave temporal para tu cuenta en <a href='https://austral.collector.alphadocere.cl/' target='_blank' style='color:#1e4d5a;font-weight:bold;text-decoration:none;'>Austral Collector</a>.</p>
+            <p>Se ha generado una clave temporal para tu cuenta en <a href='https://australcollector.cl/' target='_blank' style='color:#1e4d5a;font-weight:bold;text-decoration:none;'>Austral Collector</a>.</p>
             <p>Usa esta clave para iniciar sesión y cámbiala por una definitiva desde tu perfil.</p>
             <div class='key-box'>{$tempKey}</div>
             <p><strong>Nota:</strong> Si no solicitaste este cambio, contáctanos de inmediato.</p>
-            <div class='footer'>Mensaje automático del sistema — Administración <a href='https://austral.collector.alphadocere.cl/' target='_blank'>Austral Collector</a>.</div>
+            <div class='footer'>Mensaje automático del sistema — Administración <a href='https://australcollector.cl/' target='_blank'>Austral Collector</a>.</div>
         </div>
     </body></html>
 HTML;
@@ -222,13 +222,13 @@ function sendCustomEmail($toEmail, $username, $subject, $messageText) {
     </style></head><body>
         <div class='container'>
             <div class='header-logo'>
-                <a href='https://austral.collector.alphadocere.cl/' target='_blank'>
-                    <img src='https://austral.collector.alphadocere.cl/logo_sin_fondo2.png' alt='Austral Collector Logo' width='150' style='display:block;margin:0 auto;border:0;' />
+                <a href='https://australcollector.cl/' target='_blank'>
+                    <img src='https://australcollector.cl/logo_sin_fondo2.png' alt='Austral Collector Logo' width='150' style='display:block;margin:0 auto;border:0;' />
                 </a>
             </div>
             <div class='header'>Hola, {$username}</div>
             <div class='content'>{$messageText}</div>
-            <div class='footer'>Enviado por la administración de <a href='https://austral.collector.alphadocere.cl/' target='_blank'>Austral Collector</a>.</div>
+            <div class='footer'>Enviado por la administración de <a href='https://australcollector.cl/' target='_blank'>Austral Collector</a>.</div>
         </div>
     </body></html>
 HTML;

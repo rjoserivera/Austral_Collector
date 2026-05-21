@@ -1,6 +1,6 @@
 ---
 title: Bienvenido a Austral Collector
-description: Plataforma de coleccionismo chileno con temática Dark-Fantasy y Steampunk.
+description: Plataforma comunitaria de coleccionismo chileno con estética Dark-Fantasy y Steampunk.
 ---
 
 import { Card, CardGroup } from '@mintlify/components'
@@ -18,53 +18,45 @@ import { Card, CardGroup } from '@mintlify/components'
 
 ## ¿Qué es Austral Collector?
 
-**Austral Collector** es una plataforma web comunitaria para coleccionistas chilenos de figuras antiguas, juguetes vintage y objetos de colección. Está diseñada con una estética **Dark-Fantasy y Steampunk**, con animaciones fluidas, carruseles infinitos, modales interactivos y diseño completamente adaptable a dispositivos móviles.
+**Austral Collector** es una plataforma web comunitaria para coleccionistas chilenos de figuras, juguetes vintage y objetos de colección. Diseñada con una estética **Dark-Fantasy y Steampunk**, ofrece animaciones fluidas, carruseles interactivos, modales dinámicos y diseño completamente adaptable a dispositivos móviles.
 
-La plataforma permite a los miembros registrados publicar sus colecciones, votar figuras, interactuar con la comunidad y acceder a un panel de administración completo.
+La plataforma permite a los miembros registrados publicar sus colecciones, votar figuras, interactuar con la comunidad y acceder a un panel de administración completo con gestión de usuarios, eventos, galería, promociones, moderación de contenido y más.
 
 ## Stack Tecnológico
 
 | Capa | Tecnología |
 |---|---|
 | Frontend | React 19 + Vite 8 |
-| Estilos | Vanilla CSS (Dark-Fantasy theme) |
+| Estilos | Vanilla CSS (Dark-Fantasy / Steampunk theme) |
 | Routing | React Router DOM v7 |
 | Backend | PHP 8 + PDO |
-| Base de datos | MySQL (via XAMPP) |
-| Autenticación | JWT (JSON Web Tokens) |
-| PWA | vite-plugin-pwa |
+| Base de datos | MySQL |
+| Autenticación | JWT (JSON Web Tokens) + roles |
+| PWA | vite-plugin-pwa + Workbox |
 | Offline | IndexedDB (idb) |
+| Notificaciones | Sistema Toast + Confirm custom (sin librerías externas) |
+| Mascota Virtual | VirtualAssistant con mensajes por página y comportamiento por inactividad |
 
 ## Módulos Principales
 
 <CardGroup cols={2}>
-  <Card
-    title="Instalación"
-    icon="wrench"
-    href="/instalacion"
-  >
+  <Card title="Instalación" icon="wrench" href="/instalacion">
     Configura el entorno de desarrollo local con XAMPP, Node.js y la base de datos.
   </Card>
-  <Card
-    title="Arquitectura"
-    icon="sitemap"
-    href="/arquitectura"
-  >
+  <Card title="Arquitectura" icon="sitemap" href="/arquitectura">
     Estructura del proyecto, páginas, componentes y flujo de datos.
   </Card>
-  <Card
-    title="Referencia de API"
-    icon="code"
-    href="/api/introduccion"
-  >
+  <Card title="Referencia de API" icon="code" href="/api/introduccion">
     Endpoints PHP del backend: autenticación, figuras, usuarios, publicaciones y más.
   </Card>
-  <Card
-    title="Panel de Administración"
-    icon="shield"
-    href="/admin/panel"
-  >
-    Gestión de usuarios, publicaciones, eventos, galería y configuración del sitio.
+  <Card title="Panel de Administración" icon="shield" href="/admin/panel">
+    Gestión de usuarios, publicaciones, eventos, galería, promociones y configuración.
+  </Card>
+  <Card title="Historias de Usuario" icon="users" href="/historias">
+    Requerimientos funcionales documentados como historias de usuario.
+  </Card>
+  <Card title="Diagramas del Sistema" icon="diagram-project" href="/diagramas">
+    Diagramas de flujo, arquitectura, base de datos y secuencias.
   </Card>
 </CardGroup>
 
@@ -72,8 +64,13 @@ La plataforma permite a los miembros registrados publicar sus colecciones, votar
 
 - 🎨 **Diseño Dark-Fantasy / Steampunk** con tipografías variables y paleta dorada
 - 🖼️ **Galería de figuras** con votos, comentarios y perfiles públicos de coleccionistas
-- 📰 **Dashboard de usuario** con publicaciones, likes y actividad
-- 🛡️ **Panel Admin completo** con control de usuarios, eventos, galería y portafolio
-- 📱 **PWA** instalable, con soporte offline vía IndexedDB
-- 🔒 **Autenticación JWT** con roles (admin / miembro)
-- 📧 **Sistema de correos** para clave temporal y contacto
+- 📰 **Dashboard de usuario** con publicaciones, likes, reordenamiento y actividad
+- 🛡️ **Panel Admin completo** — usuarios, eventos, galería, portafolio, promociones, videos, moderación, log de actividad
+- 🤖 **Mascota Virtual** (VirtualAssistant) con mensajes contextuales por página y aparición automática al detectar inactividad en móvil
+- 📱 **PWA** instalable, con soporte offline vía IndexedDB y sincronización automática
+- 🔒 **Autenticación JWT** con roles (`admin` / `member`), clave temporal y cambio forzado de contraseña
+- 📧 **Sistema de correos** para claves temporales, advertencias y formulario de contacto
+- 🏆 **Sistema de Destacados** — miembro destacado, cumpleañero del mes y mensajes personalizados
+- ✅ **Badge de Verificación** para miembros verificados por el administrador
+- ⭐ **Sistema de valoración de perfiles** — los miembros pueden puntuar los perfiles de otros coleccionistas
+- 🔔 **Sistema de notificaciones Toast** y diálogos de confirmación personalizados

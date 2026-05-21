@@ -22,6 +22,8 @@ try {
         $id = $_POST['id'] ?? null;
         $titulo = $_POST['titulo'] ?? '';
         $fecha_display = $_POST['fecha_display'] ?? '';
+        $descripcion = $_POST['descripcion'] ?? null;
+        $enlace = $_POST['enlace'] ?? null;
         $adminId = $_POST['adminId'] ?? null;
 
         $imagen_url = null;
@@ -42,20 +44,20 @@ try {
         
         if ($id) {
             if ($imagen_url) {
-                $stmt = $pdo->prepare("UPDATE eventos SET titulo=?, fecha_display=?, imagen_url=? WHERE id=?");
-                $stmt->execute([$titulo, $fecha_display, $imagen_url, $id]);
+                $stmt = $pdo->prepare("UPDATE eventos SET titulo=?, fecha_display=?, descripcion=?, enlace=?, imagen_url=? WHERE id=?");
+                $stmt->execute([$titulo, $fecha_display, $descripcion, $enlace, $imagen_url, $id]);
             } else {
-                $stmt = $pdo->prepare("UPDATE eventos SET titulo=?, fecha_display=? WHERE id=?");
-                $stmt->execute([$titulo, $fecha_display, $id]);
+                $stmt = $pdo->prepare("UPDATE eventos SET titulo=?, fecha_display=?, descripcion=?, enlace=? WHERE id=?");
+                $stmt->execute([$titulo, $fecha_display, $descripcion, $enlace, $id]);
             }
             logAction($pdo, $adminId, 'alerta', "Actualizó el evento: $titulo");
         } else {
             if ($imagen_url) {
-                $stmt = $pdo->prepare("INSERT INTO eventos (titulo, fecha_display, imagen_url) VALUES (?,?,?)");
-                $stmt->execute([$titulo, $fecha_display, $imagen_url]);
+                $stmt = $pdo->prepare("INSERT INTO eventos (titulo, fecha_display, descripcion, enlace, imagen_url) VALUES (?,?,?,?,?)");
+                $stmt->execute([$titulo, $fecha_display, $descripcion, $enlace, $imagen_url]);
             } else {
-                $stmt = $pdo->prepare("INSERT INTO eventos (titulo, fecha_display) VALUES (?,?)");
-                $stmt->execute([$titulo, $fecha_display]);
+                $stmt = $pdo->prepare("INSERT INTO eventos (titulo, fecha_display, descripcion, enlace) VALUES (?,?,?,?)");
+                $stmt->execute([$titulo, $fecha_display, $descripcion, $enlace]);
             }
             logAction($pdo, $adminId, 'alerta', "Publicó un nuevo evento: $titulo");
         }

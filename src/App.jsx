@@ -16,6 +16,15 @@ import PasswordChangeForm from './components/PasswordChangeForm'
 import { API_URL } from './config.js'
 import { syncOfflinePosts } from './utils/offlineSync.js'
 
+// Scroll al inicio en cada cambio de ruta (mobile, tablet y PC)
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+  return null;
+}
+
 const getAuthUser = () => {
   const raw = localStorage.getItem('austral_auth_user');
   try { if (raw) return JSON.parse(raw).username || raw; } catch(e) {}
@@ -57,6 +66,7 @@ function App() {
 
   return (
     <div className="app-root">
+      <ScrollToTop />
       <NavBar />
       <Routes>
         <Route path="/" element={<HomePage />} />

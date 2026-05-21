@@ -53,6 +53,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [selectedPost, setSelectedPost] = useState(null)
   const [selectedVideo, setSelectedVideo] = useState(null)
+  const [selectedEvento, setSelectedEvento] = useState(null)
   const [cumpleIdx, setCumpleIdx] = useState(0)
   const navigate = useNavigate()
 
@@ -622,7 +623,7 @@ export default function HomePage() {
             <div className="gold-divider" />
             <ul className="hp-evento-list" ref={eventsRef}>
               {displayEventos.length > 0 ? displayEventos.map((ev, idx) => (
-                <li key={`ev-${ev.id}-${idx}`} className="hp-evento-item">
+                <li key={`ev-${ev.id}-${idx}`} className="hp-evento-item" onClick={() => setSelectedEvento(ev)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                   <img src={ev.imagen_url ? `${BASE_URL}/${ev.imagen_url}` : '/mock_event1.png'} alt={ev.titulo} className="hp-evento-thumb" loading="lazy" />
                   <div className="hp-evento-info">
                     <p className="hp-evento-title">{ev.titulo}</p>
@@ -731,6 +732,35 @@ export default function HomePage() {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
               allowFullScreen>
             </iframe>
+          </div>
+        </div>
+      )}
+      {/* MODAL DE EVENTO */}
+      {selectedEvento && (
+        <div className="evento-modal-overlay" onClick={() => setSelectedEvento(null)}>
+          <div className="evento-modal-card" onClick={e => e.stopPropagation()}>
+            <button className="evento-modal-close" onClick={() => setSelectedEvento(null)}>✕</button>
+            <img className="evento-modal-img" src={selectedEvento.imagen_url ? `${BASE_URL}/${selectedEvento.imagen_url}` : '/mock_event1.png'} alt={selectedEvento.titulo} />
+            <div className="evento-modal-body">
+              <h2 className="evento-modal-titulo">{selectedEvento.titulo}</h2>
+              <div className="evento-modal-fecha">
+                <span>📅</span>
+                <span>{selectedEvento.fecha_display}</span>
+              </div>
+              <p className="evento-modal-desc">
+                {selectedEvento.descripcion || 'Sin descripción detallada.'}
+              </p>
+              {selectedEvento.enlace && (
+                <a
+                  href={selectedEvento.enlace.startsWith('http') ? selectedEvento.enlace : `https://${selectedEvento.enlace}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="evento-modal-link"
+                >
+                  🔗 MÁS INFORMACIÓN / ENLACE
+                </a>
+              )}
+            </div>
           </div>
         </div>
       )}

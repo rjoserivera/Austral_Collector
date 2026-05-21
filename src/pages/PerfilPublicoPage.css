@@ -208,6 +208,25 @@
   line-height: 1.6;
   max-width: 800px;
   margin-top: 8px;
+  position: relative;
+  z-index: 5;
+  pointer-events: auto !important;
+  white-space: pre-wrap;
+}
+
+.bio-link {
+  color: #f1c40f !important;
+  text-decoration: underline !important;
+  font-weight: 600;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10;
+}
+
+.bio-link:hover {
+  color: #ffffff !important;
+  text-decoration: none !important;
 }
 
 /* Custom buttons */

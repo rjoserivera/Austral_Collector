@@ -445,9 +445,9 @@ function AdminUsuarios({ adminId }) {
   }
 
   const updateFieldInline = (id, field, value) => {
-    authFetch(`${API_URL}/usuarios.php`, {
+    authFetch(`${API_URL}/admin/usuarios.php`, {
       method: 'PUT',
-      body: JSON.stringify({ id, action: 'update_field', field, value })
+      body: JSON.stringify({ id, action: 'update_field', field, value, adminId })
     })
     .then(r => r.json())
     .then(d => {
@@ -458,7 +458,7 @@ function AdminUsuarios({ adminId }) {
   
   const toggleStatus = async (id, action) => {
     if(!await confirmDialog(`¿Seguro que deseas aplicar esta acción?`)) return
-    authFetch(`${API_URL}/usuarios.php`, {
+    authFetch(`${API_URL}/admin/usuarios.php`, {
       method: 'PUT',
       body: JSON.stringify({ id, action, adminId })
     })
@@ -1258,6 +1258,8 @@ function AdminEventos({ adminId }) {
   const [id, setId] = useState(null)
   const [titulo, setTitulo] = useState('')
   const [fecha_display, setFechaDisplay] = useState('')
+  const [descripcion, setDescripcion] = useState('')
+  const [enlace, setEnlace] = useState('')
   const [imagen, setImagen] = useState(null)
   const [preview, setPreview] = useState(null)
   const [showModal, setShowModal] = useState(false)
@@ -1273,7 +1275,7 @@ function AdminEventos({ adminId }) {
   useEffect(() => { loadData() }, [])
 
   const resetForm = () => {
-    setId(null); setTitulo(''); setFechaDisplay(''); setImagen(null); setPreview(null);
+    setId(null); setTitulo(''); setFechaDisplay(''); setDescripcion(''); setEnlace(''); setImagen(null); setPreview(null);
     setShowModal(false);
   }
 
@@ -1285,6 +1287,8 @@ function AdminEventos({ adminId }) {
     fd.append('adminId', adminId)
     fd.append('titulo', titulo)
     fd.append('fecha_display', fecha_display)
+    fd.append('descripcion', descripcion)
+    fd.append('enlace', enlace)
     if (imagen) fd.append('imagen', imagen)
 
     // FormData upload: inject Authorization header manually (no Content-Type to allow multipart/form-data boundary)
@@ -1325,6 +1329,8 @@ function AdminEventos({ adminId }) {
     setId(ev.id);
     setTitulo(ev.titulo);
     setFechaDisplay(ev.fecha_display || '');
+    setDescripcion(ev.descripcion || '');
+    setEnlace(ev.enlace || '');
     setPreview(ev.imagen_url ? `${BASE_URL}/${ev.imagen_url}` : null);
     setShowModal(true);
   }
@@ -1363,7 +1369,7 @@ function AdminEventos({ adminId }) {
             </div>
             
             <div className="admin-form-group" style={{ marginTop: '20px' }}>
-              <label>Fecha / Texto Informativo *</label>
+              <label>Fecha *</label>
               <input 
                 type="text" 
                 className="admin-input" 
@@ -1371,6 +1377,29 @@ function AdminEventos({ adminId }) {
                 onChange={e => setFechaDisplay(e.target.value)}
                 placeholder="Ej: Sábado 15 de Mayo / 3 al 5 de Julio..."
                 required
+              />
+            </div>
+
+            <div className="admin-form-group" style={{ marginTop: '20px' }}>
+              <label>Descripción / Detalles</label>
+              <textarea 
+                className="admin-input" 
+                value={descripcion} 
+                onChange={e => setDescripcion(e.target.value)}
+                placeholder="Detalles sobre el evento..."
+                rows="3"
+                style={{ resize: 'vertical' }}
+              />
+            </div>
+            
+            <div className="admin-form-group" style={{ marginTop: '20px' }}>
+              <label>Enlace del evento (URL)</label>
+              <input 
+                type="url" 
+                className="admin-input" 
+                value={enlace} 
+                onChange={e => setEnlace(e.target.value)}
+                placeholder="https://..."
               />
             </div>
 
@@ -2359,7 +2388,7 @@ function AdminDestacados({ adminId }) {
             Escribe el texto que acompañará a la biografía del Destacado y del Cumpleañero, por si ellos no tienen uno definido.
           </p>
 
-          <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: '1fr 1fr' }}>
+          <div className="admin-mensajes-grid">
             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
               <h4 style={{ color: '#ddd', marginBottom: '8px', fontSize: '0.9rem' }}>🏆 Mensaje de Destacado</h4>
               <textarea 
@@ -3018,7 +3047,7 @@ function AdminPromos({ adminId }) {
               </div>
               <div className="admin-form-group">
                 <label>Imagen / Logo {form.id ? '(Opcional)' : '*'}</label>
-                <span style={{ fontSize: '0.75rem', color: '#aaa', display: 'block', marginBottom: '6px' }}>Te recomendamos que ocupes una imagen de estas dimensiones: 800x400 px (horizontal 2:1).</span>
+                <span style={{ fontSize: '0.75rem', color: '#aaa', display: 'block', marginBottom: '6px' }}>Te recomendamos que ocupes una imagen de estas dimensiones: 1898x420 px (horizontal).</span>
                 <input type="file" className="admin-input" accept="image/*"
                   required={!form.id}
                   onChange={handleImgChange}
