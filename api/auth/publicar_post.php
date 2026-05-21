@@ -39,7 +39,7 @@ $uploadedFiles = [];
 if (!empty($_FILES['images']['name'][0])) {
     foreach ($_FILES['images']['name'] as $i => $originalName) {
         if ($_FILES['images']['error'][$i] !== UPLOAD_ERR_OK) continue;
-        if ($_FILES['images']['size'][$i] > 5 * 1024 * 1024) continue; // skip >5MB
+        if ($_FILES['images']['size'][$i] > 15 * 1024 * 1024) continue; // skip >15MB
 
         $ext  = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
         $allowed = ['jpg', 'jpeg', 'png', 'webp'];

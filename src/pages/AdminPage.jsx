@@ -1877,7 +1877,7 @@ function AdminIdentidad({ adminId }) {
             </h3>
             
             <div className="admin-form-group" style={{ marginBottom:'20px' }}>
-              <label>📤 Subir nueva imagen (Máx 5MB)</label>
+              <label>📤 Subir nueva imagen (Máx 15MB)</label>
               <input type="file" accept="image/*" onChange={handleComunidadFile}
                 style={{ display:'block', marginTop:'8px', color:'#f0e4cc', fontSize: '0.9rem' }} />
             </div>

@@ -34,7 +34,7 @@ $newFiles = [];
 if (!empty($_FILES['images']['name'][0])) {
     foreach ($_FILES['images']['name'] as $i => $originalName) {
         if ($_FILES['images']['error'][$i] !== UPLOAD_ERR_OK) continue;
-        if ($_FILES['images']['size'][$i] > 5 * 1024 * 1024) continue;
+        if ($_FILES['images']['size'][$i] > 15 * 1024 * 1024) continue;
 
         $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
         $allowed = ['jpg', 'jpeg', 'png', 'webp'];
@@ -55,7 +55,7 @@ $mediaOrder = json_decode($mediaOrderRaw, true) ?? [];
 $newFileIndex = 0;
 $orderedMedia = [];
 foreach ($mediaOrder as $entry) {
-    if (str_starts_with($entry, 'new_')) {
+    if (strpos($entry, 'new_') === 0) {
         if (isset($newFiles[$newFileIndex])) {
             $orderedMedia[] = $newFiles[$newFileIndex++];
         }

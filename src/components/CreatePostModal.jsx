@@ -144,8 +144,8 @@ export default function CreatePostModal({ isOpen, onClose, onSuccess, currentUse
 
     const newImages = []
     files.forEach(file => {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.info(`La imagen ${file.name} supera los 5MB.`)
+      if (file.size > 15 * 1024 * 1024) {
+        toast.info(`La imagen ${file.name} supera los 15MB.`)
         return
       }
       newImages.push({

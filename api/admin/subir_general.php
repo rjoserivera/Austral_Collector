@@ -29,8 +29,8 @@ try {
         exit;
     }
 
-    if ($file['size'] > 5 * 1024 * 1024) {
-        echo json_encode(['success' => false, 'error' => 'La imagen supera los 5MB.']);
+    if ($file['size'] > 15 * 1024 * 1024) {
+        echo json_encode(['success' => false, 'error' => 'La imagen supera los 15MB.']);
         exit;
     }
 
