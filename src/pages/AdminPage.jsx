@@ -1401,7 +1401,7 @@ function AdminEventos({ adminId }) {
 
             <div className="admin-form-group" style={{ marginTop: '20px' }}>
               <label>Imagen / Foto representativa</label>
-              <span style={{ fontSize: '0.8rem', color: '#aaa', display: 'block', marginBottom: '12px' }}>Recomendado: 800x600 px (horizontal 4:3).</span>
+              <span style={{ fontSize: '0.8rem', color: '#aaa', display: 'block', marginBottom: '12px' }}>Recomendado: 600x400 px (horizontal 3:2).</span>
               <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                  <input 
                    type="file" 

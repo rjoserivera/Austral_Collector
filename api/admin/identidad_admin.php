@@ -28,6 +28,15 @@ try {
 
         $stmt = $pdo->query("SELECT id, icon, title, descripcion as `desc` FROM identidad ORDER BY FIELD(id, 'mision', 'valores', 'metas')");
         $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (empty($data)) {
+            $data = [
+                ['id' => 'mision', 'icon' => '🎯', 'title' => 'Misión', 'desc' => ''],
+                ['id' => 'valores', 'icon' => '👍', 'title' => 'Valores', 'desc' => ''],
+                ['id' => 'metas', 'icon' => '🏁', 'title' => 'Metas', 'desc' => '']
+            ];
+        }
+        
         echo json_encode(['success' => true, 'data' => $data]);
     } 
     elseif ($method === 'PUT' || $method === 'POST') {
@@ -45,8 +54,11 @@ try {
             $pdo->beginTransaction();
             foreach ($identidades as $item) {
                 if (isset($item['id'], $item['icon'], $item['title'], $item['desc'])) {
-                    $stmt = $pdo->prepare("UPDATE identidad SET icon=?, title=?, descripcion=? WHERE id=?");
-                    $stmt->execute([$item['icon'], $item['title'], $item['desc'], $item['id']]);
+                    $stmt = $pdo->prepare("INSERT INTO identidad (id, icon, title, descripcion) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE icon=?, title=?, descripcion=?");
+                    $stmt->execute([
+                        $item['id'], $item['icon'], $item['title'], $item['desc'],
+                        $item['icon'], $item['title'], $item['desc']
+                    ]);
                     
                     logAction($pdo, $userId, 'admin', "Actualizó sección de identidad: " . $item['id']);
                 }

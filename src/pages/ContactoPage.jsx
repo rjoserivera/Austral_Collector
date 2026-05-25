@@ -34,7 +34,7 @@ export default function ContactoPage() {
     .then(r => r.json())
     .then(d => {
       if (d.success) {
-        toast.info('🚀 Mensaje enviado. Te contactaremos pronto al correo que incluiste.');
+        toast.info('🚀 Te has comunicado con la administración de Austral Collector. En cuanto podamos te responderemos.');
         document.querySelector('.contacto-form-new').reset();
       } else {
         toast.error('❌ Error al enviar el correo: ' + d.error);

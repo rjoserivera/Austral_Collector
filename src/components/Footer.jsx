@@ -36,7 +36,7 @@ export default function Footer() {
           <div className="footer-contact-box" style={{ marginBottom: 0 }}>
             <p className="footer-info-text">Escríbenos ante dudas o sugerencias</p>
             {/* Correo oficial de producción */}
-            <a href="mailto:australcollector@gmail.com" className="footer-email">australcollector@gmail.com</a>
+            <a href="mailto:administracion@australcollector.cl" className="footer-email">administracion@australcollector.cl</a>
             {/* TODO DEV: austral.cadmin@gmail.com (correo de prueba — no usar en producción) */}
           </div>
         </div>
@@ -71,7 +71,7 @@ export default function Footer() {
       <div className="footer-bottom">
         <div className="gold-divider" style={{ marginBottom: '16px' }} />
         <p className="footer-copyright">
-          © {year} <strong>Austral Collector</strong>. Todos los derechos reservados.
+          © {year} <strong>Austral Collector</strong>. Todos los derechos reservados por la comunidad Austral Collector.
           &nbsp;·&nbsp; Hecho con ❤️ para coleccionistas.
         </p>
       </div>

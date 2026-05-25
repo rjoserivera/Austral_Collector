@@ -26,7 +26,8 @@
           {
             "group": "Requerimientos",
             "pages": [
-              "historias"
+              "historias",
+              "plan_de_pruebas"
             ]
           },
           {

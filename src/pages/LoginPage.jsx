@@ -111,7 +111,7 @@ export default function LoginPage() {
     <div className="login-page">
       <div className="login-card">
         <Link to="/" className="login-brand">
-          <img src="/logo_sin_fondo.png" alt="Austral Collector Logo" className="login-logo" />
+          <img src="/logo_sin_fondo2.png" alt="Austral Collector Logo" className="login-logo" />
         </Link>
         <h1 className="login-title" style={{ marginTop: '0.5rem' }}>Acceso al Códice</h1>
         <p className="login-subtitle" style={{ color: '#f0e4cc !important' }}>Ingresa tus credenciales para continuar tu travesía.</p>
@@ -176,8 +176,8 @@ export default function LoginPage() {
             <p className="notice-footer">
               Para solicitar tu acceso o recibir más información, por favor comunícate con nosotros:
             </p>
-            <a href="mailto:contacto@australcollector.com" className="notice-email">
-              contacto@australcollector.com
+            <a href="mailto:administracion@australcollector.cl" className="notice-email">
+              administracion@australcollector.cl
             </a>
           </div>
         )}
