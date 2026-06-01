@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState('login'); // 'login' or 'register'
+  const [showPassword, setShowPassword] = useState(false);
   
   const navigate = useNavigate();
 
@@ -28,26 +29,66 @@ export default function LoginPage() {
     }
   }, [navigate]);
 
-  const [failedAttempts, setFailedAttempts] = useState(0);
-  const [lockoutTime, setLockoutTime] = useState(0);
+  // ── Lockout persistente (sobrevive recarga de página) ──────
+  // Niveles: 3 intentos → 60s | 6 intentos → 5 min | 9 intentos → 30 min
+  const LOCKOUT_LEVELS = [
+    { threshold: 3, duration: 60,   label: '1 minuto'    },
+    { threshold: 6, duration: 300,  label: '5 minutos'   },
+    { threshold: 9, duration: 1800, label: '30 minutos'  },
+  ];
 
+  const readLockoutStorage = () => {
+    try {
+      const raw = localStorage.getItem('austral_login_lockout');
+      if (!raw) return { attempts: 0, until: 0 };
+      return JSON.parse(raw);
+    } catch { return { attempts: 0, until: 0 }; }
+  };
+
+  const writeLockoutStorage = (attempts, until) => {
+    localStorage.setItem('austral_login_lockout', JSON.stringify({ attempts, until }));
+  };
+
+  const clearLockoutStorage = () => {
+    localStorage.removeItem('austral_login_lockout');
+  };
+
+  // Inicializar desde localStorage al montar
+  const [failedAttempts, setFailedAttempts] = useState(() => readLockoutStorage().attempts);
+  const [lockoutTime, setLockoutTime] = useState(() => {
+    const { until } = readLockoutStorage();
+    const remaining = Math.max(0, Math.floor((until - Date.now()) / 1000));
+    return remaining;
+  });
+
+  // Cuenta regresiva en tiempo real
   useEffect(() => {
-    let timer;
-    if (lockoutTime > 0) {
-      timer = setInterval(() => {
-        setLockoutTime(prev => prev - 1);
-      }, 1000);
-    } else if (lockoutTime === 0 && failedAttempts >= 3) {
-      setFailedAttempts(0);
-      setError('');
-    }
+    if (lockoutTime <= 0) return;
+    const timer = setInterval(() => {
+      setLockoutTime(prev => {
+        if (prev <= 1) {
+          setError('');
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
     return () => clearInterval(timer);
-  }, [lockoutTime, failedAttempts]);
+  }, [lockoutTime]);
+
+  const formatLockout = (seconds) => {
+    if (seconds >= 60) {
+      const m = Math.ceil(seconds / 60);
+      return `${m} minuto${m > 1 ? 's' : ''}`;
+    }
+    return `${seconds} segundo${seconds !== 1 ? 's' : ''}`;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (lockoutTime > 0) {
-      setError(`Demasiados intentos. Intenta nuevamente en ${lockoutTime} segundos.`);
+      setError(`Demasiados intentos. Intenta nuevamente en ${formatLockout(lockoutTime)}.`);
       return;
     }
     setError('');
@@ -67,13 +108,16 @@ export default function LoginPage() {
     .then(r => r.json())
     .then(data => {
       if (data.success && data.user) {
+        // Login exitoso — limpiar todo el historial de bloqueos
         setFailedAttempts(0);
+        setLockoutTime(0);
+        clearLockoutStorage();
+
         if (data.alert_destacado) {
           toast.add('Atención: No hay ningún cumpleañero ni destacado configurado. Se mostrará la publicación con más "Me gusta" por el momento.', 'warning', 10000);
         }
         localStorage.setItem('austral_auth_user', JSON.stringify(data.user));
         localStorage.setItem('austral_auth_role', data.user.role);
-        // Save JWT token for authenticated API requests
         const token = data.token || data.jwt;
         if (token) localStorage.setItem('austral_auth_token', token);
         
@@ -82,18 +126,26 @@ export default function LoginPage() {
           navigate('/');
         } else {
           localStorage.removeItem('austral_auth_require_pass_change');
-          // Navigate to the user's public profile page instead of the admin dashboard
           navigate(`/perfil/${data.user.id}`);
         }
 
       } else {
         const newAttempts = failedAttempts + 1;
         setFailedAttempts(newAttempts);
-        if (newAttempts >= 3) {
-          setLockoutTime(60);
-          setError('Demasiados intentos fallidos. Por favor, espera 1 minuto.');
+
+        // Determinar qué nivel de bloqueo aplicar
+        const level = [...LOCKOUT_LEVELS].reverse().find(l => newAttempts >= l.threshold);
+
+        if (level) {
+          const until = Date.now() + level.duration * 1000;
+          writeLockoutStorage(newAttempts, until);
+          setLockoutTime(level.duration);
+          setError(`Demasiados intentos fallidos. Por favor, espera ${level.label}.`);
         } else {
-          setError(data.error || 'Credenciales incorrectas.');
+          // Guardar intentos aunque no haya bloqueo aún (para que persista entre recargas)
+          writeLockoutStorage(newAttempts, 0);
+          const remaining = 3 - newAttempts;
+          setError(`${data.error || 'Credenciales incorrectas.'} (${remaining} intento${remaining !== 1 ? 's' : ''} restante${remaining !== 1 ? 's' : ''} antes del bloqueo)`);
         }
       }
     })
@@ -151,19 +203,42 @@ export default function LoginPage() {
 
             <div className="login-form-group">
               <label htmlFor="clave">Clave de Acceso</label>
-              <input 
-                id="clave"
-                type="password" 
-                className="login-input" 
-                placeholder="••••••••" 
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                autoComplete="current-password"
-              />
+              <div className="login-input-wrap">
+                <input 
+                  id="clave"
+                  type={showPassword ? 'text' : 'password'}
+                  className="login-input" 
+                  placeholder="••••••••" 
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  className="login-eye-btn"
+                  onClick={() => setShowPassword(p => !p)}
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             <button type="submit" className="btn-primary login-submit-btn" disabled={loading || lockoutTime > 0}>
-              {lockoutTime > 0 ? `Bloqueado (${lockoutTime}s)` : loading ? 'Verificando...' : 'Ingresar al Gremio'}
+              {lockoutTime > 0
+                ? `🔒 Bloqueado (${formatLockout(lockoutTime)})`
+                : loading ? 'Verificando...' : 'Ingresar al Gremio'}
             </button>
           </form>
         ) : (

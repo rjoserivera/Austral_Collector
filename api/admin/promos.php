@@ -5,6 +5,7 @@
 require_once '../db.php';
 require_once 'auth_check.php';
 require_once '../image_utils.php';
+require_once 'log_helper.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -83,6 +84,7 @@ if ($method === 'POST') {
             $stmt->execute([$titulo, $link_url, $orden, $seccion, $id]);
         }
         echo json_encode(['success' => true, 'id' => $id]);
+        adminLog($pdo, $currentUser, 'admin', "Actualizó promoción/aliado: \"$titulo\"");
         exit;
     } else {
         // INSERT MODE
@@ -93,6 +95,7 @@ if ($method === 'POST') {
         $stmt->execute([$seccion, $titulo, $subtitulo ?: null, $imagen_url, $link_url, $btn_texto, $orden]);
 
         echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
+        adminLog($pdo, $currentUser, 'admin', "Agregó nueva promoción/aliado: \"$titulo\"");
         exit;
     }
 }
@@ -111,6 +114,7 @@ if ($method === 'PUT') {
 
     if ($action === 'toggle_activo') {
         $pdo->prepare("UPDATE hp_promociones SET activo = NOT activo WHERE id = ?")->execute([$id]);
+        adminLog($pdo, $currentUser, 'admin', "Cambió visibilidad de promoción ID: $id");
         echo json_encode(['success' => true]);
         exit;
     }
@@ -159,6 +163,7 @@ if ($method === 'DELETE') {
     }
 
     $pdo->prepare("DELETE FROM hp_promociones WHERE id = ?")->execute([$id]);
+    adminLog($pdo, $currentUser, 'admin', "Eliminó promoción/aliado ID: $id");
     echo json_encode(['success' => true]);
     exit;
 }

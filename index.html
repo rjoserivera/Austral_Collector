@@ -1,18 +1,76 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/logo_head.png" />
-    <link rel="apple-touch-icon" href="/logo_head.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Austral Collector — Plataforma de gestión para el coleccionismo vintage. Juegos, juguetes y coleccionables de ayer y hoy." />
-    <title>Austral Collector — Coleccionismo Vintage</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo_head.png" />
+  <link rel="apple-touch-icon" href="/logo_head.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Austral Collector — Plataforma de gestión para el coleccionismo vintage. Juegos, juguetes y coleccionables de ayer y hoy." />
+  <title>Austral Collector — Coleccionismo Vintage</title>
+
+  <!-- Open Graph / Facebook / Google -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://australcollector.cl/" />
+  <meta property="og:title"       content="Austral Collector — Coleccionismo Vintage" />
+  <meta property="og:description" content="Plataforma de gestión para el coleccionismo vintage. Juegos, juguetes y coleccionables de ayer y hoy." />
+  <meta property="og:image"       content="https://australcollector.cl/logo_sin_fondo2.png" />
+  <meta property="og:locale"      content="es_CL" />
+  <meta property="og:site_name"   content="Austral Collector" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="Austral Collector — Coleccionismo Vintage" />
+  <meta name="twitter:description" content="Plataforma de gestión para el coleccionismo vintage. Juegos, juguetes y coleccionables de ayer y hoy." />
+  <meta name="twitter:image"       content="https://australcollector.cl/logo_sin_fondo2.png" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://australcollector.cl/" />
+
+  <!-- JSON-LD: Datos estructurados para Google -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Austral Collector",
+    "url": "https://australcollector.cl",
+    "logo": "https://australcollector.cl/logo_sin_fondo2.png",
+    "image": "https://australcollector.cl/logo_sin_fondo2.png",
+    "description": "Plataforma de gestión para el coleccionismo vintage. Juegos, juguetes y coleccionables de ayer y hoy.",
+    "sameAs": ["https://www.instagram.com/australcollector"]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Austral Collector",
+    "url": "https://australcollector.cl",
+    "description": "Plataforma de gestión para el coleccionismo vintage. Juegos, juguetes y coleccionables de ayer y hoy."
+  }
+  </script>
+
+  <!-- Fuentes: preconnect primero, luego carga no bloqueante con display=swap -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- media="print" + onload evita que las fuentes bloqueen el render (mejora FCP/LCP) -->
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=Inter:wght@300;400;500;600&display=swap"
+    media="print"
+    onload="this.media='all'"
+  />
+  <noscript>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=Inter:wght@300;400;500;600&display=swap"
+    />
+  </noscript>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>

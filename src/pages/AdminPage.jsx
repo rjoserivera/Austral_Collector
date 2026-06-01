@@ -11,31 +11,31 @@ const API_URL = '/api/admin'
 const getLogConfig = (tipo) => {
   const t = (tipo || '').toLowerCase();
   const config = {
-    'login':   { label: 'LOGIN',   icon: '🟢', class: 'tipo-login' },
-    'auth':    { label: 'LOGIN',   icon: '🟢', class: 'tipo-login' },
-    'alerta':  { label: 'ALERTA',  icon: '🔴', class: 'tipo-alerta' },
-    'event':   { label: 'ALERTA',  icon: '🔴', class: 'tipo-alerta' },
-    'figura':  { label: 'FIGURA',  icon: '🗿', class: 'tipo-figura' },
+    'login': { label: 'LOGIN', icon: '🟢', class: 'tipo-login' },
+    'auth': { label: 'LOGIN', icon: '🟢', class: 'tipo-login' },
+    'alerta': { label: 'ALERTA', icon: '🔴', class: 'tipo-alerta' },
+    'event': { label: 'ALERTA', icon: '🔴', class: 'tipo-alerta' },
+    'figura': { label: 'FIGURA', icon: '🗿', class: 'tipo-figura' },
     'cosplay': { label: 'COSPLAY', icon: '🎭', class: 'tipo-cosplay' },
-    'admin':   { label: 'ADMIN',   icon: '🛡️', class: 'tipo-admin' },
+    'admin': { label: 'ADMIN', icon: '🛡️', class: 'tipo-admin' },
     'usuario': { label: 'USUARIO', icon: '👤', class: 'tipo-usuario' },
-    'identidad':{ label: 'IDENTIDAD', icon: '⭐', class: 'tipo-identidad' },
+    'identidad': { label: 'IDENTIDAD', icon: '⭐', class: 'tipo-identidad' },
   };
   return config[t] || { label: t.toUpperCase(), icon: '⚪', class: '' };
 };
 
 const NAV = [
-  { id: 'inicio',     icon: '📊', label: 'Inicio' },
-  { id: 'usuarios',   icon: '👥', label: 'Gestión de Usuarios' },
+  { id: 'inicio', icon: '📊', label: 'Inicio' },
+  { id: 'usuarios', icon: '👥', label: 'Gestión de Usuarios' },
   { id: 'moderacion', icon: '⚖️', label: 'Moderación de Contenido' },
-  { id: 'videos',     icon: '🎬', label: 'Promocion Videos' },
+  { id: 'videos', icon: '🎬', label: 'Promocion Videos' },
   { id: 'destacados', icon: '🏆', label: 'Contenido Destacado' },
-  { id: 'eventos',    icon: '📢', label: 'Noticias y Eventos' },
-  { id: 'identidad',  icon: '⭐', label: 'Identidad y Nosotros' },
-  { id: 'config',     icon: '⚙️', label: 'Logo de Inicio' },
-  { id: 'hp_promos',  icon: '🌟', label: 'Promociones Home' },
-  { id: 'mascota',    icon: '🤖', label: 'Asistente Virtual' },
-  { id: 'actividad',  icon: '📋', label: 'Log de Actividad' },
+  { id: 'eventos', icon: '📢', label: 'Noticias y Eventos' },
+  { id: 'identidad', icon: '⭐', label: 'Identidad y Nosotros' },
+  { id: 'config', icon: '⚙️', label: 'Logo de Inicio' },
+  { id: 'hp_promos', icon: '🌟', label: 'Promociones Home' },
+  { id: 'mascota', icon: '🤖', label: 'Asistente Virtual' },
+  { id: 'actividad', icon: '📋', label: 'Log de Actividad' },
 ]
 
 export default function AdminPage() {
@@ -46,14 +46,14 @@ export default function AdminPage() {
   let adminId = null;
   let userName = 'Administrador';
   let adminAvatar = null;
-  try { 
+  try {
     if (userNameRaw) {
       const uObj = JSON.parse(userNameRaw);
       userName = uObj.username || userNameRaw;
       adminId = uObj.id;
       adminAvatar = uObj.avatar_url || null;
     }
-  } catch(e) { userName = userNameRaw; }
+  } catch (e) { userName = userNameRaw; }
 
   if (userRole !== 'admin') {
     return <Navigate to="/login" replace />
@@ -121,17 +121,17 @@ export default function AdminPage() {
         </header>
 
         <div className="admin-main-body">
-          {activeTab === 'inicio'     && <AdminInicio />}
-          {activeTab === 'usuarios'   && <AdminUsuarios adminId={adminId} />}
-          {activeTab === 'videos'     && <AdminVideos adminId={adminId} />}
-          {activeTab === 'eventos'    && <AdminEventos adminId={adminId} />}
+          {activeTab === 'inicio' && <AdminInicio />}
+          {activeTab === 'usuarios' && <AdminUsuarios adminId={adminId} />}
+          {activeTab === 'videos' && <AdminVideos adminId={adminId} />}
+          {activeTab === 'eventos' && <AdminEventos adminId={adminId} />}
           {activeTab === 'destacados' && <AdminDestacados adminId={adminId} />}
-          {activeTab === 'identidad'  && <AdminIdentidad adminId={adminId} />}
-          {activeTab === 'config'     && <AdminConfiguracion adminId={adminId} />}
-          {activeTab === 'actividad'  && <AdminActividad adminId={adminId} />}
+          {activeTab === 'identidad' && <AdminIdentidad adminId={adminId} />}
+          {activeTab === 'config' && <AdminConfiguracion adminId={adminId} />}
+          {activeTab === 'actividad' && <AdminActividad adminId={adminId} />}
           {activeTab === 'moderacion' && <AdminModeracion adminId={adminId} />}
-          {activeTab === 'hp_promos'  && <AdminPromos adminId={adminId} />}
-          {activeTab === 'mascota'    && <AdminMascota adminId={adminId} />}
+          {activeTab === 'hp_promos' && <AdminPromos adminId={adminId} />}
+          {activeTab === 'mascota' && <AdminMascota adminId={adminId} />}
         </div>
       </main>
     </div>
@@ -156,7 +156,7 @@ function AdminInicio() {
     authFetch(`${API_URL}/get_stats.php`)
       .then(r => r.json())
       .then(d => {
-        if(d.error) setError(d.error)
+        if (d.error) setError(d.error)
         else setData(d)
       })
       .catch(e => setError(e.message))
@@ -167,18 +167,18 @@ function AdminInicio() {
 
   const { stats, logs, birthdays, newest_user } = data
 
-  const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+  const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
   const currentMonth = monthNames[new Date().getMonth()]
 
   const statCards = [
-    { icon: '👥', label: 'Usuarios',     value: stats.usuarios,    color: 'teal' },
-    { icon: '🪪', label: 'Perfiles',     value: stats.perfiles,    color: 'teal' },
-    { icon: '🗿', label: 'Figuras',      value: stats.figuras,     color: 'rust' },
-    { icon: '🎭', label: 'Cosplays',     value: stats.cosplays,    color: 'rust' },
-    { icon: '🎬', label: 'Videos',       value: stats.videos,      color: 'gold' },
-    { icon: '📝', label: 'Publicaciones',value: stats.total_posts,  color: 'gold' },
-    { icon: '❤️', label: 'Total Likes',  value: stats.total_likes,  color: 'teal' },
-    { icon: '📢', label: 'Noticias',     value: stats.eventos,      color: 'rust' },
+    { icon: '👥', label: 'Usuarios', value: stats.usuarios, color: 'teal' },
+    { icon: '🪪', label: 'Perfiles', value: stats.perfiles, color: 'teal' },
+    { icon: '🗿', label: 'Figuras', value: stats.figuras, color: 'rust' },
+    { icon: '🎭', label: 'Cosplays', value: stats.cosplays, color: 'rust' },
+    { icon: '🎬', label: 'Videos', value: stats.videos, color: 'gold' },
+    { icon: '📝', label: 'Publicaciones', value: stats.total_posts, color: 'gold' },
+    { icon: '❤️', label: 'Total Likes', value: stats.total_likes, color: 'teal' },
+    { icon: '📢', label: 'Noticias', value: stats.eventos, color: 'rust' },
   ]
 
   return (
@@ -222,9 +222,9 @@ function AdminInicio() {
               <div className="birthday-list">
                 {birthdays.users.map(u => (
                   <div className="birthday-item" key={u.id}>
-                    <img 
-                      src={u.avatar_url ? `${BASE_URL}/${u.avatar_url}` : '/logo_sin_fondo.png'} 
-                      alt={u.username} 
+                    <img
+                      src={u.avatar_url ? `${BASE_URL}/${u.avatar_url}` : '/logo_sin_fondo.png'}
+                      alt={u.username}
                       className="birthday-avatar"
                       onError={e => { e.currentTarget.src = '/logo_sin_fondo.png' }}
                     />
@@ -437,7 +437,7 @@ function AdminUsuarios({ adminId }) {
       } else {
         toast.error(d.error)
       }
-    } catch(err) {
+    } catch (err) {
       toast.error('Error de conexión: ' + err.message)
     } finally {
       setIsSaving(false)
@@ -445,28 +445,28 @@ function AdminUsuarios({ adminId }) {
   }
 
   const updateFieldInline = (id, field, value) => {
-    authFetch(`${API_URL}/admin/usuarios.php`, {
+    authFetch(`${API_URL}/usuarios.php`, {
       method: 'PUT',
       body: JSON.stringify({ id, action: 'update_field', field, value, adminId })
     })
-    .then(r => r.json())
-    .then(d => {
-      if(d.success) loadData()
-      else toast.error(d.error)
-    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) loadData()
+        else toast.error(d.error)
+      })
   }
-  
+
   const toggleStatus = async (id, action) => {
-    if(!await confirmDialog(`¿Seguro que deseas aplicar esta acción?`)) return
-    authFetch(`${API_URL}/admin/usuarios.php`, {
+    if (!await confirmDialog(`¿Seguro que deseas aplicar esta acción?`)) return
+    authFetch(`${API_URL}/usuarios.php`, {
       method: 'PUT',
       body: JSON.stringify({ id, action, adminId })
     })
-    .then(r => r.json())
-    .then(d => {
-      if(d.success) loadData()
-      else toast.error(d.error)
-    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) loadData()
+        else toast.error(d.error)
+      })
   }
 
   const sendTempKey = async (user) => {
@@ -476,21 +476,21 @@ function AdminUsuarios({ adminId }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: user.id })
     })
-    .then(r => r.json())
-    .then(d => {
-      if (d.success) {
-        setKeyResult(d)
-      } else {
-        toast.error('Error: ' + d.error)
-      }
-    })
-    .catch(e => toast.error('Error de conexión: ' + e.message))
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          setKeyResult(d)
+        } else {
+          toast.error('Error: ' + d.error)
+        }
+      })
+      .catch(e => toast.error('Error de conexión: ' + e.message))
   }
 
   const handleSendMessage = async (e) => {
     e.preventDefault()
     if (!messageForm.asunto || !messageForm.mensaje) return toast.info('Por favor llena todos los campos.')
-    
+
     setIsSendingMsg(true)
     setSentCount(0)
 
@@ -498,7 +498,7 @@ function AdminUsuarios({ adminId }) {
       if (messageModal.mass) {
         const activeUsers = usuarios.filter(u => u.is_active == 1 && u.email)
         setTotalToSend(activeUsers.length)
-        
+
         let count = 0
         const batchSize = 5;
         for (let i = 0; i < activeUsers.length; i += batchSize) {
@@ -542,7 +542,7 @@ function AdminUsuarios({ adminId }) {
           toast.error('Error: ' + d.error)
         }
       }
-      
+
       setMessageModal(null)
       setMessageForm({ asunto: '', mensaje: '' })
     } catch (e) {
@@ -559,9 +559,9 @@ function AdminUsuarios({ adminId }) {
 
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase()
-      result = result.filter(u => 
-        u.username.toLowerCase().includes(q) || 
-        (u.nombre && u.nombre.toLowerCase().includes(q)) || 
+      result = result.filter(u =>
+        u.username.toLowerCase().includes(q) ||
+        (u.nombre && u.nombre.toLowerCase().includes(q)) ||
         (u.apellido && u.apellido.toLowerCase().includes(q))
       )
     }
@@ -601,16 +601,16 @@ function AdminUsuarios({ adminId }) {
       {/* Modal de Mensaje */}
       {messageModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <form className="admin-modal-form" 
-            style={{ 
-              width: '500px', 
-              background: '#0d2830', 
-              border: '1px solid var(--color-gold)', 
-              borderRadius: '12px', 
-              padding: '2.5rem', 
-              position: 'relative', 
-              boxShadow: '0 20px 40px rgba(0,0,0,0.6)' 
-            }} 
+          <form className="admin-modal-form"
+            style={{
+              width: '500px',
+              background: '#0d2830',
+              border: '1px solid var(--color-gold)',
+              borderRadius: '12px',
+              padding: '2.5rem',
+              position: 'relative',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.6)'
+            }}
             onSubmit={handleSendMessage}
           >
             <h3 style={{ color: 'var(--color-gold)', borderBottom: '1px solid rgba(255,215,0,0.3)', paddingBottom: '12px', marginBottom: '20px', fontSize: '1.4rem' }}>
@@ -618,19 +618,19 @@ function AdminUsuarios({ adminId }) {
             </h3>
             <div className="admin-form-group">
               <label>Asunto</label>
-              <input 
-                type="text" className="admin-input" required 
-                value={messageForm.asunto} 
-                onChange={e => setMessageForm({...messageForm, asunto: e.target.value})}
+              <input
+                type="text" className="admin-input" required
+                value={messageForm.asunto}
+                onChange={e => setMessageForm({ ...messageForm, asunto: e.target.value })}
                 placeholder="Ej: Mantenimiento programado"
               />
             </div>
             <div className="admin-form-group">
               <label>Mensaje</label>
-              <textarea 
+              <textarea
                 className="admin-input" required rows="6"
                 value={messageForm.mensaje}
-                onChange={e => setMessageForm({...messageForm, mensaje: e.target.value})}
+                onChange={e => setMessageForm({ ...messageForm, mensaje: e.target.value })}
                 placeholder="Escribe el contenido del correo aquí..."
                 style={{ resize: 'vertical' }}
               />
@@ -651,10 +651,10 @@ function AdminUsuarios({ adminId }) {
         <h2 className="admin-sec-title">👥 Listado de Usuarios</h2>
         {!formMode && (
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <input 
-              type="text" 
-              className="admin-input" 
-              placeholder="Buscar usuario o nombre..." 
+            <input
+              type="text"
+              className="admin-input"
+              placeholder="Buscar usuario o nombre..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               style={{ padding: '6px 12px', width: '200px' }}
@@ -685,11 +685,11 @@ function AdminUsuarios({ adminId }) {
           </div>
         )}
       </div>
-      
+
       {formMode && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:1001, display:'flex', alignItems:'center', justifyContent:'center', padding: '20px' }}>
-          <div style={{ width:'700px', background:'#0d2830', border:'1px solid var(--color-gold)', borderRadius:'12px', padding:'2.5rem', position:'relative', boxShadow:'0 20px 40px rgba(0,0,0,0.6)', maxHeight: '90vh', overflowY: 'auto' }}>
-            <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.4rem', borderBottom:'1px solid rgba(255,215,0,0.3)', paddingBottom:'12px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ width: '700px', background: '#0d2830', border: '1px solid var(--color-gold)', borderRadius: '12px', padding: '2.5rem', position: 'relative', boxShadow: '0 20px 40px rgba(0,0,0,0.6)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <h3 style={{ color: 'var(--color-gold)', marginBottom: '20px', fontSize: '1.4rem', borderBottom: '1px solid rgba(255,215,0,0.3)', paddingBottom: '12px' }}>
               {formMode === 'create' ? '➕ Registrar Nuevo Usuario' : '✏️ Editar Usuario'}
             </h3>
             <form onSubmit={submitForm}>
@@ -697,12 +697,12 @@ function AdminUsuarios({ adminId }) {
                 <div className="admin-form-group">
                   <label style={{ color: '#f0e4cc' }}>Nombre de Usuario *</label>
                   <input type="text" className="admin-input" placeholder="Ej: CollectorMaster"
-                    value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} />
+                    value={formData.username} onChange={e => setFormData({ ...formData, username: e.target.value })} />
                 </div>
                 <div className="admin-form-group">
                   <label style={{ color: '#f0e4cc' }}>Correo Electrónico *</label>
                   <input type="email" className="admin-input" placeholder="Ej: collector@correo.com"
-                    value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                    value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
                 </div>
               </div>
 
@@ -710,21 +710,21 @@ function AdminUsuarios({ adminId }) {
                 <div className="admin-form-group">
                   <label style={{ color: '#f0e4cc' }}>Nombre real</label>
                   <input type="text" className="admin-input" placeholder="Opcional"
-                    value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} />
+                    value={formData.nombre} onChange={e => setFormData({ ...formData, nombre: e.target.value })} />
                 </div>
                 <div className="admin-form-group">
                   <label style={{ color: '#f0e4cc' }}>Apellido</label>
                   <input type="text" className="admin-input" placeholder="Opcional"
-                    value={formData.apellido} onChange={e => setFormData({...formData, apellido: e.target.value})} />
+                    value={formData.apellido} onChange={e => setFormData({ ...formData, apellido: e.target.value })} />
                 </div>
               </div>
-              
+
               <div className="admin-form-row">
                 <div className="admin-form-group">
                   <label style={{ color: '#f0e4cc' }}>{formMode === 'create' ? 'Contraseña Provisional *' : 'Nueva Contraseña (vacío para no cambiar)'}</label>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <input type="text" className="admin-input" placeholder="Mínimo 6 caracteres"
-                      value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} 
+                      value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })}
                       style={{ flex: 1 }} />
                     <button type="button" className="btn-primary" onClick={generatePassword} title="Generar clave aleatoria" style={{ padding: '8px 12px' }}>
                       ✨
@@ -738,15 +738,15 @@ function AdminUsuarios({ adminId }) {
                 </div>
                 <div className="admin-form-group">
                   <label style={{ color: '#f0e4cc' }}>Fecha de Nacimiento</label>
-                  <input type="date" className="admin-input" 
-                    value={formData.fecha_nacimiento} onChange={e => setFormData({...formData, fecha_nacimiento: e.target.value})} />
+                  <input type="date" className="admin-input"
+                    value={formData.fecha_nacimiento} onChange={e => setFormData({ ...formData, fecha_nacimiento: e.target.value })} />
                 </div>
               </div>
 
               <div className="admin-form-row">
                 <div className="admin-form-group">
                   <label style={{ color: '#f0e4cc' }}>Rol del Sistema</label>
-                  <select className="admin-select" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
+                  <select className="admin-select" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
                     <option value="user">Coleccionista (Estándar)</option>
                     <option value="admin">Administrador (Acceso Total)</option>
                   </select>
@@ -754,7 +754,7 @@ function AdminUsuarios({ adminId }) {
                 {formMode === 'edit' && (
                   <div className="admin-form-group">
                     <label style={{ color: '#f0e4cc' }}>Estado de Cuenta</label>
-                    <select className="admin-select" value={formData.is_active} onChange={e => setFormData({...formData, is_active: e.target.value})}>
+                    <select className="admin-select" value={formData.is_active} onChange={e => setFormData({ ...formData, is_active: e.target.value })}>
                       <option value="1">Activa</option>
                       <option value="0">Baneada/Inactiva</option>
                     </select>
@@ -771,7 +771,7 @@ function AdminUsuarios({ adminId }) {
                     value={formData.verification_type}
                     onChange={e => {
                       const vt = e.target.value
-                      setFormData({...formData, verification_type: vt, verification_badge: vt !== 'external' ? null : formData.verification_badge})
+                      setFormData({ ...formData, verification_type: vt, verification_badge: vt !== 'external' ? null : formData.verification_badge })
                       if (vt !== 'external') { setBadgeFile(null); setBadgePreview(null) }
                     }}
                   >
@@ -812,7 +812,7 @@ function AdminUsuarios({ adminId }) {
                   </div>
                 )}
               </div>
-              
+
               <div className="admin-form-actions" style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                 <button type="button" className="btn-outline btn-sm" onClick={() => setFormMode(null)} disabled={isSaving} style={{ borderColor: 'rgba(240,228,204,0.7)', color: 'rgba(240,228,204,0.7)' }}>
                   Cancelar
@@ -859,12 +859,12 @@ function AdminUsuarios({ adminId }) {
                   </td>
                   <td className="td-muted">{u.email}</td>
                   <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                    <button 
-                      className="act-btn" 
+                    <button
+                      className="act-btn"
                       title="Enviar mensaje personalizado"
-                      style={{ 
-                        background: 'var(--color-gold)', 
-                        border: '1px solid #000', 
+                      style={{
+                        background: 'var(--color-gold)',
+                        border: '1px solid #000',
                         color: '#000',
                         width: '32px',
                         height: '32px',
@@ -880,7 +880,7 @@ function AdminUsuarios({ adminId }) {
                     </button>
                   </td>
                   <td>
-                    <select 
+                    <select
                       className={`badge-select ${u.role === 'admin' ? 'bs-admin' : 'bs-user'}`}
                       value={u.role}
                       onChange={(e) => updateFieldInline(u.id, 'role', e.target.value)}
@@ -905,8 +905,8 @@ function AdminUsuarios({ adminId }) {
                       <button className="act-btn act-gold" title="Editar Usuario" onClick={() => openForm('edit', u)}>
                         ✏️
                       </button>
-                      <button 
-                        className="act-btn" 
+                      <button
+                        className="act-btn"
                         title="Enviar clave temporal por email"
                         style={{ background: 'rgba(45,110,126,0.3)', border: '1px solid rgba(45,110,126,0.6)' }}
                         onClick={() => sendTempKey(u)}
@@ -927,7 +927,7 @@ function AdminUsuarios({ adminId }) {
 
       {totalPages > 1 && (
         <div className="galeria-pagination">
-          <button 
+          <button
             className="pagination-btn"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -945,7 +945,7 @@ function AdminUsuarios({ adminId }) {
               </button>
             ))}
           </div>
-          <button 
+          <button
             className="pagination-btn"
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
@@ -1014,22 +1014,22 @@ function AdminVideos({ adminId }) {
   const handleVideoSubmit = (e) => {
     e.preventDefault()
     if (!videoForm.titulo || !videoForm.link) return toast.info('Campos obligatorios')
-    
+
     setSaving(true)
     authFetch(`${API_URL}/videos.php`, {
       method: 'POST',
       body: JSON.stringify({ ...videoForm, adminId })
     })
-    .then(() => {
-      setVideoModal(false)
-      setVideoForm({ titulo: '', link: '' })
-      loadData()
-    })
-    .finally(() => setSaving(false))
+      .then(() => {
+        setVideoModal(false)
+        setVideoForm({ titulo: '', link: '' })
+        loadData()
+      })
+      .finally(() => setSaving(false))
   }
 
   const handleDelete = async (id) => {
-    if(!await confirmDialog(`¿Eliminar video?`)) return
+    if (!await confirmDialog(`¿Eliminar video?`)) return
     authFetch(`${API_URL}/videos.php`, {
       method: 'DELETE',
       body: JSON.stringify({ id, adminId })
@@ -1050,13 +1050,13 @@ function AdminVideos({ adminId }) {
       {/* Modal de Video Personalizado */}
       {videoModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <form 
+          <form
             onSubmit={handleVideoSubmit}
-            style={{ 
-              width: '450px', 
-              background: '#0d2830', 
-              border: '1px solid var(--color-gold)', 
-              borderRadius: '12px', 
+            style={{
+              width: '450px',
+              background: '#0d2830',
+              border: '1px solid var(--color-gold)',
+              borderRadius: '12px',
               padding: '2rem',
               boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
               position: 'relative'
@@ -1067,19 +1067,19 @@ function AdminVideos({ adminId }) {
             </h3>
             <div className="admin-form-group">
               <label>Título del Video</label>
-              <input 
+              <input
                 type="text" className="admin-input" required autoFocus
-                value={videoForm.titulo} 
-                onChange={e => setVideoForm({...videoForm, titulo: e.target.value})}
+                value={videoForm.titulo}
+                onChange={e => setVideoForm({ ...videoForm, titulo: e.target.value })}
                 placeholder="Ej: Review de Figura XYZ"
               />
             </div>
             <div className="admin-form-group">
               <label>Link de YouTube</label>
-              <input 
-                type="url" className="admin-input" required 
-                value={videoForm.link} 
-                onChange={e => setVideoForm({...videoForm, link: e.target.value})}
+              <input
+                type="url" className="admin-input" required
+                value={videoForm.link}
+                onChange={e => setVideoForm({ ...videoForm, link: e.target.value })}
                 placeholder="https://www.youtube.com/watch?v=..."
               />
             </div>
@@ -1100,7 +1100,7 @@ function AdminVideos({ adminId }) {
         <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '16px' }}>
           Selecciona hasta 4 videos que se mostrarán en formato de carrusel en la portada principal.
         </p>
-        
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
           {[
             { label: 'Video Slot 1', key: 'video_destacado_1' },
@@ -1118,42 +1118,43 @@ function AdminVideos({ adminId }) {
             }
 
             return (
-            <div key={idx} style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <h4 style={{ color: '#ddd', marginBottom: '8px', fontSize: '0.9rem' }}>{slot.label}</h4>
-              
-              {ytId ? (
-                <img 
-                  src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} 
-                  alt="Thumbnail" 
-                  style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '6px', marginBottom: '10px', border: '1px solid rgba(255,255,255,0.1)' }} 
-                />
-              ) : (
-                <div style={{ width: '100%', height: '140px', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555', fontSize: '0.8rem' }}>
-                  Sin video
-                </div>
-              )}
+              <div key={idx} style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <h4 style={{ color: '#ddd', marginBottom: '8px', fontSize: '0.9rem' }}>{slot.label}</h4>
 
-              <select 
-                className="admin-select" 
-                value={videoConfig[slot.key]} 
-                onChange={e => setVideoConfig({...videoConfig, [slot.key]: e.target.value})} 
-                style={{ width: '100%', marginBottom: '12px' }}
-              >
-                <option value="">– Sin video –</option>
-                {videos.map(v => (
-                  <option key={v.id} value={v.id}>{v.titulo}</option>
-                ))}
-              </select>
-              <button
-                className="btn-outline btn-sm"
-                disabled={savingConfig}
-                onClick={() => handleSaveConfig(slot.key, videoConfig[slot.key])}
-                style={{ width: '100%' }}
-              >
-                {savingConfig ? 'Guardando...' : `Guardar Slot ${idx + 1}`}
-              </button>
-            </div>
-          )})}
+                {ytId ? (
+                  <img
+                    src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`}
+                    alt="Thumbnail"
+                    style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '6px', marginBottom: '10px', border: '1px solid rgba(255,255,255,0.1)' }}
+                  />
+                ) : (
+                  <div style={{ width: '100%', height: '140px', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555', fontSize: '0.8rem' }}>
+                    Sin video
+                  </div>
+                )}
+
+                <select
+                  className="admin-select"
+                  value={videoConfig[slot.key]}
+                  onChange={e => setVideoConfig({ ...videoConfig, [slot.key]: e.target.value })}
+                  style={{ width: '100%', marginBottom: '12px' }}
+                >
+                  <option value="">– Sin video –</option>
+                  {videos.map(v => (
+                    <option key={v.id} value={v.id}>{v.titulo}</option>
+                  ))}
+                </select>
+                <button
+                  className="btn-outline btn-sm"
+                  disabled={savingConfig}
+                  onClick={() => handleSaveConfig(slot.key, videoConfig[slot.key])}
+                  style={{ width: '100%' }}
+                >
+                  {savingConfig ? 'Guardando...' : `Guardar Slot ${idx + 1}`}
+                </button>
+              </div>
+            )
+          })}
         </div>
       </div>
 
@@ -1172,12 +1173,12 @@ function AdminVideos({ adminId }) {
                 <tr key={v.id}>
                   <td><strong>{v.titulo}</strong></td>
                   <td>
-                    <a href={v.link_yt} target="_blank" rel="noreferrer" 
-                      style={{ 
-                        color: '#0d2830', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '8px', 
+                    <a href={v.link_yt} target="_blank" rel="noreferrer"
+                      style={{
+                        color: '#0d2830',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
                         textDecoration: 'underline',
                         fontWeight: '800',
                         fontSize: '0.9rem'
@@ -1187,14 +1188,14 @@ function AdminVideos({ adminId }) {
                     </a>
                   </td>
                   <td>
-                    <button 
-                      className={`act-btn ${parseInt(v.destacado)===1 ? 'act-gold' : ''}`} 
+                    <button
+                      className={`act-btn ${parseInt(v.destacado) === 1 ? 'act-gold' : ''}`}
                       onClick={() => toggleDest(v.id)}
                       style={{
                         width: '38px',
                         height: '38px',
                         fontSize: '1.3rem',
-                        background: parseInt(v.destacado)===1 ? '#ffd700' : '#f0e4cc',
+                        background: parseInt(v.destacado) === 1 ? '#ffd700' : '#f0e4cc',
                         border: '2px solid #0d2830',
                         borderRadius: '8px',
                         color: '#000',
@@ -1205,14 +1206,14 @@ function AdminVideos({ adminId }) {
                         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                       }}
                     >
-                      {parseInt(v.destacado)===1 ? '⭐' : '☆'}
+                      {parseInt(v.destacado) === 1 ? '⭐' : '☆'}
                     </button>
                   </td>
                   <td>
                     <div className="action-row">
-                      <button 
-                        className="act-btn act-red" 
-                        onClick={() => handleDelete(v.id)} 
+                      <button
+                        className="act-btn act-red"
+                        onClick={() => handleDelete(v.id)}
                         title="Eliminar"
                         style={{
                           width: '38px',
@@ -1235,7 +1236,7 @@ function AdminVideos({ adminId }) {
                   </td>
                 </tr>
               ))}
-              {videos.length === 0 && <tr><td colSpan="4" style={{textAlign:'center', padding:'20px'}}>No hay videos.</td></tr>}
+              {videos.length === 0 && <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>No hay videos.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -1249,7 +1250,7 @@ function AdminEventos({ adminId }) {
   const [eventos, setEventos] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  
+
   // Form state
   const [id, setId] = useState(null)
   const [titulo, setTitulo] = useState('')
@@ -1264,7 +1265,7 @@ function AdminEventos({ adminId }) {
     setLoading(true)
     authFetch(`${API_URL}/eventos.php`)
       .then(r => r.json())
-      .then(d => { if(d.success) setEventos(d.eventos || []) })
+      .then(d => { if (d.success) setEventos(d.eventos || []) })
       .finally(() => setLoading(false))
   }
 
@@ -1294,31 +1295,31 @@ function AdminEventos({ adminId }) {
       headers: token ? { 'Authorization': `Bearer ${token}` } : {},
       body: fd
     })
-    .then(r => r.json())
-    .then(d => {
-      if(d.success) {
-        resetForm()
-        loadData()
-      } else {
-        toast.error(d.error)
-      }
-    })
-    .catch(error => toast.error("Error al guardar: " + error.message))
-    .finally(() => setSaving(false))
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          resetForm()
+          loadData()
+        } else {
+          toast.error(d.error)
+        }
+      })
+      .catch(error => toast.error("Error al guardar: " + error.message))
+      .finally(() => setSaving(false))
   }
 
   const handleDelete = async (evtId) => {
-    if(!await confirmDialog('¿Eliminar esta noticia/evento?')) return
+    if (!await confirmDialog('¿Eliminar esta noticia/evento?')) return
     authFetch(`${API_URL}/eventos.php`, {
       method: 'DELETE',
       body: JSON.stringify({ id: evtId, adminId })
     })
-    .then(r => r.json())
-    .then(d => {
-      if(d.success) loadData()
-      else toast.error(d.error)
-    })
-    .catch(error => toast.error("Error al eliminar: " + error.message))
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) loadData()
+        else toast.error(d.error)
+      })
+      .catch(error => toast.error("Error al eliminar: " + error.message))
   }
 
   const handleEdit = async (ev) => {
@@ -1336,13 +1337,13 @@ function AdminEventos({ adminId }) {
       {/* MODAL DE EVENTOS */}
       {showModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <form 
+          <form
             onSubmit={handleSubmit}
-            style={{ 
-              width: '550px', 
-              background: '#0d2830', 
-              border: '1px solid var(--color-gold)', 
-              borderRadius: '12px', 
+            style={{
+              width: '550px',
+              background: '#0d2830',
+              border: '1px solid var(--color-gold)',
+              borderRadius: '12px',
               padding: '2.5rem',
               boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
               position: 'relative'
@@ -1351,25 +1352,25 @@ function AdminEventos({ adminId }) {
             <h3 style={{ borderBottom: '1px solid rgba(255,215,0,0.3)', paddingBottom: '12px', marginBottom: '24px', color: '#ffd700', fontSize: '1.4rem' }}>
               {id ? '✏️ Editar Noticia / Evento' : '🆕 Nueva Noticia / Evento'}
             </h3>
-            
+
             <div className="admin-form-group">
               <label>Título / Nombre de la Noticia *</label>
-              <input 
-                type="text" 
-                className="admin-input" 
-                value={titulo} 
-                onChange={e => setTitulo(e.target.value)} 
-                required 
-                placeholder="Ej: ComicCon 2026 / Lanzamiento..." 
+              <input
+                type="text"
+                className="admin-input"
+                value={titulo}
+                onChange={e => setTitulo(e.target.value)}
+                required
+                placeholder="Ej: ComicCon 2026 / Lanzamiento..."
               />
             </div>
-            
+
             <div className="admin-form-group" style={{ marginTop: '20px' }}>
               <label>Fecha *</label>
-              <input 
-                type="text" 
-                className="admin-input" 
-                value={fecha_display} 
+              <input
+                type="text"
+                className="admin-input"
+                value={fecha_display}
                 onChange={e => setFechaDisplay(e.target.value)}
                 placeholder="Ej: Sábado 15 de Mayo / 3 al 5 de Julio..."
                 required
@@ -1378,22 +1379,22 @@ function AdminEventos({ adminId }) {
 
             <div className="admin-form-group" style={{ marginTop: '20px' }}>
               <label>Descripción / Detalles</label>
-              <textarea 
-                className="admin-input" 
-                value={descripcion} 
+              <textarea
+                className="admin-input"
+                value={descripcion}
                 onChange={e => setDescripcion(e.target.value)}
                 placeholder="Detalles sobre el evento..."
                 rows="3"
                 style={{ resize: 'vertical' }}
               />
             </div>
-            
+
             <div className="admin-form-group" style={{ marginTop: '20px' }}>
               <label>Enlace del evento (URL)</label>
-              <input 
-                type="url" 
-                className="admin-input" 
-                value={enlace} 
+              <input
+                type="url"
+                className="admin-input"
+                value={enlace}
                 onChange={e => setEnlace(e.target.value)}
                 placeholder="https://..."
               />
@@ -1403,32 +1404,32 @@ function AdminEventos({ adminId }) {
               <label>Imagen / Foto representativa</label>
               <span style={{ fontSize: '0.8rem', color: '#aaa', display: 'block', marginBottom: '12px' }}>Recomendado: 600x400 px (horizontal 3:2).</span>
               <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                 <input 
-                   type="file" 
-                   accept="image/*"
-                   style={{ color: '#ddd' }}
-                   onChange={e => {
-                     const file = e.target.files[0];
-                     setImagen(file);
-                     if(file) setPreview(URL.createObjectURL(file));
-                   }} 
-                 />
-                 {preview && (
-                   <div style={{ position: 'relative' }}>
-                     <img 
-                       src={preview} 
-                       alt="Preview" 
-                       style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '2px solid var(--color-gold)' }} 
-                     />
-                     <button 
-                       type="button" 
-                       onClick={() => { setImagen(null); setPreview(null); }}
-                       style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#d9534f', color: '#fff', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', fontSize: '12px' }}
-                     >
-                       &times;
-                     </button>
-                   </div>
-                 )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ color: '#ddd' }}
+                  onChange={e => {
+                    const file = e.target.files[0];
+                    setImagen(file);
+                    if (file) setPreview(URL.createObjectURL(file));
+                  }}
+                />
+                {preview && (
+                  <div style={{ position: 'relative' }}>
+                    <img
+                      src={preview}
+                      alt="Preview"
+                      style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '2px solid var(--color-gold)' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { setImagen(null); setPreview(null); }}
+                      style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#d9534f', color: '#fff', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', fontSize: '12px' }}
+                    >
+                      &times;
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1450,7 +1451,7 @@ function AdminEventos({ adminId }) {
       </div>
 
       <h3 className="admin-sub-title" style={{ marginTop: '30px', color: '#1a3d4a' }}>Noticias Publicadas Actuales</h3>
-      
+
       {loading ? <Loading /> : (
         <div className="admin-table-wrap">
           <div className="table-responsive-wrapper">
@@ -1467,10 +1468,10 @@ function AdminEventos({ adminId }) {
                 {eventos.map(ev => (
                   <tr key={ev.id}>
                     <td>
-                      <img 
-                        src={ev.imagen_url ? `${BASE_URL}/${ev.imagen_url}` : '/mock_event1.png'} 
-                        alt="Mini" 
-                        style={{ width: '60px', height: '45px', objectFit: 'cover', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.1)' }} 
+                      <img
+                        src={ev.imagen_url ? `${BASE_URL}/${ev.imagen_url}` : '/mock_event1.png'}
+                        alt="Mini"
+                        style={{ width: '60px', height: '45px', objectFit: 'cover', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.1)' }}
                       />
                     </td>
                     <td>
@@ -1513,7 +1514,7 @@ function AdminIdentidad({ adminId }) {
   // Secciones del Portafolio
   const [grupos, setGrupos] = useState([])
   const [addingGroup, setAddingGroup] = useState(false)
-  
+
   // Modal de Items (Fotos/Videos)
   const [showItemModal, setShowItemModal] = useState(false)
   const [itemForm, setItemForm] = useState({ id: null, grupo_id: null, tipo: 'foto', titulo: '', descripcion: '', url: '', file: null, preview: null })
@@ -1536,24 +1537,24 @@ function AdminIdentidad({ adminId }) {
   try {
     const user = JSON.parse(localStorage.getItem('austral_auth_user') || '{}')
     userId = user.id
-  } catch(e) {}
+  } catch (e) { }
 
   const loadAll = () => {
     setLoading(true)
     // Identidad cards
     authFetch(`${API_URL}/identidad_admin.php?user_id=${userId}`)
-      .then(r => r.json()).then(d => { if(d.success) setIdentidades(d.data || []) })
+      .then(r => r.json()).then(d => { if (d.success) setIdentidades(d.data || []) })
       .catch(e => console.error(e))
 
     // Secciones (Grupos)
     authFetch(`${API_URL}/portafolio_grupos.php`)
-      .then(r => r.json()).then(d => { if(d.success) setGrupos(d.grupos || []) })
+      .then(r => r.json()).then(d => { if (d.success) setGrupos(d.grupos || []) })
       .catch(e => console.error(e))
 
     // Config (comunidad)
     authFetch(`${API_URL}/destacados.php`)
       .then(r => r.json()).then(d => {
-        if(d.config) {
+        if (d.config) {
           setComunidadUrl(d.config.portafolio_comunidad || '')
           setComunidadPreview(d.config.portafolio_comunidad || '')
         }
@@ -1577,7 +1578,7 @@ function AdminIdentidad({ adminId }) {
       method: 'PUT',
       body: JSON.stringify({ user_id: userId, identidades: [item] })
     }).then(r => r.json()).then(d => {
-      if(d.success) toast.success(`✅ ${item.title} actualizado!`)
+      if (d.success) toast.success(`✅ ${item.title} actualizado!`)
       else toast.error('Error: ' + d.error)
       return d.success
     }).finally(() => setSavingId(null))
@@ -1590,27 +1591,36 @@ function AdminIdentidad({ adminId }) {
       method: 'POST',
       body: JSON.stringify({ action: 'create_group', titulo: 'Nueva Sección' })
     }).then(r => r.json()).then(d => {
-      if(d.success) loadAll()
-      else toast.error('Error al crear grupo')
+      if (d.success) {
+        setGrupos(prev => [...prev, { id: d.id, titulo: 'Nueva Sección', items: [] }])
+        toast.success('✅ Sección creada')
+      } else {
+        toast.error('Error al crear grupo')
+      }
     }).finally(() => setAddingGroup(false))
   }
-  
+
   const updateGroupTitle = (id, newTitle) => {
     authFetch(`${API_URL}/portafolio_grupos.php`, {
       method: 'POST',
       body: JSON.stringify({ action: 'update_group', id, titulo: newTitle })
     }).then(r => r.json()).then(d => {
-      if(d.success) toast.success('✅ Título actualizado')
+      if (d.success) toast.success('✅ Título actualizado')
     })
   }
 
   const deleteGroup = async (id) => {
-    if(!await confirmDialog('¿Eliminar esta sección y TODO su contenido?')) return
+    if (!await confirmDialog('¿Eliminar esta sección y TODO su contenido?')) return
     authFetch(`${API_URL}/portafolio_grupos.php`, {
       method: 'POST',
       body: JSON.stringify({ action: 'delete_group', id })
     }).then(r => r.json()).then(d => {
-      if(d.success) loadAll()
+      if (d.success) {
+        setGrupos(prev => prev.filter(g => g.id !== id))
+        toast.success('✅ Sección eliminada correctamente')
+      } else {
+        toast.error('❌ Error al eliminar la sección')
+      }
     })
   }
 
@@ -1635,6 +1645,7 @@ function AdminIdentidad({ adminId }) {
     setSavingItem(true)
     const token = localStorage.getItem('austral_auth_token')
     const action = itemForm.id ? 'update_item' : 'add_item'
+    const isEditing = !!itemForm.id
 
     if (itemForm.tipo === 'foto') {
       const fd = new FormData()
@@ -1651,8 +1662,19 @@ function AdminIdentidad({ adminId }) {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         body: fd
       }).then(r => r.json()).then(d => {
-        if(d.success) { setShowItemModal(false); loadAll() }
-        else toast.error('Error: ' + d.error)
+        if (d.success) {
+          setShowItemModal(false)
+          setGrupos(prev => prev.map(g => {
+            if (g.id !== itemForm.grupo_id) return g
+            if (isEditing) {
+              return { ...g, items: g.items.map(it => it.id === itemForm.id ? { ...it, ...d.item } : it) }
+            }
+            return { ...g, items: [...(g.items || []), d.item] }
+          }))
+          toast.success(isEditing ? '✅ Foto actualizada correctamente' : '✅ Foto agregada correctamente')
+        } else {
+          toast.error('Error: ' + d.error)
+        }
       }).finally(() => setSavingItem(false))
     } else {
       authFetch(`${API_URL}/portafolio_grupos.php`, {
@@ -1667,19 +1689,35 @@ function AdminIdentidad({ adminId }) {
           url: itemForm.url
         })
       }).then(r => r.json()).then(d => {
-        if(d.success) { setShowItemModal(false); loadAll() }
-        else toast.error('Error: ' + d.error)
+        if (d.success) {
+          setShowItemModal(false)
+          setGrupos(prev => prev.map(g => {
+            if (g.id !== itemForm.grupo_id) return g
+            if (isEditing) {
+              return { ...g, items: g.items.map(it => it.id === itemForm.id ? { ...it, ...d.item } : it) }
+            }
+            return { ...g, items: [...(g.items || []), d.item] }
+          }))
+          toast.success(isEditing ? '✅ Video actualizado correctamente' : '✅ Video agregado correctamente')
+        } else {
+          toast.error('Error: ' + d.error)
+        }
       }).finally(() => setSavingItem(false))
     }
   }
 
   const deleteItem = async (id) => {
-    if(!await confirmDialog('¿Eliminar este elemento?')) return
+    if (!await confirmDialog('¿Eliminar este elemento?')) return
     authFetch(`${API_URL}/portafolio_grupos.php`, {
       method: 'POST',
       body: JSON.stringify({ action: 'delete_item', id })
     }).then(r => r.json()).then(d => {
-      if(d.success) loadAll()
+      if (d.success) {
+        setGrupos(prev => prev.map(g => ({ ...g, items: (g.items || []).filter(it => it.id !== id) })))
+        toast.success('✅ Elemento eliminado correctamente')
+      } else {
+        toast.error('❌ Error al eliminar el elemento')
+      }
     })
   }
 
@@ -1711,7 +1749,7 @@ function AdminIdentidad({ adminId }) {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         body: fd
       }).then(r => r.json()).then(d => {
-        if(d.success) {
+        if (d.success) {
           // Guardar la URL resultante en la configuración (destacados.php)
           return authFetch(`${API_URL}/destacados.php`, {
             method: 'POST',
@@ -1731,7 +1769,7 @@ function AdminIdentidad({ adminId }) {
         method: 'POST',
         body: JSON.stringify({ clave: 'portafolio_comunidad', valor: comunidadUrl, adminId })
       }).then(r => r.json()).then(d => {
-        if(d.success) { setComunidadPreview(comunidadUrl); toast.success('✅ URL de Banner guardada.') }
+        if (d.success) { setComunidadPreview(comunidadUrl); toast.success('✅ URL de Banner guardada.') }
         else toast.error('❌ Error al guardar.')
       }).catch(e => toast.error('❌ ' + e.message)).finally(() => setSavingCom(false))
     }
@@ -1744,7 +1782,7 @@ function AdminIdentidad({ adminId }) {
       method: 'POST',
       body: JSON.stringify({ clave: 'portafolio_comunidad', valor: '', adminId })
     }).then(r => r.json()).then(d => {
-      if(d.success) {
+      if (d.success) {
         setComunidadUrl('')
         setComunidadPreview('')
         toast.success('✅ Banner eliminado.')
@@ -1760,50 +1798,50 @@ function AdminIdentidad({ adminId }) {
     <div className="admin-section">
       {/* ── MODAL AGREGAR / EDITAR ITEM ─────────────────────── */}
       {showItemModal && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.88)', zIndex:1001, display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <form onSubmit={saveItem} style={{ width:'460px', background:'#0d2830', border:'1px solid var(--color-gold)', borderRadius:'14px', padding:'2rem', position:'relative' }}>
-            <button type="button" onClick={() => setShowItemModal(false)} style={{ position:'absolute', top:'12px', right:'14px', background:'none', border:'none', color:'#aaa', fontSize:'1.4rem', cursor:'pointer' }}>✕</button>
-            <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.2rem' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <form onSubmit={saveItem} style={{ width: '460px', background: '#0d2830', border: '1px solid var(--color-gold)', borderRadius: '14px', padding: '2rem', position: 'relative' }}>
+            <button type="button" onClick={() => setShowItemModal(false)} style={{ position: 'absolute', top: '12px', right: '14px', background: 'none', border: 'none', color: '#aaa', fontSize: '1.4rem', cursor: 'pointer' }}>✕</button>
+            <h3 style={{ color: 'var(--color-gold)', marginBottom: '20px', fontSize: '1.2rem' }}>
               {itemForm.id ? '✏️ Editar ' : '➕ Agregar '} {itemForm.tipo === 'foto' ? 'Foto' : 'Video'}
             </h3>
 
             {itemForm.tipo === 'foto' ? (
-              <div className="admin-form-group" style={{ marginBottom:'16px' }}>
+              <div className="admin-form-group" style={{ marginBottom: '16px' }}>
                 <label>Imagen *</label>
-                {!itemForm.id && <input type="file" accept="image/*" required onChange={handleItemFile} style={{ display:'block', marginTop:'6px', color:'#f0e4cc' }} />}
-                {itemForm.id && <input type="file" accept="image/*" onChange={handleItemFile} style={{ display:'block', marginTop:'6px', color:'#f0e4cc' }} />}
-                
+                {!itemForm.id && <input type="file" accept="image/*" required onChange={handleItemFile} style={{ display: 'block', marginTop: '6px', color: '#f0e4cc' }} />}
+                {itemForm.id && <input type="file" accept="image/*" onChange={handleItemFile} style={{ display: 'block', marginTop: '6px', color: '#f0e4cc' }} />}
+
                 {itemForm.preview && (
-                  <img src={itemForm.preview} alt="Preview" style={{ marginTop:'12px', width:'100%', height:'180px', objectFit:'cover', borderRadius:'8px', border:'1px solid rgba(255,215,0,0.3)' }} />
+                  <img src={itemForm.preview} alt="Preview" style={{ marginTop: '12px', width: '100%', height: '180px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,215,0,0.3)' }} />
                 )}
                 {!itemForm.preview && itemForm.url && (
-                  <img src={`${BASE_URL}/${itemForm.url}`} alt="Current" style={{ marginTop:'12px', width:'100%', height:'180px', objectFit:'cover', borderRadius:'8px', border:'1px solid rgba(255,215,0,0.3)' }} />
+                  <img src={`${BASE_URL}/${itemForm.url}`} alt="Current" style={{ marginTop: '12px', width: '100%', height: '180px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,215,0,0.3)' }} />
                 )}
               </div>
             ) : (
-              <div className="admin-form-group" style={{ marginBottom:'16px' }}>
+              <div className="admin-form-group" style={{ marginBottom: '16px' }}>
                 <label>URL de YouTube *</label>
-                <input type="url" required className="admin-input" value={itemForm.url} onChange={e => setItemForm({...itemForm, url: e.target.value})} placeholder="https://youtube.com/watch?v=..." style={{ marginTop:'6px' }} />
+                <input type="url" required className="admin-input" value={itemForm.url} onChange={e => setItemForm({ ...itemForm, url: e.target.value })} placeholder="https://youtube.com/watch?v=..." style={{ marginTop: '6px' }} />
               </div>
             )}
 
             {itemForm.tipo === 'video' && (
-              <div className="admin-form-group" style={{ marginBottom:'16px' }}>
+              <div className="admin-form-group" style={{ marginBottom: '16px' }}>
                 <label>Título (opcional)</label>
-                <input type="text" className="admin-input" value={itemForm.titulo} onChange={e => setItemForm({...itemForm, titulo: e.target.value})} placeholder="Ej: Entrevista..." style={{ marginTop:'6px' }} />
+                <input type="text" className="admin-input" value={itemForm.titulo} onChange={e => setItemForm({ ...itemForm, titulo: e.target.value })} placeholder="Ej: Entrevista..." style={{ marginTop: '6px' }} />
               </div>
             )}
 
-            <div className="admin-form-group" style={{ marginBottom:'20px' }}>
+            <div className="admin-form-group" style={{ marginBottom: '20px' }}>
               <label>Descripción (opcional)</label>
               <textarea className="admin-input" rows="3" value={itemForm.descripcion}
-                onChange={e => setItemForm({...itemForm, descripcion: e.target.value})}
+                onChange={e => setItemForm({ ...itemForm, descripcion: e.target.value })}
                 placeholder="Breve descripción..."
-                style={{ resize:'none', marginTop:'6px' }} />
+                style={{ resize: 'none', marginTop: '6px' }} />
             </div>
 
-            <div style={{ display:'flex', gap:'10px' }}>
-              <button type="submit" className="btn-primary" disabled={savingItem} style={{ flex:1 }}>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button type="submit" className="btn-primary" disabled={savingItem} style={{ flex: 1 }}>
                 {savingItem ? 'Guardando...' : '💾 Guardar'}
               </button>
               <button type="button" className="btn-outline" onClick={() => setShowItemModal(false)} disabled={savingItem}>
@@ -1819,7 +1857,7 @@ function AdminIdentidad({ adminId }) {
         <div className="admin-modal-overlay">
           <div className="admin-modal-content">
 
-            <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.4rem', borderBottom:'1px solid rgba(255,215,0,0.3)', paddingBottom:'12px' }}>
+            <h3 style={{ color: 'var(--color-gold)', marginBottom: '20px', fontSize: '1.4rem', borderBottom: '1px solid rgba(255,215,0,0.3)', paddingBottom: '12px' }}>
               ✏️ Editar {identidades[editIdIndex].id.toUpperCase()}
             </h3>
 
@@ -1828,29 +1866,29 @@ function AdminIdentidad({ adminId }) {
               <input type="text" className="admin-input" value={identidades[editIdIndex].title}
                 onChange={e => handleChange(editIdIndex, 'title', e.target.value)} />
             </div>
-            
-            <div className="admin-form-group" style={{ marginTop:'20px' }}>
+
+            <div className="admin-form-group" style={{ marginTop: '20px' }}>
               <label>Ícono (Emoji)</label>
               <input type="text" className="admin-input" value={identidades[editIdIndex].icon}
                 onChange={e => handleChange(editIdIndex, 'icon', e.target.value)} />
             </div>
-            
-            <div className="admin-form-group" style={{ marginTop:'20px' }}>
+
+            <div className="admin-form-group" style={{ marginTop: '20px' }}>
               <label>Descripción</label>
               <textarea className="admin-input" rows="6" value={identidades[editIdIndex].desc}
                 onChange={e => handleChange(editIdIndex, 'desc', e.target.value)}
-                style={{ resize:'vertical' }} />
+                style={{ resize: 'vertical' }} />
             </div>
 
-            <div style={{ display:'flex', gap:'12px', marginTop:'30px' }}>
-              <button 
-                className="btn-primary" 
-                style={{ flex:1 }}
+            <div style={{ display: 'flex', gap: '12px', marginTop: '30px' }}>
+              <button
+                className="btn-primary"
+                style={{ flex: 1 }}
                 onClick={() => {
                   handleSaveSingle(editIdIndex).then(success => {
                     if (success) setEditIdIndex(null);
                   });
-                }} 
+                }}
                 disabled={savingId === identidades[editIdIndex].id}
               >
                 {savingId === identidades[editIdIndex].id ? 'Guardando...' : '💾 Guardar Cambios'}
@@ -1867,32 +1905,32 @@ function AdminIdentidad({ adminId }) {
       {showBannerModal && (
         <div className="admin-modal-overlay">
           <div className="admin-modal-content">
-            <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.4rem', borderBottom:'1px solid rgba(255,215,0,0.3)', paddingBottom:'12px' }}>
+            <h3 style={{ color: 'var(--color-gold)', marginBottom: '20px', fontSize: '1.4rem', borderBottom: '1px solid rgba(255,215,0,0.3)', paddingBottom: '12px' }}>
               🤝 Editar Banner de Comunidad
             </h3>
-            
-            <div className="admin-form-group" style={{ marginBottom:'20px' }}>
+
+            <div className="admin-form-group" style={{ marginBottom: '20px' }}>
               <label>📤 Subir nueva imagen (Máx 15MB)</label>
               <input type="file" accept="image/*" onChange={handleComunidadFile}
-                style={{ display:'block', marginTop:'8px', color:'#f0e4cc', fontSize: '0.9rem' }} />
+                style={{ display: 'block', marginTop: '8px', color: '#f0e4cc', fontSize: '0.9rem' }} />
             </div>
-            
-            <div className="admin-form-group" style={{ marginBottom:'25px' }}>
+
+            <div className="admin-form-group" style={{ marginBottom: '25px' }}>
               <label>🔗 O pegar URL directa</label>
               <input type="url" className="admin-input"
                 value={comunidadUrl}
-                onChange={e => { setComunidadUrl(e.target.value); if(!comunidadFile) setComunidadPreview(e.target.value) }}
-                placeholder="https://ejemplo.com/imagen.jpg" style={{ marginTop:'6px' }} />
+                onChange={e => { setComunidadUrl(e.target.value); if (!comunidadFile) setComunidadPreview(e.target.value) }}
+                placeholder="https://ejemplo.com/imagen.jpg" style={{ marginTop: '6px' }} />
             </div>
-            
-            <div style={{ display:'flex', gap:'12px' }}>
-              <button 
-                className="btn-primary" 
-                style={{ flex:1 }}
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                className="btn-primary"
+                style={{ flex: 1 }}
                 onClick={() => {
                   saveComunidad();
                   setShowBannerModal(false);
-                }} 
+                }}
                 disabled={savingCom}
               >
                 {savingCom ? 'Guardando...' : '💾 Actualizar Banner'}
@@ -1921,8 +1959,8 @@ function AdminIdentidad({ adminId }) {
                 {item.desc || 'Sin descripción configurada...'}
               </p>
             </div>
-            <button 
-              className="btn-outline btn-sm" 
+            <button
+              className="btn-outline btn-sm"
               style={{ borderColor: 'var(--color-gold)', color: '#1a3d4a', fontWeight: 'bold', whiteSpace: 'nowrap', padding: '6px 16px' }}
               onClick={() => setEditIdIndex(index)}
             >
@@ -1936,11 +1974,11 @@ function AdminIdentidad({ adminId }) {
 
 
       {/* ── B: SECCIONES DEL PORTAFOLIO ───────────────────── */}
-      <div style={{ borderTop:'2px solid rgba(200,169,110,0.35)', paddingTop:'32px', marginBottom:'40px' }}>
-        <div className="admin-sec-header" style={{ marginBottom:'20px' }}>
+      <div style={{ borderTop: '2px solid rgba(200,169,110,0.35)', paddingTop: '32px', marginBottom: '40px' }}>
+        <div className="admin-sec-header" style={{ marginBottom: '20px' }}>
           <div>
             <h2 className="admin-sec-title">🖼️ Secciones del Portafolio</h2>
-            <p style={{ color:'#4a3520', fontSize:'0.85rem', marginTop:'4px' }}>
+            <p style={{ color: '#4a3520', fontSize: '0.85rem', marginTop: '4px' }}>
               Agrupa tus fotos y videos en secciones personalizadas (ej. Eventos, Star Wars, Colección).
             </p>
           </div>
@@ -1950,20 +1988,20 @@ function AdminIdentidad({ adminId }) {
         </div>
 
         {grupos.length === 0 ? (
-          <div style={{ textAlign:'center', padding:'40px 20px', background:'rgba(0,0,0,0.06)', borderRadius:'10px', border:'1px dashed rgba(139,90,43,0.35)', color:'#3a2a0f' }}>
-            <div style={{ fontSize:'2.5rem', marginBottom:'8px' }}>📂</div>
-            <p style={{ fontWeight:500 }}>No hay secciones aún.</p>
+          <div style={{ textAlign: 'center', padding: '40px 20px', background: 'rgba(0,0,0,0.06)', borderRadius: '10px', border: '1px dashed rgba(139,90,43,0.35)', color: '#3a2a0f' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>📂</div>
+            <p style={{ fontWeight: 500 }}>No hay secciones aún.</p>
           </div>
         ) : (
-          <div style={{ display:'flex', flexDirection:'column', gap:'30px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
             {grupos.map((grupo) => (
-              <div key={grupo.id} style={{ background:'rgba(30, 77, 90, 0.05)', border:'1px solid rgba(45, 110, 126, 0.2)', borderRadius:'12px', padding:'20px' }}>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px', borderBottom:'1px solid rgba(45, 110, 126, 0.1)', paddingBottom:'12px' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
-                    <input 
-                      type="text" 
-                      className="admin-input" 
-                      style={{ fontSize:'1.1rem', fontWeight:'bold', color:'#1a3d4a', width:'250px', background:'transparent', border:'1px solid transparent', padding:'4px 8px' }}
+              <div key={grupo.id} style={{ background: 'rgba(30, 77, 90, 0.05)', border: '1px solid rgba(45, 110, 126, 0.2)', borderRadius: '12px', padding: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid rgba(45, 110, 126, 0.1)', paddingBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <input
+                      type="text"
+                      className="admin-input"
+                      style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#1a3d4a', width: '250px', background: 'transparent', border: '1px solid transparent', padding: '4px 8px' }}
                       value={grupo.titulo}
                       onChange={(e) => {
                         const newG = [...grupos]
@@ -1973,31 +2011,31 @@ function AdminIdentidad({ adminId }) {
                       }}
                       onBlur={(e) => updateGroupTitle(grupo.id, e.target.value)}
                     />
-                    <button className="btn-outline btn-sm" onClick={() => deleteGroup(grupo.id)} style={{ color:'#d9534f', borderColor:'rgba(217,83,79,0.3)' }} title="Eliminar Sección">🗑️</button>
+                    <button className="btn-outline btn-sm" onClick={() => deleteGroup(grupo.id)} style={{ color: '#d9534f', borderColor: 'rgba(217,83,79,0.3)' }} title="Eliminar Sección">🗑️</button>
                   </div>
-                  <div style={{ display:'flex', gap:'10px' }}>
+                  <div style={{ display: 'flex', gap: '10px' }}>
                     <button className="btn-primary btn-sm" onClick={() => openItemModal(grupo.id, 'foto')}>➕ Añadir Foto</button>
-                    <button className="btn-primary btn-sm" onClick={() => openItemModal(grupo.id, 'video')} style={{ background:'#c9a84c' }}>➕ Añadir Video</button>
+                    <button className="btn-primary btn-sm" onClick={() => openItemModal(grupo.id, 'video')} style={{ background: '#c9a84c' }}>➕ Añadir Video</button>
                   </div>
                 </div>
 
-                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px, 1fr))', gap:'16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
                   {grupo.items && grupo.items.map((item) => {
                     const isVideo = item.tipo === 'video'
                     const ytId = isVideo ? getYtId(item.url) : null
                     const imgSrc = isVideo ? (ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : '') : `${BASE_URL}/${item.url}`
 
                     return (
-                      <div key={item.id} style={{ background:'#1a3d4a', borderRadius:'10px', overflow:'hidden', border:'1px solid rgba(139,90,43,0.3)', position:'relative', boxShadow:'0 4px 12px rgba(0,0,0,0.15)', aspectRatio:'1/1' }}>
+                      <div key={item.id} style={{ background: '#1a3d4a', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(139,90,43,0.3)', position: 'relative', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', aspectRatio: '1/1' }}>
                         {imgSrc ? (
-                          <img src={imgSrc} alt={item.titulo || 'Item'} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', pointerEvents:'none' }} />
+                          <img src={imgSrc} alt={item.titulo || 'Item'} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', pointerEvents: 'none' }} />
                         ) : (
-                          <div style={{ width:'100%', height:'100%', background:'rgba(0,0,0,0.2)', display:'flex', alignItems:'center', justifyContent:'center', color:'#aaa', fontSize:'2rem' }}>🎬</div>
+                          <div style={{ width: '100%', height: '100%', background: 'rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontSize: '2rem' }}>🎬</div>
                         )}
-                        
+
                         {isVideo && (
-                          <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%, -50%)', width:'40px', height:'40px', background:'rgba(0,0,0,0.6)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', pointerEvents:'none' }}>
-                            <div style={{ width:0, height:0, borderTop:'8px solid transparent', borderBottom:'8px solid transparent', borderLeft:'12px solid #fff', marginLeft:'4px' }} />
+                          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '40px', height: '40px', background: 'rgba(0,0,0,0.6)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                            <div style={{ width: 0, height: 0, borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderLeft: '12px solid #fff', marginLeft: '4px' }} />
                           </div>
                         )}
 
@@ -2006,7 +2044,7 @@ function AdminIdentidad({ adminId }) {
                           <button onClick={() => openItemModal(grupo.id, item.tipo, item)} style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '6px', color: '#fff', width: '34px', height: '34px', cursor: 'pointer' }} title="Editar">✏️</button>
                           <button onClick={() => deleteItem(item.id)} style={{ background: 'rgba(217,83,79,0.9)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '6px', color: '#fff', width: '34px', height: '34px', cursor: 'pointer' }} title="Eliminar">🗑️</button>
                         </div>
-                        
+
                         {/* Tipo label */}
                         <div style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(0,0,0,0.6)', borderRadius: '4px', padding: '2px 8px', color: '#fff', fontSize: '0.75rem', textTransform: 'uppercase' }}>
                           {item.tipo}
@@ -2035,10 +2073,10 @@ function AdminIdentidad({ adminId }) {
 
       {/* ── D: IMAGEN COMUNIDAD ───────────────────── */}
       <div className="admin-portafolio-sec">
-        <div className="admin-sec-header" style={{ marginBottom:'16px' }}>
+        <div className="admin-sec-header" style={{ marginBottom: '16px' }}>
           <div>
             <h2 className="admin-sec-title">🤝 Banner "Únete a la Comunidad"</h2>
-            <p style={{ color:'#4a3520', fontSize:'0.85rem', marginTop: '4px' }}>
+            <p style={{ color: '#4a3520', fontSize: '0.85rem', marginTop: '4px' }}>
               Gestiona la imagen que aparece en la sección Comunidad.
             </p>
           </div>
@@ -2049,24 +2087,24 @@ function AdminIdentidad({ adminId }) {
 
             {comunidadPreview ? (
               <>
-                <img 
+                <img
                   src={comunidadPreview.startsWith('uploads/') ? `${BASE_URL}/${comunidadPreview}` : comunidadPreview}
                   alt="Preview"
                   className="admin-banner-img"
-                  onError={e => { e.target.style.display = 'none'; }} 
+                  onError={e => { e.target.style.display = 'none'; }}
                 />
                 <div style={{ position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '10px' }}>
-                  <button 
-                    className="act-btn act-gold" 
-                    title="Editar Banner" 
+                  <button
+                    className="act-btn act-gold"
+                    title="Editar Banner"
                     style={{ width: '40px', height: '40px', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}
                     onClick={() => setShowBannerModal(true)}
                   >
                     ✏️
                   </button>
-                  <button 
-                    className="act-btn act-red" 
-                    title="Eliminar Banner" 
+                  <button
+                    className="act-btn act-red"
+                    title="Eliminar Banner"
                     style={{ width: '40px', height: '40px', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}
                     onClick={clearComunidad}
                   >
@@ -2088,25 +2126,25 @@ function AdminIdentidad({ adminId }) {
 
       {/* MODAL CONFIGURAR BANNER (comunidad) */}
       {showBannerModal && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:1001, display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <form onSubmit={(e) => { e.preventDefault(); saveComunidad(); setShowBannerModal(false); }} style={{ width:'460px', background:'#0d2830', border:'1px solid var(--color-gold)', borderRadius:'12px', padding:'2rem', position:'relative' }}>
-            <button type="button" onClick={() => setShowBannerModal(false)} style={{ position:'absolute', top:'12px', right:'14px', background:'none', border:'none', color:'#aaa', fontSize:'1.4rem', cursor:'pointer' }}>✕</button>
-            <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.2rem' }}>🖼️ Configurar Banner</h3>
-            
-            <div className="admin-form-group" style={{ marginBottom:'16px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <form onSubmit={(e) => { e.preventDefault(); saveComunidad(); setShowBannerModal(false); }} style={{ width: '460px', background: '#0d2830', border: '1px solid var(--color-gold)', borderRadius: '12px', padding: '2rem', position: 'relative' }}>
+            <button type="button" onClick={() => setShowBannerModal(false)} style={{ position: 'absolute', top: '12px', right: '14px', background: 'none', border: 'none', color: '#aaa', fontSize: '1.4rem', cursor: 'pointer' }}>✕</button>
+            <h3 style={{ color: 'var(--color-gold)', marginBottom: '20px', fontSize: '1.2rem' }}>🖼️ Configurar Banner</h3>
+
+            <div className="admin-form-group" style={{ marginBottom: '16px' }}>
               <label>Subir Imagen desde equipo</label>
-              <input type="file" accept="image/*" onChange={handleComunidadFile} className="admin-input" style={{ marginTop:'6px' }} />
+              <input type="file" accept="image/*" onChange={handleComunidadFile} className="admin-input" style={{ marginTop: '6px' }} />
             </div>
 
             <div style={{ textAlign: 'center', margin: '10px 0', color: '#aaa', fontSize: '0.8rem' }}>O</div>
 
-            <div className="admin-form-group" style={{ marginBottom:'20px' }}>
+            <div className="admin-form-group" style={{ marginBottom: '20px' }}>
               <label>Ingresar URL de la imagen</label>
-              <input type="url" value={comunidadUrl} onChange={e => setComunidadUrl(e.target.value)} className="admin-input" placeholder="https://..." style={{ marginTop:'6px' }} />
+              <input type="url" value={comunidadUrl} onChange={e => setComunidadUrl(e.target.value)} className="admin-input" placeholder="https://..." style={{ marginTop: '6px' }} />
             </div>
 
-            <div style={{ display:'flex', gap:'10px' }}>
-              <button type="submit" className="btn-primary" disabled={savingCom} style={{ flex:1 }}>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button type="submit" className="btn-primary" disabled={savingCom} style={{ flex: 1 }}>
                 {savingCom ? 'Guardando...' : '💾 Guardar'}
               </button>
               <button type="button" className="btn-outline" onClick={() => setShowBannerModal(false)}>Cancelar</button>
@@ -2129,7 +2167,7 @@ function AdminConfiguracion({ adminId }) {
   useEffect(() => {
     authFetch(`${API_URL}/destacados.php`)
       .then(r => r.json()).then(d => {
-        if(d.config) {
+        if (d.config) {
           setLogoUrl(d.config.logo_sitio || '')
           setLogoPreview(d.config.logo_sitio || '')
         }
@@ -2144,7 +2182,7 @@ function AdminConfiguracion({ adminId }) {
     setLogoFile(f)
     setLogoPreview(URL.createObjectURL(f))
   }
-  
+
   const handleLogoUpload = (e) => {
     e.preventDefault()
     setSavingLogo(true)
@@ -2158,7 +2196,7 @@ function AdminConfiguracion({ adminId }) {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         body: fd
       }).then(r => r.json()).then(d => {
-        if(d.success) {
+        if (d.success) {
           return authFetch(`${API_URL}/destacados.php`, {
             method: 'POST',
             body: JSON.stringify({ clave: 'logo_sitio', valor: d.imagen_url, adminId })
@@ -2176,7 +2214,7 @@ function AdminConfiguracion({ adminId }) {
         method: 'POST',
         body: JSON.stringify({ clave: 'logo_sitio', valor: logoUrl, adminId })
       }).then(r => r.json()).then(d => {
-        if(d.success) { setLogoPreview(logoUrl); toast.success('✅ URL del logo guardada.') }
+        if (d.success) { setLogoPreview(logoUrl); toast.success('✅ URL del logo guardada.') }
         else toast.error('❌ Error al guardar.')
       }).catch(e => toast.error('❌ ' + e.message)).finally(() => setSavingLogo(false))
     }
@@ -2189,7 +2227,7 @@ function AdminConfiguracion({ adminId }) {
       method: 'POST',
       body: JSON.stringify({ clave: 'logo_sitio', valor: '', adminId })
     }).then(r => r.json()).then(d => {
-      if(d.success) {
+      if (d.success) {
         setLogoUrl('')
         setLogoPreview('')
         toast.success('✅ Logo restablecido.')
@@ -2208,7 +2246,7 @@ function AdminConfiguracion({ adminId }) {
       </div>
 
       <div className="admin-portafolio-sec" style={{ marginTop: '20px' }}>
-        <p style={{ color:'#4a3520', fontSize:'0.9rem', marginBottom: '20px' }}>
+        <p style={{ color: '#4a3520', fontSize: '0.9rem', marginBottom: '20px' }}>
           Gestiona el logo principal que aparece en la cabecera del "Hero" en la página de inicio.
           Este logo no afectará a la barra de navegación (Navbar).
         </p>
@@ -2217,24 +2255,24 @@ function AdminConfiguracion({ adminId }) {
           <div className="admin-banner-img-wrap" style={{ height: '180px', position: 'relative', borderStyle: 'solid', background: '#0d2830' }}>
             {logoPreview ? (
               <>
-                <img 
+                <img
                   src={logoPreview.startsWith('uploads/') ? `${BASE_URL}/${logoPreview}` : logoPreview}
                   alt="Preview Logo"
                   style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                  onError={e => { e.target.style.display = 'none'; }} 
+                  onError={e => { e.target.style.display = 'none'; }}
                 />
                 <div style={{ position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '10px' }}>
-                  <button 
-                    className="act-btn act-gold" 
-                    title="Editar Logo" 
+                  <button
+                    className="act-btn act-gold"
+                    title="Editar Logo"
                     style={{ width: '40px', height: '40px', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}
                     onClick={() => setShowLogoModal(true)}
                   >
                     ✏️
                   </button>
-                  <button 
-                    className="act-btn act-red" 
-                    title="Eliminar Logo" 
+                  <button
+                    className="act-btn act-red"
+                    title="Eliminar Logo"
                     style={{ width: '40px', height: '40px', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}
                     onClick={clearLogo}
                   >
@@ -2255,25 +2293,25 @@ function AdminConfiguracion({ adminId }) {
       </div>
 
       {showLogoModal && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:1001, display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <form onSubmit={(e) => { e.preventDefault(); handleLogoUpload(e); setShowLogoModal(false); }} style={{ width:'460px', background:'#0d2830', border:'1px solid var(--color-gold)', borderRadius:'12px', padding:'2rem', position:'relative' }}>
-            <button type="button" onClick={() => setShowLogoModal(false)} style={{ position:'absolute', top:'12px', right:'14px', background:'none', border:'none', color:'#aaa', fontSize:'1.4rem', cursor:'pointer' }}>✕</button>
-            <h3 style={{ color:'var(--color-gold)', marginBottom:'20px', fontSize:'1.2rem' }}>📛 Configurar Logo de Inicio</h3>
-            
-            <div className="admin-form-group" style={{ marginBottom:'16px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <form onSubmit={(e) => { e.preventDefault(); handleLogoUpload(e); setShowLogoModal(false); }} style={{ width: '460px', background: '#0d2830', border: '1px solid var(--color-gold)', borderRadius: '12px', padding: '2rem', position: 'relative' }}>
+            <button type="button" onClick={() => setShowLogoModal(false)} style={{ position: 'absolute', top: '12px', right: '14px', background: 'none', border: 'none', color: '#aaa', fontSize: '1.4rem', cursor: 'pointer' }}>✕</button>
+            <h3 style={{ color: 'var(--color-gold)', marginBottom: '20px', fontSize: '1.2rem' }}>📛 Configurar Logo de Inicio</h3>
+
+            <div className="admin-form-group" style={{ marginBottom: '16px' }}>
               <label>Subir Imagen (PNG sin fondo recomendado)</label>
-              <input type="file" accept="image/*" onChange={handleLogoFile} className="admin-input" style={{ marginTop:'6px' }} />
+              <input type="file" accept="image/*" onChange={handleLogoFile} className="admin-input" style={{ marginTop: '6px' }} />
             </div>
 
             <div style={{ textAlign: 'center', margin: '10px 0', color: '#aaa', fontSize: '0.8rem' }}>O</div>
 
-            <div className="admin-form-group" style={{ marginBottom:'20px' }}>
+            <div className="admin-form-group" style={{ marginBottom: '20px' }}>
               <label>Ingresar URL de la imagen</label>
-              <input type="url" value={logoUrl} onChange={e => setLogoUrl(e.target.value)} className="admin-input" placeholder="https://..." style={{ marginTop:'6px' }} />
+              <input type="url" value={logoUrl} onChange={e => setLogoUrl(e.target.value)} className="admin-input" placeholder="https://..." style={{ marginTop: '6px' }} />
             </div>
 
-            <div style={{ display:'flex', gap:'10px' }}>
-              <button type="submit" className="btn-primary" disabled={savingLogo} style={{ flex:1 }}>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button type="submit" className="btn-primary" disabled={savingLogo} style={{ flex: 1 }}>
                 {savingLogo ? 'Guardando...' : '💾 Guardar Logo'}
               </button>
               <button type="button" className="btn-outline" onClick={() => setShowLogoModal(false)}>Cancelar</button>
@@ -2288,9 +2326,9 @@ function AdminConfiguracion({ adminId }) {
 
 // ── SECCIÓN: Destacados ────────────────────────────────────
 function AdminDestacados({ adminId }) {
-  const [data, setData]         = useState(null)
-  const [error, setError]       = useState(null)
-  const [saving, setSaving]     = useState(false)
+  const [data, setData] = useState(null)
+  const [error, setError] = useState(null)
+  const [saving, setSaving] = useState(false)
   // ← All hooks at top level, before any conditional return
   const [miembroId, setMiembroId] = useState('')
   const [searchUser, setSearchUser] = useState('')
@@ -2329,7 +2367,7 @@ function AdminDestacados({ adminId }) {
   }
 
   if (error) return <ErrorMsg msg={error} />
-  if (!data)  return <Loading />
+  if (!data) return <Loading />
 
   const { listas } = data
 
@@ -2344,12 +2382,12 @@ function AdminDestacados({ adminId }) {
           <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '16px' }}>
             Selecciona el usuario que aparecerá como miembro destacado en la página principal.
           </p>
-          
+
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
-            <input 
-              type="text" 
-              placeholder="Buscar usuario..." 
-              className="admin-input" 
+            <input
+              type="text"
+              placeholder="Buscar usuario..."
+              className="admin-input"
               style={{ width: '200px', padding: '8px 12px' }}
               value={searchUser}
               onChange={e => setSearchUser(e.target.value)}
@@ -2362,9 +2400,9 @@ function AdminDestacados({ adminId }) {
               .filter(u => u.nombre.toLowerCase().includes(searchUser.toLowerCase()))
               .map(u => (
                 <option key={u.id} value={u.id}>{u.nombre}</option>
-            ))}
+              ))}
           </select>
-          
+
           <div style={{ marginTop: '16px' }}>
             <button
               className="btn-primary"
@@ -2386,9 +2424,9 @@ function AdminDestacados({ adminId }) {
           <div className="admin-mensajes-grid">
             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
               <h4 style={{ color: '#ddd', marginBottom: '8px', fontSize: '0.9rem' }}>🏆 Mensaje de Destacado</h4>
-              <textarea 
-                className="admin-input" 
-                rows="4" 
+              <textarea
+                className="admin-input"
+                rows="4"
                 value={txtDestacado}
                 onChange={e => setTxtDestacado(e.target.value)}
                 placeholder="Por su increíble colección y valiosos aportes..."
@@ -2406,9 +2444,9 @@ function AdminDestacados({ adminId }) {
 
             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
               <h4 style={{ color: '#ddd', marginBottom: '8px', fontSize: '0.9rem' }}>🎉 Mensaje de Cumpleañero</h4>
-              <textarea 
-                className="admin-input" 
-                rows="4" 
+              <textarea
+                className="admin-input"
+                rows="4"
                 value={txtCumple}
                 onChange={e => setTxtCumple(e.target.value)}
                 placeholder="¡El Gremio celebra tu día...!"
@@ -2476,23 +2514,23 @@ function AdminActividad() {
     <div className="admin-section">
       <div className="admin-sec-header" style={{ display: 'block', marginBottom: '24px' }}>
         <h2 className="admin-sec-title">📋 Log Completo de Actividad</h2>
-        
+
         {/* Barra de Filtros Refinada */}
-        <div style={{ 
-          display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', 
+        <div style={{
+          display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap',
           background: 'rgba(30, 77, 90, 0.05)',
-          padding: '16px 20px', 
-          borderRadius: '10px', 
+          padding: '16px 20px',
+          borderRadius: '10px',
           marginTop: '12px',
           border: '1.5px solid rgba(45, 110, 126, 0.1)'
         }}>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <label style={{ fontSize: '0.75rem', color: '#1a3d4a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Responsable</label>
-            <input 
-              type="text" 
-              placeholder="Buscar usuario..." 
-              className="admin-input" 
+            <input
+              type="text"
+              placeholder="Buscar usuario..."
+              className="admin-input"
               style={{ width: '180px' }}
               value={fUsuario}
               onChange={e => setFUsuario(e.target.value)}
@@ -2501,7 +2539,7 @@ function AdminActividad() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <label style={{ fontSize: '0.75rem', color: '#1a3d4a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Categoría</label>
-            <select 
+            <select
               className="admin-select"
               style={{ width: '150px', height: '38px' }}
               value={fTipo}
@@ -2519,9 +2557,9 @@ function AdminActividad() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <label style={{ fontSize: '0.75rem', color: '#1a3d4a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Desde</label>
-            <input 
-              type="date" 
-              className="admin-input" 
+            <input
+              type="date"
+              className="admin-input"
               style={{ width: '150px' }}
               value={fFechaDesde}
               onChange={e => setFFechaDesde(e.target.value)}
@@ -2530,9 +2568,9 @@ function AdminActividad() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <label style={{ fontSize: '0.75rem', color: '#1a3d4a', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Hasta</label>
-            <input 
-              type="date" 
-              className="admin-input" 
+            <input
+              type="date"
+              className="admin-input"
               style={{ width: '150px' }}
               value={fFechaHasta}
               onChange={e => setFFechaHasta(e.target.value)}
@@ -2540,7 +2578,7 @@ function AdminActividad() {
           </div>
 
           <div style={{ display: 'flex', gap: '10px', marginLeft: 'auto', alignSelf: 'flex-end' }}>
-            <button className="btn-outline btn-sm" onClick={() => { setFUsuario(''); setFTipo(''); setFFechaDesde(''); setFFechaHasta(''); setTimeout(loadData, 50) }} 
+            <button className="btn-outline btn-sm" onClick={() => { setFUsuario(''); setFTipo(''); setFFechaDesde(''); setFFechaHasta(''); setTimeout(loadData, 50) }}
               style={{ borderColor: 'rgba(180,160,120,0.6)', color: '#5a4530' }}>
               Limpiar
             </button>
@@ -2551,7 +2589,7 @@ function AdminActividad() {
         </div>
       </div>
 
-      
+
       {loading ? <Loading /> : (
         <>
           <div className="admin-table-wrap">
@@ -2588,8 +2626,8 @@ function AdminActividad() {
 
           {totalPages > 1 && (
             <div className="galeria-pagination" style={{ marginTop: '24px' }}>
-              <button 
-                disabled={currentPage === 1} 
+              <button
+                disabled={currentPage === 1}
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 className="pagination-btn"
               >
@@ -2606,8 +2644,8 @@ function AdminActividad() {
                   </button>
                 ))}
               </div>
-              <button 
-                disabled={currentPage === totalPages} 
+              <button
+                disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 className="pagination-btn"
               >
@@ -2631,7 +2669,7 @@ function AdminModeracion({ adminId }) {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 30
   const [selectedPost, setSelectedPost] = useState(null)
-  
+
   // Modal de eliminación con advertencia
   const [postToRemove, setPostToRemove] = useState(null) // { id, tipo, nombre }
   const [deleteReason, setDeleteReason] = useState('')
@@ -2641,8 +2679,8 @@ function AdminModeracion({ adminId }) {
     setLoading(true)
     const authUserStr = localStorage.getItem('austral_auth_user')
     let viewer = ''
-    try { if (authUserStr) viewer = JSON.parse(authUserStr).username } catch(e) {}
-    
+    try { if (authUserStr) viewer = JSON.parse(authUserStr).username } catch (e) { }
+
     authFetch(`${API_URL}/publicaciones.php?viewer_username=${viewer}`)
       .then(r => r.json())
       .then(d => setPosts(d.data || []))
@@ -2658,7 +2696,7 @@ function AdminModeracion({ adminId }) {
   const handleDelete = async (e) => {
     e.preventDefault()
     if (!postToRemove || !deleteReason) return
-    
+
     setIsDeleting(true)
     authFetch(`${API_URL}/publicaciones.php`, {
       method: 'DELETE',
@@ -2669,26 +2707,26 @@ function AdminModeracion({ adminId }) {
         adminId: adminId
       })
     })
-    .then(r => r.json())
-    .then(d => {
-      if (d.success) {
-        toast.success('Publicación eliminada correctamente. Correo de advertencia enviado.')
-        setPostToRemove(null)
-        setDeleteReason('')
-        loadData()
-      } else {
-        toast.error('Error: ' + d.error)
-      }
-    })
-    .catch(e => toast.info(e.message))
-    .finally(() => setIsDeleting(false))
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          toast.success('Publicación eliminada correctamente. Correo de advertencia enviado.')
+          setPostToRemove(null)
+          setDeleteReason('')
+          loadData()
+        } else {
+          toast.error('Error: ' + d.error)
+        }
+      })
+      .catch(e => toast.info(e.message))
+      .finally(() => setIsDeleting(false))
   }
 
   const handleLike = (id) => {
     const authUserStr = localStorage.getItem('austral_auth_user')
     let currentUser = null
-    try { if (authUserStr) currentUser = JSON.parse(authUserStr) } catch(e) { currentUser = null }
-    
+    try { if (authUserStr) currentUser = JSON.parse(authUserStr) } catch (e) { currentUser = null }
+
     if (!currentUser) {
       toast.info('Debes iniciar sesión para dar me gusta.')
       return
@@ -2699,25 +2737,25 @@ function AdminModeracion({ adminId }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: currentUser.username, post_id: id })
     })
-    .then(r => r.json())
-    .then(d => {
-      if (d.success) {
-        setPosts(prev => prev.map(f => {
-          if (f.id !== id) return f
-          return { ...f, userLiked: d.action === 'liked', total_likes: d.total_likes }
-        }))
-        if (selectedPost && selectedPost.id === id) {
-          setSelectedPost(prev => ({
-            ...prev,
-            userLiked: d.action === 'liked',
-            total_likes: d.total_likes
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          setPosts(prev => prev.map(f => {
+            if (f.id !== id) return f
+            return { ...f, userLiked: d.action === 'liked', total_likes: d.total_likes }
           }))
+          if (selectedPost && selectedPost.id === id) {
+            setSelectedPost(prev => ({
+              ...prev,
+              userLiked: d.action === 'liked',
+              total_likes: d.total_likes
+            }))
+          }
+        } else {
+          toast.error(d.error || 'Error al procesar el like.')
         }
-      } else {
-        toast.error(d.error || 'Error al procesar el like.')
-      }
-    })
-    .catch(e => console.error("Error toggling like:", e))
+      })
+      .catch(e => console.error("Error toggling like:", e))
   }
 
   const filteredPosts = posts.filter(p => {
@@ -2734,13 +2772,13 @@ function AdminModeracion({ adminId }) {
     // La API ya devuelve arrays para hashtags e imagenes_extra
     let hashtags = Array.isArray(p.hashtags) ? p.hashtags : []
     let extra = Array.isArray(p.imagenes_extra) ? p.imagenes_extra : []
-    
+
     // Si por algún motivo vinieran como string (ej. caché antigua)
     if (typeof p.hashtags === 'string') {
-      try { hashtags = JSON.parse(p.hashtags) } catch(e) { hashtags = [] }
+      try { hashtags = JSON.parse(p.hashtags) } catch (e) { hashtags = [] }
     }
     if (typeof p.imagenes_extra === 'string') {
-      try { extra = JSON.parse(p.imagenes_extra) } catch(e) { extra = [] }
+      try { extra = JSON.parse(p.imagenes_extra) } catch (e) { extra = [] }
     }
 
     setSelectedPost({ ...p, hashtags, imagenes_extra: extra })
@@ -2753,11 +2791,11 @@ function AdminModeracion({ adminId }) {
     <div className="admin-section">
       {/* Modal de eliminación con motivo */}
       {postToRemove && (
-        <div 
+        <div
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           onClick={() => setPostToRemove(null)}
         >
-          <div 
+          <div
             style={{ background: '#121212', border: '1px solid #d9534f', borderRadius: '12px', padding: '2rem', maxWidth: '440px', width: '90%' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -2766,7 +2804,7 @@ function AdminModeracion({ adminId }) {
             <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
               Escribe el motivo de la eliminación. Este mensaje se le enviará por correo electrónico al autor para advertirle.
             </p>
-            
+
             <form onSubmit={handleDelete}>
               <textarea
                 className="admin-input"
@@ -2776,7 +2814,7 @@ function AdminModeracion({ adminId }) {
                 onChange={e => setDeleteReason(e.target.value)}
                 required
               ></textarea>
-              
+
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                 <button type="button" className="btn-outline btn-sm" onClick={() => setPostToRemove(null)} disabled={isDeleting}>Cancelar</button>
                 <button type="submit" className="btn-primary btn-sm" style={{ background: '#d9534f' }} disabled={isDeleting}>
@@ -2796,10 +2834,10 @@ function AdminModeracion({ adminId }) {
             <option value="figura">Sólo Figuras</option>
             <option value="cosplay">Sólo Cosplays</option>
           </select>
-          <input 
-            type="text" 
-            className="admin-input" 
-            placeholder="Buscar por nombre o autor..." 
+          <input
+            type="text"
+            className="admin-input"
+            placeholder="Buscar por nombre o autor..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             style={{ width: '220px' }}
@@ -2865,7 +2903,7 @@ function AdminModeracion({ adminId }) {
 
       {totalPages > 1 && (
         <div className="galeria-pagination">
-          <button 
+          <button
             className="pagination-btn"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -2883,7 +2921,7 @@ function AdminModeracion({ adminId }) {
               </button>
             ))}
           </div>
-          <button 
+          <button
             className="pagination-btn"
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
@@ -2893,12 +2931,12 @@ function AdminModeracion({ adminId }) {
         </div>
       )}
 
-      <PostModal 
+      <PostModal
         post={selectedPost}
         isOpen={!!selectedPost}
         onClose={() => setSelectedPost(null)}
-        onLike={handleLike} 
-        onTagClick={() => {}} 
+        onLike={handleLike}
+        onTagClick={() => { }}
       />
     </div>
   )
@@ -2965,7 +3003,7 @@ function AdminPromos({ adminId }) {
       } else {
         toast.error(d.error || 'Error al guardar.')
       }
-    } catch(err) {
+    } catch (err) {
       toast.error('Error de conexión: ' + err.message)
     } finally {
       setSaving(false)
@@ -3025,20 +3063,20 @@ function AdminPromos({ adminId }) {
             <div className="admin-form-group">
               <label>Nombre de la Promoción (control interno) *</label>
               <input type="text" className="admin-input" required placeholder="Ej: Tienda Oficial"
-                value={form.titulo} onChange={e => setForm({...form, titulo: e.target.value})} />
+                value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} />
             </div>
 
             <div className="admin-form-group">
               <label>URL de destino (link externo) *</label>
               <input type="url" className="admin-input" required placeholder="https://..."
-                value={form.link_url} onChange={e => setForm({...form, link_url: e.target.value})} />
+                value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} />
             </div>
 
             <div className="admin-form-row">
               <div className="admin-form-group">
                 <label>Orden (número bajo = primero)</label>
                 <input type="number" className="admin-input" min="0" max="99"
-                  value={form.orden} onChange={e => setForm({...form, orden: e.target.value})} />
+                  value={form.orden} onChange={e => setForm({ ...form, orden: e.target.value })} />
               </div>
               <div className="admin-form-group">
                 <label>Imagen / Logo {form.id ? '(Opcional)' : '*'}</label>
@@ -3231,16 +3269,16 @@ function AdminMascota({ adminId }) {
 
       <form onSubmit={handleSave} style={{ maxWidth: '1100px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-          
+
           <div className="admin-form-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
             <h3 style={{ color: 'var(--color-gold)', fontSize: '1rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               🏠 Página de Inicio
             </h3>
-            <textarea 
-              className="admin-input" 
-              rows="5" 
-              value={texts.inicio} 
-              onChange={(e) => handleChange('inicio', e.target.value)} 
+            <textarea
+              className="admin-input"
+              rows="5"
+              value={texts.inicio}
+              onChange={(e) => handleChange('inicio', e.target.value)}
               placeholder="Ej: ¡Hola! Bienvenido a Austral Collector."
               style={{ fontSize: '0.95rem', flex: 1, resize: 'none' }}
             />
@@ -3250,11 +3288,11 @@ function AdminMascota({ adminId }) {
             <h3 style={{ color: 'var(--color-gold)', fontSize: '1rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               📜 Nosotros / Identidad
             </h3>
-            <textarea 
-              className="admin-input" 
-              rows="5" 
-              value={texts.nosotros} 
-              onChange={(e) => handleChange('nosotros', e.target.value)} 
+            <textarea
+              className="admin-input"
+              rows="5"
+              value={texts.nosotros}
+              onChange={(e) => handleChange('nosotros', e.target.value)}
               style={{ fontSize: '0.95rem', flex: 1, resize: 'none' }}
             />
           </div>
@@ -3263,11 +3301,11 @@ function AdminMascota({ adminId }) {
             <h3 style={{ color: 'var(--color-gold)', fontSize: '1rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               🖼️ Galería / Post
             </h3>
-            <textarea 
-              className="admin-input" 
-              rows="5" 
-              value={texts.galeria} 
-              onChange={(e) => handleChange('galeria', e.target.value)} 
+            <textarea
+              className="admin-input"
+              rows="5"
+              value={texts.galeria}
+              onChange={(e) => handleChange('galeria', e.target.value)}
               style={{ fontSize: '0.95rem', flex: 1, resize: 'none' }}
             />
           </div>
@@ -3276,11 +3314,11 @@ function AdminMascota({ adminId }) {
             <h3 style={{ color: 'var(--color-gold)', fontSize: '1rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               👥 Miembros / Perfiles
             </h3>
-            <textarea 
-              className="admin-input" 
-              rows="5" 
-              value={texts.miembros} 
-              onChange={(e) => handleChange('miembros', e.target.value)} 
+            <textarea
+              className="admin-input"
+              rows="5"
+              value={texts.miembros}
+              onChange={(e) => handleChange('miembros', e.target.value)}
               style={{ fontSize: '0.95rem', flex: 1, resize: 'none' }}
             />
           </div>
@@ -3289,11 +3327,11 @@ function AdminMascota({ adminId }) {
             <h3 style={{ color: 'var(--color-gold)', fontSize: '1rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               ✉️ Página de Contacto
             </h3>
-            <textarea 
-              className="admin-input" 
-              rows="5" 
-              value={texts.contacto} 
-              onChange={(e) => handleChange('contacto', e.target.value)} 
+            <textarea
+              className="admin-input"
+              rows="5"
+              value={texts.contacto}
+              onChange={(e) => handleChange('contacto', e.target.value)}
               style={{ fontSize: '0.95rem', flex: 1, resize: 'none' }}
             />
           </div>

@@ -14,7 +14,7 @@ import LoginPage from './pages/LoginPage'
 import VirtualAssistant from './components/VirtualAssistant'
 import PasswordChangeForm from './components/PasswordChangeForm'
 import { API_URL } from './config.js'
-import { syncOfflinePosts } from './utils/offlineSync.js'
+import { debouncedSync } from './utils/offlineSync.js'
 
 // Scroll al inicio en cada cambio de ruta (mobile, tablet y PC)
 function ScrollToTop() {
@@ -46,7 +46,7 @@ function App() {
   useEffect(() => {
     const handleOnline = () => {
       setIsOffline(false)
-      syncOfflinePosts(API_URL)
+      debouncedSync(API_URL)
     }
     const handleOffline = () => setIsOffline(true)
 
@@ -55,7 +55,7 @@ function App() {
 
     // Attempt sync immediately on load if online
     if (navigator.onLine) {
-      syncOfflinePosts(API_URL)
+      debouncedSync(API_URL)
     }
 
     return () => {

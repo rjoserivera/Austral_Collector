@@ -43,18 +43,22 @@ export const removeOfflinePost = async (id) => {
   window.dispatchEvent(new CustomEvent('SYNC_QUEUE_CHANGED'));
 };
 
+// ── Sync lock ──────────────────────────────────────────────
+// Single module-level flag. Checked and set SYNCHRONOUSLY
+// before any await so concurrent calls (React StrictMode
+// double-mount, rapid 'online' events) are all blocked.
 let isSyncing = false;
 
 // Sync all offline posts with the server
 export const syncOfflinePosts = async (apiUrl) => {
   if (!navigator.onLine) return; // Prevent sync if still offline
-  if (isSyncing) return; // Prevent concurrent syncs
+  if (isSyncing) return;        // Prevent concurrent syncs
 
-  isSyncing = true; // Acquire lock synchronously BEFORE querying DB
+  isSyncing = true; // Acquire lock synchronously BEFORE any async operation
 
   try {
     const posts = await getOfflinePosts();
-    if (posts.length === 0) return; // Nothing to sync
+    if (posts.length === 0) return;
 
     console.log(`☁️ Syncing ${posts.length} offline posts to server...`);
 
@@ -66,34 +70,33 @@ export const syncOfflinePosts = async (apiUrl) => {
         formData.append('descripcion', post.descripcion || '');
         if (post.hashtags) formData.append('hashtags', JSON.stringify(post.hashtags));
         if (post.anio) formData.append('anio', post.anio);
-        
+
         let url = '';
-        
+
         if (post.isEditing) {
           formData.append('id', post.id_original);
           formData.append('tipo_original', post.tipo_original);
           url = `${apiUrl}/auth/editar_post.php`;
-          
+
           const order = [];
           let newImageIndex = 0;
-          
+
           post.imagesBase64.forEach((imgObj) => {
             if (imgObj.isKept) {
               order.push(imgObj.originalUrl);
             } else {
               order.push(`new_${newImageIndex}`);
-              // Convert base64 back to file
               const file = base64ToFile(imgObj.base64, imgObj.name);
               formData.append('images[]', file);
               newImageIndex++;
             }
           });
           formData.append('media_order', JSON.stringify(order));
-          
+
         } else {
           formData.append('user_id', post.user_id);
           url = `${apiUrl}/auth/publicar_post.php`;
-          
+
           post.imagesBase64.forEach((imgObj) => {
             const file = base64ToFile(imgObj.base64, imgObj.name);
             formData.append('images[]', file);
@@ -102,7 +105,7 @@ export const syncOfflinePosts = async (apiUrl) => {
 
         const response = await fetch(url, { method: 'POST', body: formData });
         const data = await response.json();
-        
+
         if (data.success) {
           console.log(`✅ Synced post ID: ${post.id}`);
           await removeOfflinePost(post.id);
@@ -116,8 +119,18 @@ export const syncOfflinePosts = async (apiUrl) => {
       }
     }
   } finally {
-    isSyncing = false; // Always release lock safely
+    isSyncing = false; // Always release lock
   }
+};
+
+// ── Debounced sync trigger ─────────────────────────────────
+// Collapses multiple rapid calls (React StrictMode double-mount,
+// multiple 'online' events fired in quick succession on mobile)
+// into a single execution after a short delay.
+let syncDebounceTimer = null;
+export const debouncedSync = (apiUrl, delayMs = 800) => {
+  clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(() => syncOfflinePosts(apiUrl), delayMs);
 };
 
 // Convert File/Blob to Base64 (needed to store images in IndexedDB safely across browsers)

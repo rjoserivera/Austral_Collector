@@ -235,4 +235,43 @@ HTML;
 
     return _dispatchEmail($toEmail, $subject, $html, 'CUSTOM_MAIL');
 }
+
+// ============================================================
+// FUNCIÓN PÚBLICA 4: Correo de registro (nuevo usuario)
+// ============================================================
+function sendRegistrationEmail($toEmail, $username, $tempKey) {
+    $subject = "¡Bienvenido a Austral Collector!";
+
+    $html = <<<HTML
+    <html><head><style>
+        body{font-family:Arial,sans-serif;line-height:1.6;color:#333}
+        .container{padding:20px;border:1px solid #ddd;border-radius:8px;max-width:600px;margin:0 auto}
+        .header-logo{text-align:center;margin-bottom:20px}
+        .header-logo img{max-width:150px;height:auto}
+        .header{font-size:1.2rem;font-weight:bold;color:#1e4d5a;margin-bottom:15px}
+        .info-box{background:#f9f9f9;padding:15px;border-radius:5px;margin:15px 0}
+        .key-box{background:#1e4d5a;color:#fff;padding:15px;text-align:center;font-size:1.5rem;font-family:monospace;border-radius:5px;margin:20px 0;letter-spacing:2px}
+        .footer{font-size:.8rem;color:#777;margin-top:20px;border-top:1px solid #eee;padding-top:10px;text-align:center}
+        .footer a{color:#1e4d5a;text-decoration:none;font-weight:bold}
+    </style></head><body>
+        <div class='container'>
+            <div class='header-logo'>
+                <a href='https://australcollector.cl/' target='_blank'>
+                    <img src='https://australcollector.cl/logo_sin_fondo2.png' alt='Austral Collector Logo' width='150' style='display:block;margin:0 auto;border:0;' />
+                </a>
+            </div>
+            <div class='header'>Hola, ¡felicidades {$username}!</div>
+            <p>Se ha creado un perfil para ti en <a href='https://australcollector.cl/' target='_blank' style='color:#1e4d5a;font-weight:bold;text-decoration:none;'>Austral Collector</a>.</p>
+            <div class='info-box'>
+                <strong>Tu nombre de usuario para iniciar sesión:</strong> {$username}<br>
+            </div>
+            <p>Usa la siguiente clave temporal para iniciar sesión por primera vez. Por razones de seguridad, el sistema te pedirá actualizar tu contraseña inmediatamente tras ingresar.</p>
+            <div class='key-box'>{$tempKey}</div>
+            <div class='footer'>Mensaje automático del sistema — Administración <a href='https://australcollector.cl/' target='_blank'>Austral Collector</a>.</div>
+        </div>
+    </body></html>
+HTML;
+
+    return _dispatchEmail($toEmail, $subject, $html, 'REGISTER');
+}
 ?>

@@ -106,8 +106,12 @@ export default function DashboardPage() {
     })
       .then(r => r.json())
       .then(d => {
-        if (d.success) loadData()
-        else toast.error('Error: ' + (d.error || 'No se pudo eliminar.'))
+        if (d.success) {
+          setFiguras(prev => prev.filter(f => f.id !== fig.id))
+          toast.success(`🗑️ "${fig.nombre}" eliminado correctamente.`)
+        } else {
+          toast.error('Error: ' + (d.error || 'No se pudo eliminar.'))
+        }
       })
       .catch(e => toast.error('Error: ' + e.message))
   }
@@ -159,8 +163,6 @@ export default function DashboardPage() {
   }
 
   const saveNewOrder = () => {
-    // Al finalizar de arrastrar, mandamos al backend el nuevo orden
-    // figuras local state ya está reordenado
     const ordenData = figuras.map((fig) => ({
       id: fig.id,
       tipo: fig.tipo
@@ -171,7 +173,12 @@ export default function DashboardPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orden: ordenData })
     })
-      .catch(e => console.error("Error guardando reorden: ", e))
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) toast.success('✅ Orden guardado correctamente.')
+        else toast.error('❌ Error al guardar el orden.')
+      })
+      .catch(e => toast.error('Error al reordenar: ' + e.message))
   }
 
   const handleManualReorder = (currentIndexOnPage, newPositionStr) => {
@@ -204,7 +211,13 @@ export default function DashboardPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orden: ordenData })
-    }).catch(e => console.error("Error guardando reorden manual: ", e));
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) toast.success(`✅ Publicación movida a la posición ${newPos}.`)
+        else toast.error('❌ Error al guardar la nueva posición.')
+      })
+      .catch(e => toast.error('Error al reordenar: ' + e.message));
   }
 
   const handleTogglePin = (fig) => {
@@ -215,9 +228,13 @@ export default function DashboardPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ post_id: fig.id, is_pinned: newStatus })
     }).then(r => r.json()).then(d => {
-      if(d.success) loadData();
-      else toast.error('Error al fijar publicación.');
-    }).catch(e => console.error(e));
+      if (d.success) {
+        setFiguras(prev => prev.map(f => f.id === fig.id ? { ...f, is_pinned: newStatus } : f))
+        toast.success(newStatus === 1 ? `📌 "${fig.nombre}" fijado en tu perfil.` : `📍 "${fig.nombre}" desfijado.`)
+      } else {
+        toast.error('Error al fijar/desfijar la publicación.')
+      }
+    }).catch(e => toast.error('Error: ' + e.message));
   };
 
   const currentFilteredFiguras = figuras.filter(f => (f.tipo || 'figura') === activeTab);
@@ -263,7 +280,7 @@ export default function DashboardPage() {
               <img src={avatar} alt="Mi Avatar" className="db-avatar-img" />
               <div className="db-media-actions">
                 <button className="btn-outline db-btn-sm" onClick={() => avatarInputRef.current.click()}>✏️ Editar</button>
-                <button className="btn-outline db-btn-sm btn-danger" onClick={() => { setAvatar('/mock_avatar.png'); setAvatarFile(null); }}>🗑️ Eliminar</button>
+                <button className="btn-outline db-btn-sm btn-danger" onClick={() => { setAvatar('/mock_avatar.png'); setAvatarFile(null); toast.info('Avatar restablecido al predeterminado. Guarda los cambios para confirmar.') }}>🗑️ Eliminar</button>
               </div>
               <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
               {avatarFile && <small style={{ color: '#8cf08c', marginTop: '4px' }}>✅ Nueva foto lista para guardar</small>}
@@ -279,7 +296,7 @@ export default function DashboardPage() {
               </div>
               <div className="db-media-actions">
                 <button className="btn-outline db-btn-sm" onClick={() => bannerInputRef.current.click()}>✏️ Editar</button>
-                <button className="btn-outline db-btn-sm btn-danger" onClick={() => { setBanner('/mock_banner.png'); setBannerFile(null); }}>🗑️ Eliminar</button>
+                <button className="btn-outline db-btn-sm btn-danger" onClick={() => { setBanner('/mock_banner.png'); setBannerFile(null); toast.info('Banner restablecido al predeterminado. Guarda los cambios para confirmar.') }}>🗑️ Eliminar</button>
               </div>
               <input ref={bannerInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBannerChange} />
               {bannerFile && <small style={{ color: '#8cf08c', marginTop: '4px' }}>✅ Nuevo banner listo para guardar</small>}

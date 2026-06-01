@@ -6,14 +6,9 @@
 
 require_once '../db.php';
 require_once 'auth_check.php';
+require_once 'log_helper.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
-
-function logAction($pdo, $userId, $tipo, $accion) {
-    if (!$userId) return;
-    $stmt = $pdo->prepare("INSERT INTO logs (user_id, tipo, accion) VALUES (?, ?, ?)");
-    $stmt->execute([$userId, $tipo, $accion]);
-}
 
 try {
     if ($method === 'GET') {
@@ -82,7 +77,7 @@ try {
             $stmt = $pdo->prepare("DELETE FROM posts WHERE id = ?");
             $stmt->execute([$postId]);
             
-            logAction($pdo, $adminId, 'admin', "Eliminó publicación: " . $post['nombre'] . " ($post[tipo]). Motivo: " . $motivo);
+            adminLog($pdo, $currentUser, 'admin', "Eliminó publicación de moderación: \"" . $post['nombre'] . "\" (" . $post['tipo'] . ") del usuario: " . $post['username'] . ". Motivo: " . $motivo);
             
             echo json_encode(['success' => true]);
         } else {

@@ -4,14 +4,9 @@
 
 require_once '../db.php';
 require_once 'auth_check.php';
+require_once 'log_helper.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
-
-function logAction($pdo, $userId, $tipo, $accion) {
-    if (!$userId) return;
-    $stmt = $pdo->prepare("INSERT INTO logs (user_id, tipo, accion) VALUES (?, ?, ?)");
-    $stmt->execute([$userId, $tipo, $accion]);
-}
 
 try {
     if ($method === 'GET') {
@@ -50,7 +45,7 @@ try {
                 $stmt = $pdo->prepare("UPDATE eventos SET titulo=?, fecha_display=?, descripcion=?, enlace=? WHERE id=?");
                 $stmt->execute([$titulo, $fecha_display, $descripcion, $enlace, $id]);
             }
-            logAction($pdo, $adminId, 'alerta', "Actualizó el evento: $titulo");
+            adminLog($pdo, $currentUser, 'alerta', "Actualizó el evento: \"$titulo\"");
         } else {
             if ($imagen_url) {
                 $stmt = $pdo->prepare("INSERT INTO eventos (titulo, fecha_display, descripcion, enlace, imagen_url) VALUES (?,?,?,?,?)");
@@ -59,7 +54,7 @@ try {
                 $stmt = $pdo->prepare("INSERT INTO eventos (titulo, fecha_display, descripcion, enlace) VALUES (?,?,?,?)");
                 $stmt->execute([$titulo, $fecha_display, $descripcion, $enlace]);
             }
-            logAction($pdo, $adminId, 'alerta', "Publicó un nuevo evento: $titulo");
+            adminLog($pdo, $currentUser, 'alerta', "Publicó nuevo evento: \"$titulo\"");
         }
         echo json_encode(['success' => true]);
     }
@@ -69,7 +64,7 @@ try {
         $adminId = $data['adminId'] ?? null;
         
         $pdo->prepare("DELETE FROM eventos WHERE id = ?")->execute([$id]);
-        logAction($pdo, $adminId, 'alerta', "Eliminó el evento ID: $id");
+        adminLog($pdo, $currentUser, 'alerta', "Eliminó el evento ID: $id");
         
         echo json_encode(['success' => true]);
     }

@@ -4,14 +4,9 @@
 
 require_once '../db.php';
 require_once 'auth_check.php';
+require_once 'log_helper.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
-
-function logAction($pdo, $userId, $tipo, $accion) {
-    if (!$userId) return;
-    $stmt = $pdo->prepare("INSERT INTO logs (user_id, tipo, accion) VALUES (?, ?, ?)");
-    $stmt->execute([$userId, $tipo, $accion]);
-}
 
 try {
     if ($method === 'GET') {
@@ -34,10 +29,10 @@ try {
             $data['verification_type'] ?? 'none'
         ]);
         
-        logAction($pdo, $data['adminId'] ?? null, 'admin', "Creó al usuario: " . $data['username']);
+        adminLog($pdo, $currentUser, 'admin', "Creó nuevo usuario: " . $data['username'] . " (rol: " . $data['role'] . ")");
         
         require_once 'mailer.php';
-        sendTempKeyEmail($data['email'], $data['username'], $data['password']);
+        sendRegistrationEmail($data['email'], $data['username'], $data['password']);
         
         echo json_encode(['success' => true, 'username' => $data['username'], 'id' => (int)$pdo->lastInsertId()]);
     }
@@ -54,8 +49,10 @@ try {
             $accionStr = "Actualizó " . $data['field'] . " del usuario ID: " . $data['id'];
             if ($data['field'] === 'is_active') {
                 $accionStr = $data['value'] == 1 ? "Desbaneó al usuario ID: " . $data['id'] : "Baneó al usuario ID: " . $data['id'];
+            } elseif ($data['field'] === 'role') {
+                $accionStr = "Cambió rol del usuario ID: " . $data['id'] . " a: " . $data['value'];
             }
-            logAction($pdo, $data['adminId'] ?? null, 'admin', $accionStr);
+            adminLog($pdo, $currentUser, 'admin', $accionStr);
         } else {
             $verType  = $data['verification_type']  ?? 'none';
             $verBadge = $data['verification_badge']  ?? null;
@@ -70,7 +67,7 @@ try {
                     $data['nombre'], $data['apellido'], $data['fecha_nacimiento'], $data['is_active'],
                     $verType, $verBadge, $data['id']
                 ]);
-                logAction($pdo, $data['adminId'] ?? null, 'admin', "Editó perfil completo y cambió contraseña del usuario: " . $data['username']);
+                adminLog($pdo, $currentUser, 'admin', "Editó perfil completo y restableció contraseña del usuario: " . $data['username']);
                 
                 require_once 'mailer.php';
                 sendTempKeyEmail($data['email'], $data['username'], $data['password']);
@@ -81,7 +78,7 @@ try {
                     $data['nombre'], $data['apellido'], $data['fecha_nacimiento'], $data['is_active'],
                     $verType, $verBadge, $data['id']
                 ]);
-                logAction($pdo, $data['adminId'] ?? null, 'admin', "Editó perfil completo del usuario: " . $data['username']);
+                adminLog($pdo, $currentUser, 'admin', "Editó perfil del usuario: " . $data['username']);
             }
         }
         echo json_encode(['success' => true]);

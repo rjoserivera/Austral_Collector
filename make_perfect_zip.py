@@ -16,8 +16,9 @@ with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
     if os.path.exists(dist_dir):
         for root, dirs, files in os.walk(dist_dir):
             for file in files:
+                if file == '.htaccess':
+                    continue  # se agrega desde raíz para evitar duplicado
                 file_path = os.path.join(root, file)
-                # relpath desde dist_dir hace que vayan a la raíz del zip
                 arcname = os.path.relpath(file_path, start=dist_dir)
                 zipf.write(file_path, arcname)
     

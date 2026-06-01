@@ -79,7 +79,7 @@ $password = $data['password'];
 
     try {
         $logStmt = $pdo->prepare("INSERT INTO logs (user_id, tipo, accion) VALUES (?, 'login', ?)");
-        $logAction = "Intento de inicio de sesión fallido para usuario: " . $username;
+        $logAction = "⚠️ Contraseña incorrecta para usuario: \"" . $username . "\"";
         $logStmt->execute([$failedUserId, $logAction]);
     } catch(PDOException $e) {}
 

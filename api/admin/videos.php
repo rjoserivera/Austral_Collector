@@ -4,14 +4,9 @@
 
 require_once '../db.php';
 require_once 'auth_check.php';
+require_once 'log_helper.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
-
-function logAction($pdo, $userId, $tipo, $accion) {
-    if (!$userId) return;
-    $stmt = $pdo->prepare("INSERT INTO logs (user_id, tipo, accion) VALUES (?, ?, ?)");
-    $stmt->execute([$userId, $tipo, $accion]);
-}
 
 try {
     if ($method === 'GET') {
@@ -23,7 +18,7 @@ try {
         $stmt = $pdo->prepare("INSERT INTO videos (titulo, link_yt) VALUES (?,?)");
         $stmt->execute([$data['titulo'], $data['link']]);
         
-        logAction($pdo, $data['adminId'] ?? null, 'admin', "Agregó video: " . $data['titulo']);
+        adminLog($pdo, $currentUser, 'admin', "Agregó video: \"" . $data['titulo'] . "\"");
         
         echo json_encode(['success' => true]);
     }
@@ -31,7 +26,7 @@ try {
         $data = json_decode(file_get_contents('php://input'), true);
         $pdo->prepare("DELETE FROM videos WHERE id = ?")->execute([$data['id']]);
         
-        logAction($pdo, $data['adminId'] ?? null, 'admin', "Eliminó video ID: " . $data['id']);
+        adminLog($pdo, $currentUser, 'admin', "Eliminó video ID: " . $data['id']);
         
         echo json_encode(['success' => true]);
     }
@@ -39,7 +34,7 @@ try {
         $data = json_decode(file_get_contents('php://input'), true);
         $pdo->prepare("UPDATE videos SET destacado = 1 - destacado WHERE id = ?")->execute([$data['id']]);
         
-        logAction($pdo, $data['adminId'] ?? null, 'admin', "Cambió estado destacado de video ID: " . $data['id']);
+        adminLog($pdo, $currentUser, 'admin', "Cambió estado destacado de video ID: " . $data['id']);
         
         echo json_encode(['success' => true]);
     }

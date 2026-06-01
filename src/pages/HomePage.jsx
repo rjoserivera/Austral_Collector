@@ -434,7 +434,7 @@ export default function HomePage() {
                     )}
                     {/* Top UI Area with Banner Background */}
                     <div className="hp-miembro-wrap" style={{
-                      backgroundImage: targetUserObj.user.banner_url ? `url('${BASE_URL}/${targetUserObj.user.banner_url}')` : 'none',
+                      backgroundImage: `url('${targetUserObj.user.banner_url ? `${BASE_URL}/${targetUserObj.user.banner_url}` : '/mock_banner.png'}')`,
                     }}>
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(20,35,45,0.95) 0%, rgba(20,35,45,0.6) 100%)', zIndex: 1 }} />
 

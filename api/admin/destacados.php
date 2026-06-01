@@ -4,6 +4,7 @@
 
 require_once '../db.php';
 require_once 'auth_check.php';
+require_once 'log_helper.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -57,6 +58,22 @@ try {
                 $stmtDM->execute([$valor, date('m-Y')]);
             }
         }
+
+        // Etiquetas legibles para el log
+        $labelsLog = [
+            'miembro_destacado'    => 'Miembro Destacado del mes',
+            'txt_destacado'        => 'Texto del Miembro Destacado',
+            'txt_cumple'           => 'Texto de Cumpleañeros',
+            'portafolio_comunidad' => 'Banner de Comunidad',
+            'logo_sitio'           => 'Logo del sitio',
+            'video_destacado_1'    => 'Video Destacado Slot 1',
+            'video_destacado_2'    => 'Video Destacado Slot 2',
+            'video_destacado_3'    => 'Video Destacado Slot 3',
+            'video_destacado_4'    => 'Video Destacado Slot 4',
+        ];
+        $label = $labelsLog[$clave] ?? $clave;
+        $valorLog = $valor ? "\"$valor\"" : '(eliminado/vaciado)';
+        adminLog($pdo, $currentUser, 'admin', "Actualizó configuración: $label → $valorLog");
 
         echo json_encode(['success' => true]);
     }

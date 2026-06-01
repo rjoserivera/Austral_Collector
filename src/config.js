@@ -21,7 +21,12 @@ export function authFetch(url, options = {}) {
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {}),
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    // Authorization puede ser bloqueado por Apache en algunos hostings.
+    // X-Token es un header personalizado que Apache nunca bloquea.
+    ...(token ? {
+      'Authorization': `Bearer ${token}`,
+      'X-Token': token,
+    } : {}),
   };
   return fetch(url, { ...options, headers }).then(response => {
     if (response.status === 401) {
