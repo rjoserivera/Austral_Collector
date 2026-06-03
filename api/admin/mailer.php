@@ -1,48 +1,92 @@
 <?php
 /**
  * mailer.php - Servicio de Correo para Austral Collector
- * 
- * ESTRATEGIA DE ENVÍO (compatible con cPanel/hosting):
- * 1. Intenta SMTP directo con Gmail (funciona en local/VPS)
- * 2. Si falla (cPanel bloquea puerto 465), usa mail() nativo del servidor
+ *
+ * ESTRATEGIA DE ENVÍO (3 capas):
+ * 1. SendGrid Web API  — máxima compatibilidad (Gmail, Outlook, Microsoft 365, institucional)
+ * 2. SMTP directo      — fallback si SendGrid falla
+ * 3. mail() nativo     — último recurso cPanel
  */
 
+// ============================================================
+// CONFIGURACIÓN CENTRAL
+// ============================================================
+define('SENDER_EMAIL', 'administracion@australcollector.cl');
+define('SENDER_NAME',  'Austral Collector');
+define('SENDGRID_API_KEY', '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');
+define('SMTP_HOST',    'ssl://mail.australcollector.cl');
+define('SMTP_PORT',    465);
+define('SMTP_PASS',    '}s%Eet7n,RO}');
+
 // -------------------------------------------------------
-// HELPER: Construir cuerpo del mensaje RAW para SMTP
+// MÉTODO 1: SendGrid Web API v3 (HTTP/HTTPS — sin puertos SMTP)
+// Compatible con Microsoft 365, Outlook, inacapmail.cl, etc.
 // -------------------------------------------------------
-function _buildRawMessage(array $headers, string $body): string {
-    return implode("\r\n", $headers) . "\r\n\r\n" . $body . "\r\n.\r\n";
+function _sendViaSendGrid(string $toEmail, string $subject, string $htmlBody): array {
+    if (!function_exists('curl_init')) {
+        return ['success' => false, 'log' => 'cURL no disponible', 'method' => 'sendgrid'];
+    }
+
+    $payload = json_encode([
+        'personalizations' => [[
+            'to' => [['email' => $toEmail]]
+        ]],
+        'from'    => ['email' => SENDER_EMAIL, 'name' => SENDER_NAME],
+        'subject' => $subject,
+        'content' => [['type' => 'text/html', 'value' => $htmlBody]]
+    ]);
+
+    $ch = curl_init('https://api.sendgrid.com/v3/mail/send');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => $payload,
+        CURLOPT_TIMEOUT        => 15,
+        CURLOPT_HTTPHEADER     => [
+            'Authorization: Bearer ' . SENDGRID_API_KEY,
+            'Content-Type: application/json',
+        ],
+    ]);
+
+    $response   = curl_exec($ch);
+    $httpCode   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError  = curl_error($ch);
+    curl_close($ch);
+
+    // SendGrid devuelve 202 Accepted cuando el envío es exitoso
+    $success = ($httpCode === 202);
+    $log     = "HTTP {$httpCode}" . ($curlError ? " | cURL error: {$curlError}" : "") . ($response ? " | Response: {$response}" : "");
+
+    return ['success' => $success, 'log' => $log, 'method' => 'sendgrid'];
 }
 
 // -------------------------------------------------------
-// HELPER: Envío via SMTP manual (Gmail SSL 465)
+// MÉTODO 2: SMTP directo (mail.australcollector.cl:465)
 // -------------------------------------------------------
 function _sendViaSmtp(string $toEmail, string $subject, string $htmlBody): array {
-    $adminEmail  = "administracion@australcollector.cl";
-    $appPassword = "}s%Eet7n,RO}";
-    $host        = "ssl://mail.australcollector.cl";
-    $port        = 465;
-    $smtpLog     = "";
-    $success     = false;
+    $smtpLog = "";
+    $success = false;
+
+    $encodedSubject = "=?UTF-8?B?" . base64_encode($subject) . "?=";
 
     $headers = [
-        "From: \"Austral Collector\" <{$adminEmail}>",
+        "From: \"" . SENDER_NAME . "\" <" . SENDER_EMAIL . ">",
         "To: {$toEmail}",
-        "Subject: {$subject}",
+        "Subject: {$encodedSubject}",
         "MIME-Version: 1.0",
         "Content-Type: text/html; charset=UTF-8",
         "Content-Transfer-Encoding: base64",
     ];
 
     try {
-        $socket = @fsockopen($host, $port, $errno, $errstr, 12);
+        $socket = @fsockopen(SMTP_HOST, SMTP_PORT, $errno, $errstr, 12);
         if (!$socket) throw new Exception("fsockopen fallo [{$errno}]: {$errstr}");
 
         $read = function() use ($socket) {
             $r = "";
             while ($l = fgets($socket, 515)) {
                 $r .= $l;
-                if ($l[3] === ' ') break;
+                if (isset($l[3]) && $l[3] === ' ') break;
             }
             return $r;
         };
@@ -52,16 +96,15 @@ function _sendViaSmtp(string $toEmail, string $subject, string $htmlBody): array
         };
 
         $smtpLog .= $read();
-        $smtpLog .= $cmd("EHLO localhost");
+        $smtpLog .= $cmd("EHLO australcollector.cl");
         $smtpLog .= $cmd("AUTH LOGIN");
-        $smtpLog .= $cmd(base64_encode($adminEmail));
-        $smtpLog .= $cmd(base64_encode($appPassword));
-        $smtpLog .= $cmd("MAIL FROM: <{$adminEmail}>");
+        $smtpLog .= $cmd(base64_encode(SENDER_EMAIL));
+        $smtpLog .= $cmd(base64_encode(SMTP_PASS));
+        $smtpLog .= $cmd("MAIL FROM: <" . SENDER_EMAIL . ">");
         $smtpLog .= $cmd("RCPT TO: <{$toEmail}>");
         $smtpLog .= $cmd("DATA");
 
-        // Cuerpo en base64 para evitar problemas con caracteres especiales
-        $encodedBody = base64_encode($htmlBody);
+        $encodedBody = chunk_split(base64_encode($htmlBody), 76, "\r\n");
         fputs($socket, implode("\r\n", $headers) . "\r\n\r\n" . $encodedBody . "\r\n.\r\n");
 
         $final = $read();
@@ -69,7 +112,7 @@ function _sendViaSmtp(string $toEmail, string $subject, string $htmlBody): array
         $smtpLog .= $cmd("QUIT");
         fclose($socket);
 
-        if (strpos($final, "250 ") !== false) {
+        if (strpos($final, "250") !== false) {
             $success = true;
         }
     } catch (Exception $e) {
@@ -80,46 +123,53 @@ function _sendViaSmtp(string $toEmail, string $subject, string $htmlBody): array
 }
 
 // -------------------------------------------------------
-// HELPER: Envío via mail() nativo del servidor (cPanel)
+// MÉTODO 3: mail() nativo cPanel (último recurso)
 // -------------------------------------------------------
 function _sendViaNativeMail(string $toEmail, string $subject, string $htmlBody): array {
-    $senderEmail = "no-reply@alphadocere.cl"; // dominio del hosting cPanel
-    $senderName  = "Austral Collector";
+    $encodedSubject = "=?UTF-8?B?" . base64_encode($subject) . "?=";
 
-    $headers  = "From: \"{$senderName}\" <{$senderEmail}>\r\n";
-    $headers .= "Reply-To: {$senderEmail}\r\n";
+    $headers  = "From: \"" . SENDER_NAME . "\" <" . SENDER_EMAIL . ">\r\n";
+    $headers .= "Reply-To: " . SENDER_EMAIL . "\r\n";
     $headers .= "MIME-Version: 1.0\r\n";
     $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
     $headers .= "X-Mailer: PHP/" . phpversion();
 
-    $success = @mail($toEmail, $subject, $htmlBody, $headers);
+    $success = @mail($toEmail, $encodedSubject, $htmlBody, $headers, "-f " . SENDER_EMAIL);
 
     return ['success' => (bool)$success, 'log' => $success ? 'native mail() OK' : 'native mail() FAILED', 'method' => 'native_mail'];
 }
 
 // -------------------------------------------------------
-// HELPER: Dispatcher — intenta SMTP, fallback a mail()
+// DISPATCHER — SendGrid → SMTP → mail()
 // -------------------------------------------------------
 function _dispatchEmail(string $toEmail, string $subject, string $htmlBody, string $tag): bool {
     $logFile = __DIR__ . '/mail_sent.log';
     $ts      = date('Y-m-d H:i:s');
 
-    // 1. Intento SMTP
-    $result = _sendViaSmtp($toEmail, $subject, $htmlBody);
+    // 1. Intentar SendGrid (mejor compatibilidad con Microsoft 365 / correos institucionales)
+    $result = _sendViaSendGrid($toEmail, $subject, $htmlBody);
 
-    // 2. Si SMTP falla → fallback a mail() nativo
+    // 2. Si SendGrid falla → SMTP directo
+    if (!$result['success']) {
+        $sgLog  = $result['log'];
+        $result = _sendViaSmtp($toEmail, $subject, $htmlBody);
+        $result['sendgrid_log'] = $sgLog;
+    }
+
+    // 3. Si SMTP también falla → mail() nativo
     if (!$result['success']) {
         $smtpLog = $result['log'];
         $result  = _sendViaNativeMail($toEmail, $subject, $htmlBody);
-        $result['smtp_log'] = $smtpLog; // guardar ambos logs
+        $result['smtp_log'] = $smtpLog;
     }
 
-    // 3. Log
+    // Log
     $status  = $result['success'] ? "SENT via {$result['method']}" : "FAILED";
     $logLine = "[{$ts}] {$tag} TO: {$toEmail} | SUBJECT: {$subject} | STATUS: {$status}\n";
     if (!$result['success']) {
-        $logLine .= "--- SMTP LOG ---\n" . ($result['smtp_log'] ?? $result['log']) . "\n";
-        $logLine .= "--- NATIVE LOG ---\n" . $result['log'] . "\n";
+        $logLine .= "--- SENDGRID LOG ---\n" . ($result['sendgrid_log'] ?? '') . "\n";
+        $logLine .= "--- SMTP LOG ---\n"      . ($result['smtp_log']     ?? '') . "\n";
+        $logLine .= "--- NATIVE LOG ---\n"    . $result['log']                  . "\n";
     }
     $logLine .= "--------------------------------------------------------\n\n";
     file_put_contents($logFile, $logLine, FILE_APPEND);
