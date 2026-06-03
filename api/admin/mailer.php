@@ -9,14 +9,18 @@
  */
 
 // ============================================================
-// CONFIGURACIÓN CENTRAL
+// CONFIGURACIÓN CENTRAL — leída desde .env (nunca hardcodeada)
 // ============================================================
-define('SENDER_EMAIL', 'administracion@australcollector.cl');
-define('SENDER_NAME',  'Austral Collector');
-define('SENDGRID_API_KEY', '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');
-define('SMTP_HOST',    'ssl://mail.australcollector.cl');
-define('SMTP_PORT',    465);
-define('SMTP_PASS',    '}s%Eet7n,RO}');
+$_mailerEnv = @parse_ini_file(__DIR__ . '/../../.env') ?: [];
+
+define('SENDER_EMAIL',      'administracion@australcollector.cl');
+define('SENDER_NAME',       'Austral Collector');
+define('SENDGRID_API_KEY',  $_mailerEnv['SENDGRID_API_KEY'] ?? '');
+define('SMTP_HOST',         'ssl://' . ($_mailerEnv['SMTP_HOST'] ?? 'mail.australcollector.cl'));
+define('SMTP_PORT',         (int)($_mailerEnv['SMTP_PORT']   ?? 465));
+define('SMTP_PASS',         $_mailerEnv['SMTP_PASS']         ?? '');
+
+unset($_mailerEnv); // limpiar memoria
 
 // -------------------------------------------------------
 // MÉTODO 1: SendGrid Web API v3 (HTTP/HTTPS — sin puertos SMTP)
