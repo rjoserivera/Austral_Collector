@@ -55,7 +55,7 @@
 > ⚠️ La carpeta debe llamarse exactamente `Austral_Collector` para que las rutas del API en XAMPP funcionen correctamente.
 
 ```bash
-git clone [https://github.com/rjoserivera/Austral_Collector.git]  Austral_Collector
+git clone [https://github.com/luisalmonacid3091-spec/australcollector]  Austral_Collector
 cd Austral_Collector
 ```
 
