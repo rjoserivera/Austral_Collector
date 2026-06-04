@@ -55,7 +55,7 @@
 > ⚠️ La carpeta debe llamarse exactamente `Austral_Collector` para que las rutas del API en XAMPP funcionen correctamente.
 
 ```bash
-git clone https://github.com/rjoserivera/Austral_Collector.git Austral_Collector
+git clone [https://github.com/rjoserivera/Austral_Collector.git]  Austral_Collector
 cd Austral_Collector
 ```
 
@@ -68,7 +68,7 @@ npm install
 ### 3. Configurar la base de datos
 - Abre `http://localhost/phpmyadmin`
 - Crea una base de datos llamada `austral_collector_db`
-- Importa el esquema SQL que se encuentra en el archivo `alphadocere_austral_collector.sql` (en la raíz del proyecto)
+
 
 ### 4. Configurar variables de entorno
 
@@ -150,7 +150,6 @@ Austral_Collector/
 
 🌐 **Sitio en producción:** [https://australcollector.cl/](https://australcollector.cl/)
 
-La documentación completa del proyecto está en la carpeta `docs/` y se sirve con [Mintlify](https://mintlify.com/):
 
 ```bash
 cd docs
@@ -181,4 +180,4 @@ Este proyecto está bajo la licencia incluida en [LICENSE](docs/LICENSE).
 
 ---
 
-## 🏆 ¡Bienvenido al coleccionismo oscuro y los juguetes de tu infancia!
+## 🏆 ¡Bienvenido al coleccionismo y los juguetes de tu infancia!
