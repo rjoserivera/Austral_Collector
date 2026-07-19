@@ -169,6 +169,16 @@ Contiene 8 diagramas del sistema: arquitectura, flujo de navegación, autenticac
 
 ---
 
+## 🔗 Repositorios Vinculados
+
+Este proyecto cuenta con dos repositorios remotos principales configurados:
+- **origin**: `https://github.com/rjoserivera/Austral_Collector`
+- **cliente**: `https://github.com/luisalmonacid3091-spec/australcollector`
+
+Para subir cambios a ambos repositorios a la vez, recuerda hacer push a cada uno de ellos individualmente o configurar una URL de push múltiple en el remoto.
+
+---
+
 ## 🤝 Contribuir
 
 Lee [CONTRIBUTING.md](docs/CONTRIBUTING.md) para conocer cómo colaborar con el proyecto.
