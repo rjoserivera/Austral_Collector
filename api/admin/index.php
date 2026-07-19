@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../db.php';
 require_once 'auth_check.php';
 // If we reach here, user is authenticated
 echo json_encode([

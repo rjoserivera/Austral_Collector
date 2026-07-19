@@ -72,7 +72,8 @@
     inset 0 0 40px rgba(0,0,0,0.5),
     0 15px 40px rgba(0,0,0,0.4);
   border-radius: 6px;
-  padding: 24px 30px;
+  padding: 34px 30px 24px; /* Más padding arriba por las pestañas */
+  position: relative;
 }
 
 .card-distressed-sub {
@@ -103,10 +104,53 @@
 }
 
 /* ── CONTENIDO PRINCIPAL ──────────────── */
+/* ── SELECTOR DE PESTAÑAS (TIPO NAVEGADOR) ──────────────── */
+.perfil-tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 0 !important; /* Quitar margen para que se pegue al panel */
+  padding: 0 20px;
+  position: relative;
+  z-index: 2;
+  transform: translateY(4px); /* Bajar para solapar el borde superior del panel */
+}
+
+.tab-btn {
+  background: rgba(15, 45, 55, 0.9); /* Más oscuro (inactivo) */
+  color: rgba(240, 228, 204, 0.6);
+  border: 4px solid rgba(30, 77, 90, 0.5);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  padding: 12px 24px;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: inset 0 -4px 10px rgba(0,0,0,0.3);
+}
+
+.tab-btn:hover {
+  background: rgba(20, 60, 72, 0.95);
+  color: rgba(240, 228, 204, 0.9);
+}
+
+.tab-btn.active {
+  background: rgba(30, 77, 90, 0.95); /* Mismo fondo que el panel */
+  color: var(--color-gold);
+  border: 4px solid #1e4d5a;
+  border-bottom: 4px solid rgba(30, 77, 90, 0.95); /* Ocultar el borde inferior solapando el panel */
+  box-shadow: none;
+  z-index: 3;
+}
+
 .contacto-content-row {
   display: flex;
   align-items: center;
   gap: 40px;
+  position: relative;
+  z-index: 1;
 }
 
 .contacto-panel {

@@ -1,5 +1,5 @@
 <?php
-// contacto.php - Enviar formulario de contacto a administración
+// solicitud_registro.php - Enviar solicitud de registro a administración
 // Created by Antigravity
 
 require_once __DIR__ . '/../db.php';
@@ -13,30 +13,30 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $data = json_decode(file_get_contents('php://input'), true);
 $nombre = $data['nombre'] ?? '';
 $email = $data['email'] ?? '';
-$asunto_usuario = $data['asunto'] ?? 'Sin Asunto';
-$mensaje = $data['mensaje'] ?? '';
+$username = $data['username'] ?? '';
+$fechaNacimiento = $data['fechaNacimiento'] ?? '';
 
-if (empty($nombre) || empty($email) || empty($mensaje)) {
+if (empty($nombre) || empty($email) || empty($username) || empty($fechaNacimiento)) {
     exit(json_encode(['success' => false, 'error' => 'Faltan campos obligatorios']));
 }
 
 $adminEmail = "administracion@australcollector.cl";
-$asunto = "🌟 Nuevo Contacto Web: $nombre - $asunto_usuario";
+$asunto = "📝 Nueva Solicitud de Registro: $nombre";
 
-// Vamos a usar la función pública sendCustomEmail del mailer.php existente, 
-// pero pasamos los detalles en el cuerpo.
-$cuerpoCorreo = "Has recibido una nueva consulta desde el Formulario de Contacto.\n\n" .
-                "👤 Nombre: $nombre\n" .
-                "📧 Correo del usuario: $email\n" .
-                "📌 Asunto: $asunto_usuario\n\n" .
-                "📝 Mensaje del usuario:\n" .
+// Formateamos la fecha para que sea más legible si viene en YYYY-MM-DD
+$fechaFormat = date('d/m/Y', strtotime($fechaNacimiento));
+
+$cuerpoCorreo = "Has recibido una nueva SOLICITUD DE REGISTRO desde la página web.\n\n" .
+                "Por favor, revisa estos datos para crear la cuenta manualmente:\n\n" .
                 "----------------------------------------------------\n" .
-                "$mensaje\n" .
+                "👤 Nombre y Apellido: $nombre\n" .
+                "📧 Correo Electrónico: $email\n" .
+                "👾 Usuario Deseado: $username\n" .
+                "🎂 Fecha de Nacimiento: $fechaFormat ($fechaNacimiento)\n" .
                 "----------------------------------------------------\n\n".
-                "Si deseas responderle a este usuario, escribe directamente a: $email";
+                "Para registrar a este usuario, ve al Panel de Administración > Pestaña 'Usuarios' > y haz clic en 'Añadir Usuario'.";
 
 // Enviarle el correo AL ADMINISTRADOR
-// (Usamos "Administrativo" como destinatario referencial interno)
 if (sendCustomEmail($adminEmail, "Administración de Austral Collector", $asunto, $cuerpoCorreo)) {
     echo json_encode(['success' => true]);
 } else {

@@ -298,13 +298,15 @@ function sendRegistrationEmail($toEmail, $username, $tempKey) {
 
     $html = <<<HTML
     <html><head><style>
-        body{font-family:Arial,sans-serif;line-height:1.6;color:#333}
-        .container{padding:20px;border:1px solid #ddd;border-radius:8px;max-width:600px;margin:0 auto}
+        body{font-family:Arial,sans-serif;line-height:1.6;color:#333;background:#f4f7f8;padding:20px}
+        .container{padding:30px;border:1px solid #e0e0e0;border-radius:12px;max-width:600px;background:#fff;margin:0 auto;box-shadow:0 4px 6px rgba(0,0,0,.05)}
         .header-logo{text-align:center;margin-bottom:20px}
         .header-logo img{max-width:150px;height:auto}
         .header{font-size:1.2rem;font-weight:bold;color:#1e4d5a;margin-bottom:15px}
-        .info-box{background:#f9f9f9;padding:15px;border-radius:5px;margin:15px 0}
-        .key-box{background:#1e4d5a;color:#fff;padding:15px;text-align:center;font-size:1.5rem;font-family:monospace;border-radius:5px;margin:20px 0;letter-spacing:2px}
+        .label{font-size:.85rem;color:#777;margin-bottom:4px;text-align:center;text-transform:uppercase;letter-spacing:1px}
+        .key-box{background:#1e4d5a;color:#fff;padding:15px;text-align:center;font-size:1.4rem;font-family:monospace;border-radius:8px;margin:8px 0 20px;letter-spacing:2px;word-break:break-all}
+        .divider{border:none;border-top:1px solid #eee;margin:20px 0}
+        .note{font-size:.9rem;color:#555;background:#fffbe6;border-left:4px solid #f0c040;padding:10px 14px;border-radius:4px;margin-top:10px}
         .footer{font-size:.8rem;color:#777;margin-top:20px;border-top:1px solid #eee;padding-top:10px;text-align:center}
         .footer a{color:#1e4d5a;text-decoration:none;font-weight:bold}
     </style></head><body>
@@ -314,13 +316,20 @@ function sendRegistrationEmail($toEmail, $username, $tempKey) {
                     <img src='https://australcollector.cl/logo_sin_fondo2.png' alt='Austral Collector Logo' width='150' style='display:block;margin:0 auto;border:0;' />
                 </a>
             </div>
-            <div class='header'>Hola, ¡felicidades {$username}!</div>
-            <p>Se ha creado un perfil para ti en <a href='https://australcollector.cl/' target='_blank' style='color:#1e4d5a;font-weight:bold;text-decoration:none;'>Austral Collector</a>.</p>
-            <div class='info-box'>
-                <strong>Tu nombre de usuario para iniciar sesión:</strong> {$username}<br>
-            </div>
-            <p>Usa la siguiente clave temporal para iniciar sesión por primera vez. Por razones de seguridad, el sistema te pedirá actualizar tu contraseña inmediatamente tras ingresar.</p>
+            <div class='header'>¡Felicidades, {$username}! Ya eres parte de Austral Collector.</div>
+            <p>Tu cuenta ha sido creada exitosamente. A continuación encontrarás tus credenciales de acceso:</p>
+
+            <div class='label'>Tu nombre de usuario</div>
+            <div class='key-box'>{$username}</div>
+
+            <div class='label'>Clave temporal</div>
             <div class='key-box'>{$tempKey}</div>
+
+            <p>Recuerda que también puedes iniciar sesión usando tu <strong>correo electrónico</strong> en lugar de tu nombre de usuario.</p>
+
+            <div class='note'>⚠️ <strong>Importante:</strong> Por seguridad, el sistema te pedirá que cambies esta clave temporal la primera vez que ingreses.</div>
+
+            <hr class='divider'>
             <div class='footer'>Mensaje automático del sistema — Administración <a href='https://australcollector.cl/' target='_blank'>Austral Collector</a>.</div>
         </div>
     </body></html>

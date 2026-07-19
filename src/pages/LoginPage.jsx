@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState('login'); // 'login' or 'register'
   const [showPassword, setShowPassword] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
   
   const navigate = useNavigate();
 
@@ -189,12 +190,12 @@ export default function LoginPage() {
         {mode === 'login' ? (
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="login-form-group">
-              <label htmlFor="usuario">Usuario ID</label>
+              <label htmlFor="usuario">Usuario o Correo Electrónico</label>
               <input 
                 id="usuario"
                 type="text" 
                 className="login-input" 
-                placeholder="e.g. Imagine" 
+                placeholder="usuario o ejemplo@correo.com" 
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 autoComplete="username"
@@ -240,20 +241,28 @@ export default function LoginPage() {
                 ? `🔒 Bloqueado (${formatLockout(lockoutTime)})`
                 : loading ? 'Verificando...' : 'Ingresar al Gremio'}
             </button>
+            
+            <div className="login-help-container">
+              <button type="button" className="login-help-btn" onClick={() => setShowHelpModal(true)}>
+                <span className="help-icon">?</span> ¿Cómo iniciar sesión?
+              </button>
+            </div>
           </form>
         ) : (
           <div className="registration-disabled-notice">
-            <div className="notice-icon">⚠️</div>
-            <h3>Registro por Invitación</h3>
+            <div className="notice-icon">📋</div>
+            <h3>Solicitud de Registro</h3>
             <p>
-              Como somos una comunidad privada, el registro de nuevas cuentas está habilitado únicamente por la administración.
+              Como somos una comunidad privada, el registro de nuevas cuentas está habilitado únicamente mediante solicitud y aprobación de la administración.
             </p>
-            <p className="notice-footer">
-              Para solicitar tu acceso o recibir más información, por favor comunícate con nosotros:
-            </p>
-            <a href="mailto:administracion@australcollector.cl" className="notice-email">
-              administracion@australcollector.cl
-            </a>
+            <button 
+              type="button" 
+              className="btn-primary login-submit-btn" 
+              style={{ marginTop: '1.5rem', width: '100%' }}
+              onClick={() => navigate('/contacto', { state: { tab: 'registro' } })}
+            >
+              Ir al Formulario de Registro
+            </button>
           </div>
         )}
         
@@ -265,6 +274,16 @@ export default function LoginPage() {
           )}
         </div>
       </div>
+
+      {showHelpModal && (
+        <div className="login-help-modal" onClick={() => setShowHelpModal(false)}>
+          <div className="login-help-modal-content" onClick={e => e.stopPropagation()}>
+            <button className="login-help-close" onClick={() => setShowHelpModal(false)}>×</button>
+            <h3>¿Cómo iniciar sesión?</h3>
+            <img src="/ejemplo.png" alt="Ejemplo de inicio de sesión" className="login-help-image" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

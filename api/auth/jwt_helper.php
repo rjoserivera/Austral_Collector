@@ -4,14 +4,19 @@
  * No dependencies required.
  */
 class JWT {
-    private static $secret = JWT_SECRET;
+    private static function getSecret() {
+        if (!defined('JWT_SECRET')) {
+            require_once __DIR__ . '/../db.php';
+        }
+        return JWT_SECRET;
+    }
 
     public static function encode($payload) {
         $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
         $base64UrlHeader = self::base64UrlEncode($header);
         $base64UrlPayload = self::base64UrlEncode(json_encode($payload));
         
-        $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, self::$secret, true);
+        $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, self::getSecret(), true);
         $base64UrlSignature = self::base64UrlEncode($signature);
         
         return $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
@@ -23,7 +28,7 @@ class JWT {
 
         list($header, $payload, $signature) = $parts;
 
-        $validSignature = hash_hmac('sha256', $header . "." . $payload, self::$secret, true);
+        $validSignature = hash_hmac('sha256', $header . "." . $payload, self::getSecret(), true);
         if (!hash_equals(self::base64UrlEncode($validSignature), $signature)) {
             return false;
         }

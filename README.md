@@ -150,13 +150,7 @@ Austral_Collector/
 
 🌐 **Sitio en producción:** [https://australcollector.cl/](https://australcollector.cl/)
 
-
-```bash
-cd docs
-mintlify dev
-```
-
-Disponible en `http://localhost:3000`
+La documentación completa del proyecto está en la carpeta `docs/`.
 
 También puedes abrir directamente el archivo de diagramas interactivos:
 

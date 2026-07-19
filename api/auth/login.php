@@ -51,6 +51,14 @@ $password = $data['password'];
             'exp' => time() + (60 * 60 * 24 * 7) // 7 days
         ]);
 
+        // Guardar token como cookie (funciona aunque Apache bloquee los headers)
+        setcookie('austral_token', $token, [
+            'expires'  => time() + (60 * 60 * 24 * 7),
+            'path'     => '/',
+            'httponly' => false,
+            'samesite' => 'Lax',
+        ]);
+
         echo json_encode([
             'success' => true,
             'token' => $token,

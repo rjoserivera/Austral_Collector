@@ -1,6 +1,15 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # ── Pasar el header Authorization a PHP (necesario para JWT en cPanel/FastCGI) ──
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+  # ── Pasar el header X-Token a PHP (header personalizado anti-bloqueo Apache) ──
+  RewriteCond %{HTTP:X-Token} .
+  RewriteRule .* - [E=HTTP_X_TOKEN:%{HTTP:X-Token}]
+
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d

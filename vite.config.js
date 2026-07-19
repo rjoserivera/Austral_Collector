@@ -33,18 +33,43 @@ export default defineConfig({
         ]
       },
       workbox: {
+        // Al activarse el nuevo SW, toma control inmediato de todos los clientes
+        // y elimina los cachés obsoletos automáticamente (sin que el usuario haga nada).
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
+
         // Caching strategy for API requests
         runtimeCaching: [
           {
             // ============================================
-            // PATRÓN GLOBAL PARA CACHÉ DE API (Independiente del host local/prod)
-            // Ignora la carpeta de uploads para manejarla con CacheFirst abajo
+            // RUTAS EXCLUIDAS DEL CACHÉ: /api/admin/* y /api/auth/*
+            // Estas rutas son sensibles: siempre deben ir a la red.
+            // Si se cachean, un 401 guardado puede cerrar la sesión del admin.
             // ============================================
-            urlPattern: /\/api\/(?!uploads\/).*/i,
+            urlPattern: /\/api\/(admin|auth)\/.*/i,
+            method: 'GET',
+            handler: 'NetworkOnly',
+            options: {}
+          },
+          {
+            // Lo mismo para POST/PUT/DELETE en admin y auth
+            urlPattern: /\/api\/(admin|auth)\/.*/i,
+            method: 'POST',
+            handler: 'NetworkOnly',
+            options: {}
+          },
+          {
+            // ============================================
+            // PATRÓN PARA CACHÉ DE API PÚBLICA (Independiente del host local/prod)
+            // Solo cachea rutas públicas: excluye admin, auth y uploads
+            // El sufijo -v2 invalida el caché viejo ('api-cache') en todos los navegadores.
+            // ============================================
+            urlPattern: /\/api\/(?!admin\/|auth\/|uploads\/).*/i,
             method: 'GET',
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'api-cache',
+              cacheName: 'api-cache-v2',
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24 * 7 // Keep cache for 7 days
